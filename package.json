@@ -7,7 +7,9 @@
     "start": "remix-serve build",
     "typecheck": "tsc",
     "lint:ts": "npx eslint . --ext  .ts,.tsx ./app",
-    "lint:ts:fix": "npx eslint . --ext .ts,.tsx ./app --fix"
+    "lint:ts:fix": "npx eslint . --ext .ts,.tsx ./app --fix",
+    "format": "npx prettier --write ./app/**/*.{js,jsx,ts,tsx}",
+    "format:check": "npx prettier --check ./app/**/*.{js,jsx,ts,tsx}"
   },
   "dependencies": {
     "@remix-run/css-bundle": "^1.16.0",
@@ -31,6 +33,7 @@
     "eslint-plugin-n": "^15.7.0",
     "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-react": "^7.32.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
     "prettier": "2.8.8",
     "tailwindcss": "^3.3.2",
     "typescript": "^5.0.4"
