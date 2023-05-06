@@ -11,7 +11,9 @@ import {
 } from '@remix-run/react';
 
 export const links: LinksFunction = () => [
-  ...(cssBundleHref ? [{ rel: 'stylesheet', href: cssBundleHref }] : []),
+  ...(cssBundleHref !== undefined
+    ? [{ rel: 'stylesheet', href: cssBundleHref }]
+    : []),
   {
     rel: 'stylesheet',
     href: styles,

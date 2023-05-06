@@ -4,12 +4,10 @@ export const meta: V2_MetaFunction = () => {
   return [{ title: 'Geek Console' }];
 };
 
-type IndexProps = {
-  firstProps: string;
-  secondProps: number;
-  thirdProps: string[];
-};
-
 export default function Index() {
-  return <div className="bg-gray-200 text-red-500">Hello world!</div>;
+  return (
+    <div className="bg-gray-200 text-red-500">
+      <h2>Hello World</h2>
+    </div>
+  );
 }

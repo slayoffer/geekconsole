@@ -7,3 +7,5 @@ node_modules
 
 entry.client.tsx
 entry.server.tsx
+remix.env.d.ts
+
