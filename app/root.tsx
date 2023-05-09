@@ -9,6 +9,8 @@ import {
   Scripts,
   ScrollRestoration,
 } from '@remix-run/react';
+import { Header } from './widgets/Header';
+import { Footer } from './widgets/Footer';
 
 export const links: LinksFunction = () => [
   ...(cssBundleHref !== undefined
@@ -22,15 +24,24 @@ export const links: LinksFunction = () => [
 
 export default function App() {
   return (
-    <html lang="en">
+    <html className="h-full" lang="en">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <Meta />
+        <link
+          rel="icon"
+          type="image/png"
+          href="https://i.ibb.co/31W7B1y/Png-Item-1032462.png"
+        />
         <Links />
       </head>
-      <body>
-        <Outlet />
+      <body className="min-h-full flex flex-col justify-between bg-[#1c1c1c]">
+        <Header />
+        <main className="container mx-auto flex flex-col items-center p-10">
+          <Outlet />
+        </main>
+        <Footer />
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
