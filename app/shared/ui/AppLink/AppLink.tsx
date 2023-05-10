@@ -12,11 +12,12 @@ type AppLinkProps = {
   children: ReactNode;
 } & RemixLinkProps;
 
+const BASE_APPLINK_CLASSES =
+  'text-gray-900 focus:ring-2 focus:outline-none font-bold rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center';
+
 const AppLinkVariantsStyles: AppLinkVariantsStylesType = {
-  primary:
-    'text-gray-900 bg-[--primary-color] hover:bg-[--primary-color]/90 focus:ring-2 focus:outline-none focus:ring-[--primary-color]/50 font-bold rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center',
-  secondary:
-    'text-white bg-[--secondary-color] hover:bg-[--secondary-color]/90 focus:ring-2 focus:outline-none focus:ring-[--secondary-color]/50 font-bold rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center',
+  primary: `${BASE_APPLINK_CLASSES} bg-[--primary-color] hover:bg-[--primary-color]/90 focus:ring-[--primary-color]/50`,
+  secondary: `${BASE_APPLINK_CLASSES} bg-[--secondary-color] hover:bg-[--secondary-color]/90 focus:ring-[--secondary-color]/50`,
   unstyled: '',
 };
 
