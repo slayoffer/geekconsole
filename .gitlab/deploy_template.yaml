@@ -6,15 +6,16 @@
   tags:
     - docker
   script:
-    - echo "====> Run the Container"
-    - pwd
     # Docker Host Authentication
     - mkdir -p $DOCKER_CERT_PATH
     - cd $DOCKER_CERT_PATH
-    - pwd
-    - cat $CD_DEV_CA_PEM > ca.pem &&
-      cat $CD_DEV_CERT_PEM > cert.pem &&
-      cat $CD_DEV_KEY_PEM > key.pem
+    # - cat $CD_$ENV_UPC_CA_PEM > ca.pem &&
+    #   cat $CD_$ENV_UPC_CERT_PEM > cert.pem &&
+    #   cat $CD_$ENV_UPC_KEY_PEM > key.pem
+    - echo $ENV_UPC
+    - export TMP="$ENV_UPC"_CA_PEM && cat ${!TMP} > ca.pem
+    - export TMP="$ENV_UPC"_CERT_PEM && cat ${!TMP} > cert.pem
+    - export TMP="$ENV_UPC"_KEY_PEM && cat ${!TMP} > key.pem
     - cat ca.pem
     - cat cert.pem
     - cat key.pem
@@ -24,11 +25,7 @@
     - echo $DOCKER_HOST
     - docker info
     - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
-    - pwd
-    # - set -o allexport && source deploy.env && set +o allexport
     - docker rm -f $CD_CONTAINER_NAME-$CI_COMMIT_REF_SLUG || true
-    # - export COMPOSE_PROJECT_NAME=$DOCKER_COMPOSE_PROJECT_NAME
-      # export TMP="$ENV_UPC"_CA_PEM && cat ${!TMP} > ca.pem &&
     - docker compose up -d
     - rm -rf $DOCKER_CERT_PATH
   variables:

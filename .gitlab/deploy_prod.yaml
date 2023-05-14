@@ -3,6 +3,7 @@ deploy_prod:
   extends: .deploy_template
   variables:
     DOCKER_HOST: "tcp://$CD_PROD_HOST:2376"
+    ENV_UPC: PROD
   only:
     refs:
       - main
