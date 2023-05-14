@@ -1,0 +1,13 @@
+stages:
+  - build
+  - deploy
+
+include:
+  - local: .gitlab/ci/build_front_template.yaml
+  # - local: .gitlab/ci/build_front_dev.yaml
+  # - local: .gitlab/ci/build_front_stage.yaml
+  - local: .gitlab/ci/build_front_prod.yaml
+  - local: .gitlab/ci/deploy_template.yaml
+  # - local: .gitlab/ci/deploy_dev.yaml
+  # - local: .gitlab/ci/deploy_stage.yaml
+  - local: .gitlab/ci/deploy_prod.yaml

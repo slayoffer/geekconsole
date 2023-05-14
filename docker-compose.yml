@@ -1,0 +1,13 @@
+version: "3.9"
+
+services:
+  geekconsole-front:
+    container_name: geekconsole-front-${CI_COMMIT_REF_SLUG}
+    image: registry.gitlab.devcraft.app/broz/geek-console-${CI_COMMIT_REF_SLUG}:${IMAGE_TAG_FRONT}
+    restart: unless-stopped
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true
