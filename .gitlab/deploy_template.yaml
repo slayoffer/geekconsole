@@ -18,6 +18,7 @@
     - cat ca.pem
     - cat cert.pem
     - cat key.pem
+    - ls
     - cd -
     - pwd
     - echo $DOCKER_HOST
