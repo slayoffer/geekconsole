@@ -1,4 +1,4 @@
-deploy_stage:
+deploy_dev:
   stage: deploy
   extends: .deploy_template
   variables:

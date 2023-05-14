@@ -1,4 +1,4 @@
-build_front_prod:
+build_front_dev:
   stage: build
   extends: .build_front_template
   # variables:
@@ -10,7 +10,7 @@ build_front_prod:
   #   changes:
   #     - .docker/docs/**/*
 
-build_front_prod_manual:
+build_front_dev_manual:
   stage: build
   extends: .build_front_template
   # variables:
