@@ -6,7 +6,6 @@
   tags:
     - docker
   script:
-    # Docker Host Authentication
     - mkdir -p $DOCKER_CERT_PATH
     - cd $DOCKER_CERT_PATH
     - echo $ENV_UPC
