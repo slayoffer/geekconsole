@@ -1,0 +1,118 @@
+workflow:
+  rules:
+    - if: $CI_COMMIT_BRANCH != "main" && $CI_PIPELINE_SOURCE != "merge_request_event"      
+      when: never
+    - if: $CI_COMMIT_BRANCH != "stage" && $CI_PIPELINE_SOURCE != "merge_request_event"      
+      when: never
+    - if: $CI_COMMIT_BRANCH != "dev" && $CI_PIPELINE_SOURCE != "merge_request_event"      
+      when: never
+    - when: always
+
+variables:
+  IMAGE_NAME: $CI_REGISTRY_IMAGE
+  DEV_SERVER_HOST: 35.180.46.122
+  DEV_ENDPOINT: http://ec2-35-180-46-122.eu-west-3.compute.amazonaws.com:3000
+
+stages:
+  - test
+  - build
+  - deploy
+
+
+run_unit_tests:
+  image: node:17-alpine3.14
+  stage: test
+  cache:
+    key: $CI_COMMIT_REF_NAME
+    paths:
+      - app/node_modules/
+    policy: pull-push # this is default
+  tags:
+    - ec2
+    - docker
+    - remote
+  before_script:
+    - cd app
+    - npm install
+  script:
+    - npm test
+  artifacts:
+    when: always
+    paths:
+      - app/junit.xml
+    reports:
+      junit: app/junit.xml
+
+
+run_lint_checks:
+  stage: test
+  tags:
+    - ec2
+    - docker
+    - remote
+  cache:
+    key: $CI_COMMIT_REF_NAME
+    paths:
+      - app/node_modules/
+    policy: pull
+  before_script:
+    - cd app
+    - npm install
+  script:
+    - echo "Running lint checks"
+
+
+build_image:
+  stage: build
+  tags:
+    - ec2
+    - shell
+    - remote
+  before_script:
+    - export PACKAGE_JSON_VERSION=$(cat app/package.json | jq -r .version)
+    - export VERSION=$PACKAGE_JSON_VERSION.$CI_PIPELINE_IID
+    - echo $VERSION > version-file.txt
+  script:
+    - docker build -t $IMAGE_NAME:$VERSION .
+  artifacts:
+    paths:
+      - version-file.txt
+
+
+push_image:
+  stage: build
+  needs:
+    - build_image
+  tags:
+    - ec2
+    - shell
+    - remote
+  before_script:
+    - export VERSION=$(cat version-file.txt)
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker push $IMAGE_NAME:$VERSION
+
+
+deploy_to_dev:
+  stage: deploy
+  tags: 
+    - ec2
+    - shell
+    - remote
+  before_script:
+    - chmod 400 $SSH_PRIVATE_KEY
+    - export VERSION=$(cat version-file.txt)
+  script:
+    - scp -o StrictHostKeyChecking=no -i $SSH_PRIVATE_KEY ./docker-compose.yaml ubuntu@$DEV_SERVER_HOST:/home/ubuntu
+    - ssh -o StrictHostKeyChecking=no -i $SSH_PRIVATE_KEY ubuntu@$DEV_SERVER_HOST "
+        docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY &&
+
+        export DC_IMAGE_NAME=$IMAGE_NAME &&
+        export DC_IMAGE_TAG=$VERSION &&
+
+        docker-compose down &&
+        docker-compose up -d"
+  environment:
+    name: development
+    url: $DEV_ENDPOINT
