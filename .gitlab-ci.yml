@@ -3,9 +3,6 @@ stages:
   - build
   - deploy
 
-sast:
-  stage: test
-
 include:
   - template: Jobs/SAST.gitlab-ci.yml
   - local: .gitlab/build_template.yaml
