@@ -22,7 +22,7 @@
     - pwd
     # - set -o allexport && source deploy.env && set +o allexport
     - cat deploy.env
-    - docker rm -f regboard-front-$CI_COMMIT_REF_SLUG || true
+    - docker rm -f geekconsole-front-$CI_COMMIT_REF_SLUG || true
     # - export COMPOSE_PROJECT_NAME=$DOCKER_COMPOSE_PROJECT_NAME
       # export TMP="$ENV_UPC"_CA_PEM && cat ${!TMP} > ca.pem &&
     - docker compose up -d
