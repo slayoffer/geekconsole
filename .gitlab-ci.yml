@@ -3,10 +3,10 @@ stages:
   - deploy
 
 include:
-  - local: .gitlab/build_front_template.yaml
-  - local: .gitlab/build_front_dev.yaml
-  # - local: .gitlab/build_front_stage.yaml
-  - local: .gitlab/build_front_prod.yaml
+  - local: .gitlab/build_template.yaml
+  - local: .gitlab/build_dev.yaml
+  # - local: .gitlab/build_stage.yaml
+  - local: .gitlab/build_prod.yaml
   - local: .gitlab/deploy_template.yaml
   - local: .gitlab/deploy_dev.yaml
   # - local: .gitlab/deploy_stage.yaml
