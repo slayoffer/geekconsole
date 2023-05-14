@@ -16,13 +16,13 @@
     # - export TMP="$ENV_UPC"_CA_PEM && cat ${!TMP} > ca.pem
     # - export TMP="$ENV_UPC"_CERT_PEM && cat ${!TMP} > cert.pem
     # - export TMP="$ENV_UPC"_KEY_PEM && cat ${!TMP} > key.pem
-    - export TMP=${CD_"$ENV_UPC"_CA_PEM}
+    - export TMP=$"CD_${ENV_UPC}_CA_PEM"
     - echo \$${TMP}
     - echo \$${TMP} > ca.pem
-    - export TMP=${CD_"$ENV_UPC"_CERT_PEM}
+    - export TMP=$"CD_${ENV_UPC}_CERT_PEM"
     - echo \$${TMP}
     - echo \$${TMP} > cert.pem
-    - export TMP=${CD_"$ENV_UPC"_KEY_PEM}
+    - export TMP=$"CD_${ENV_UPC}_KEY_PEM"
     - echo \$${TMP}
     - echo \$${TMP} > key.pem
     - cat ca.pem
