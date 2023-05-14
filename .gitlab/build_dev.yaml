@@ -1,21 +1,21 @@
-build_front_prod:
+build_dev:
   stage: build
-  extends: .build_front_template
+  extends: .build_template
   # variables:
   #   APP_ENV: ${CI_PROD_APP_ENV}
   only:
     refs:
-      - main
+      - dev
   # except:
   #   changes:
   #     - .docker/docs/**/*
 
-build_front_prod_manual:
+build_dev_manual:
   stage: build
-  extends: .build_front_template
+  extends: .build_template
   # variables:
   #   APP_ENV: ${CI_PROD_APP_ENV}
   when: manual
   only:
     refs:
-      - main
+      - dev
