@@ -13,9 +13,18 @@
     #   cat $CD_$ENV_UPC_CERT_PEM > cert.pem &&
     #   cat $CD_$ENV_UPC_KEY_PEM > key.pem
     - echo $ENV_UPC
-    - export TMP="$ENV_UPC"_CA_PEM && cat ${!TMP} > ca.pem
-    - export TMP="$ENV_UPC"_CERT_PEM && cat ${!TMP} > cert.pem
-    - export TMP="$ENV_UPC"_KEY_PEM && cat ${!TMP} > key.pem
+    # - export TMP="$ENV_UPC"_CA_PEM && cat ${!TMP} > ca.pem
+    # - export TMP="$ENV_UPC"_CERT_PEM && cat ${!TMP} > cert.pem
+    # - export TMP="$ENV_UPC"_KEY_PEM && cat ${!TMP} > key.pem
+    - export TMP="$ENV_UPC"_CA_PEM
+    - echo \$${TMP}
+    - eval "echo \$${TMP}" > ca.pem
+    - export TMP="$ENV_UPC"_CERT_PEM
+    - echo \$${TMP}
+    - eval "echo \$${TMP}" > cert.pem
+    - export TMP="$ENV_UPC"_KEY_PEM
+    - echo \$${TMP}
+    - eval "echo \$${TMP}" > key.pem
     - cat ca.pem
     - cat cert.pem
     - cat key.pem
