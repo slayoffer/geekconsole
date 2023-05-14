@@ -9,4 +9,5 @@ entry.client.tsx
 entry.server.tsx
 remix.env.d.ts
 postcss.config.js
+commitlint.config.js
 
