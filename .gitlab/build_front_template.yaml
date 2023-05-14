@@ -1,0 +1,28 @@
+.build_front_tepmlate:
+  stage: build
+  image: docker:20.10.16
+  services:
+    - docker:20.10.16-dind
+  tags:
+    - docker
+  variables:
+    IMAGE_TAG_FRONT: ${CI_COMMIT_REF_SLUG}-${CI_PIPELINE_IID}
+    IMAGE_SUF: ${CI_COMMIT_REF_SLUG}
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - export PACKAGE_JSON_VERSION=$(cat app/package.json | jq -r .version)
+    - export IMAGE_TAG_FRONT=$PACKAGE_JSON_VERSION.$IMAGE_TAG_FRONT
+    - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
+  script:
+    - docker build .
+      -f ./Dockerfile
+      -t $CI_REGISTRY/broz/geek-console-${CI_COMMIT_REF_SLUG}:$IMAGE_TAG_FRONT
+    - docker push
+      $CI_REGISTRY/broz/geek-console-${CI_COMMIT_REF_SLUG}:$IMAGE_TAG_FRONT
+    - grep -q '^IMAGE_TAG_FRONT' deploy.env &&
+      sed -i "s/^IMAGE_TAG_FRONT.*/IMAGE_TAG_FRONT=${CI_COMMIT_REF_SLUG}-${CI_PIPELINE_IID}/" deploy.env ||
+      echo "IMAGE_TAG_FRONT=${CI_COMMIT_REF_SLUG}-${CI_PIPELINE_IID}" >> deploy.env
+  artifacts:
+    reports:
+      dotenv: deploy.env
+

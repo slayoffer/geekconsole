@@ -1,4 +1,7 @@
 {
+  "name": "geekconsole",
+  "version": "1.0",
+  "description": "",
   "private": true,
   "sideEffects": false,
   "scripts": {
