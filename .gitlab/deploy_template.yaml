@@ -11,9 +11,9 @@
     # Docker Host Authentication
     - mkdir -p $DOCKER_CERT_PATH
     - cd $DOCKER_CERT_PATH
-    - cat $CD_PROD_CA_PEM > ca.pem &&
-      cat $CD_PROD_CERT_PEM > cert.pem &&
-      cat $CD_PROD_KEY_PEM > key.pem
+    - cat $CD_DEV_CA_PEM > ca.pem &&
+      cat $CD_DEV_CERT_PEM > cert.pem &&
+      cat $CD_DEV_KEY_PEM > key.pem
     - cd -
     - pwd
     - echo $DOCKER_HOST
