@@ -1,13 +1,19 @@
+image: docker:20.10.16
+services:
+  - docker:20.10.16-dind
+tags:
+  - docker
+
 sast:
   stage: test
 
 .build_template:
   stage: build
-  image: docker:20.10.16
-  services:
-    - docker:20.10.16-dind
-  tags:
-    - docker
+  # image: docker:20.10.16
+  # services:
+  #   - docker:20.10.16-dind
+  # tags:
+  #   - docker
   variables:
     DOCKER_TLS_CERTDIR: ""
   before_script:
