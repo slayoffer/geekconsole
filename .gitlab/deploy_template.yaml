@@ -18,13 +18,13 @@
     # - export TMP="$ENV_UPC"_KEY_PEM && cat ${!TMP} > key.pem
     - export TMP="$ENV_UPC"_CA_PEM
     - echo \$${TMP}
-    - eval "echo \$${TMP}" > ca.pem
+    - echo \$${TMP} > ca.pem
     - export TMP="$ENV_UPC"_CERT_PEM
     - echo \$${TMP}
-    - eval "echo \$${TMP}" > cert.pem
+    - echo \$${TMP} > cert.pem
     - export TMP="$ENV_UPC"_KEY_PEM
     - echo \$${TMP}
-    - eval "echo \$${TMP}" > key.pem
+    - echo \$${TMP} > key.pem
     - cat ca.pem
     - cat cert.pem
     - cat key.pem
