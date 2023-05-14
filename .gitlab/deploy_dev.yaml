@@ -1,0 +1,8 @@
+deploy_stage:
+  stage: deploy
+  extends: .deploy_template
+  variables:
+    DOCKER_HOST: "tcp://$CD_DEV_HOST:2376"
+  only:
+    refs:
+      - dev

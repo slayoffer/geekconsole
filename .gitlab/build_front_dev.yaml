@@ -5,7 +5,7 @@ build_front_prod:
   #   APP_ENV: ${CI_PROD_APP_ENV}
   only:
     refs:
-      - main
+      - dev
   # except:
   #   changes:
   #     - .docker/docs/**/*
@@ -18,4 +18,4 @@ build_front_prod_manual:
   when: manual
   only:
     refs:
-      - main
+      - dev
