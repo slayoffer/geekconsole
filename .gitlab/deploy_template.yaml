@@ -9,13 +9,13 @@
     # Docker Host Authentication
     - mkdir -p $DOCKER_CERT_PATH
     - cd $DOCKER_CERT_PATH
-    # - cat $CD_$ENV_UPC_CA_PEM > ca.pem &&
-    #   cat $CD_$ENV_UPC_CERT_PEM > cert.pem &&
-    #   cat $CD_$ENV_UPC_KEY_PEM > key.pem
     - echo $ENV_UPC
-    - export TMP="$ENV_UPC"_CA_PEM && cat ${!TMP} > ca.pem
-    - export TMP="$ENV_UPC"_CERT_PEM && cat ${!TMP} > cert.pem
-    - export TMP="$ENV_UPC"_KEY_PEM && cat ${!TMP} > key.pem
+    - export TMP="CD_${ENV_UPC}_CA_PEM"
+    - OUTPUT=$(eval "echo \$${TMP}") && cat "$OUTPUT" > ca.pem
+    - export TMP="CD_${ENV_UPC}_CERT_PEM"
+    - OUTPUT=$(eval "echo \$${TMP}") && cat "$OUTPUT" > cert.pem
+    - export TMP="CD_${ENV_UPC}_KEY_PEM"
+    - OUTPUT=$(eval "echo \$${TMP}") && cat "$OUTPUT" > key.pem
     - cat ca.pem
     - cat cert.pem
     - cat key.pem
