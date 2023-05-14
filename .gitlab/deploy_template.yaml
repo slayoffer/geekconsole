@@ -21,7 +21,7 @@
     - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
     - pwd
     # - set -o allexport && source deploy.env && set +o allexport
-    - docker rm -f $CD_FRONT_CONTAINER_NAME-$CI_COMMIT_REF_SLUG || true
+    - docker rm -f $CD_CONTAINER_NAME-$CI_COMMIT_REF_SLUG || true
     # - export COMPOSE_PROJECT_NAME=$DOCKER_COMPOSE_PROJECT_NAME
       # export TMP="$ENV_UPC"_CA_PEM && cat ${!TMP} > ca.pem &&
     - docker compose up -d
