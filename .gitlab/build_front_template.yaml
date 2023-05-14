@@ -16,9 +16,9 @@
   script:
     - docker build .
       -f ./Dockerfile
-      -t $CI_REGISTRY/broz/geek-console-${CI_COMMIT_REF_SLUG}:$IMAGE_TAG_FRONT
+      -t $CI_REGISTRY/broz/geek-console/front-${CI_COMMIT_REF_SLUG}:$IMAGE_TAG_FRONT
     - docker push
-      $CI_REGISTRY/broz/geek-console-${CI_COMMIT_REF_SLUG}:$IMAGE_TAG_FRONT
+      $CI_REGISTRY/broz/geek-console/front-${CI_COMMIT_REF_SLUG}:$IMAGE_TAG_FRONT
     - grep -q '^IMAGE_TAG_FRONT' deploy.env &&
       sed -i "s/^IMAGE_TAG_FRONT.*/IMAGE_TAG_FRONT=${IMAGE_TAG_FRONT}/" deploy.env ||
       echo "IMAGE_TAG_FRONT=${IMAGE_TAG_FRONT}" >> deploy.env
