@@ -16,8 +16,8 @@
     "format": "npx prettier --write ./app/**/*.{js,jsx,ts,tsx}",
     "format:check": "npx prettier --check ./app/**/*.{js,jsx,ts,tsx}",
     "release": "standard-version --no-verify",
-    "prepare": "husky install",
-    "preinstall": "npx only-allow pnpm"
+    "preinstall": "npx only-allow pnpm",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@remix-run/css-bundle": "^1.16.0",
