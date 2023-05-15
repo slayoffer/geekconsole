@@ -5,8 +5,6 @@ export const meta: V2_MetaFunction = () => {
   return [{ title: 'Geek Console' }];
 };
 
-// TEST PIPELINE
-
 export default function Index() {
   return (
     <div className="mt-16 flex flex-col items-center mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-full">
