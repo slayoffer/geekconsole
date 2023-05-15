@@ -1,6 +1,6 @@
 {
   "name": "geekconsole",
-  "version": "1.0",
+  "version": "0.0.2",
   "description": "",
   "private": true,
   "sideEffects": false,
@@ -15,6 +15,7 @@
     "storybook:build": "storybook build",
     "format": "npx prettier --write ./app/**/*.{js,jsx,ts,tsx}",
     "format:check": "npx prettier --check ./app/**/*.{js,jsx,ts,tsx}",
+    "release": "standard-version --no-verify",
     "prepare": "husky install"
   },
   "dependencies": {
@@ -61,6 +62,7 @@
     "postcss": "^8.4.23",
     "prettier": "2.8.8",
     "prop-types": "^15.8.1",
+    "standard-version": "^9.5.0",
     "storybook": "^7.0.9",
     "tailwindcss": "^3.3.2",
     "typescript": "^5.0.4"
