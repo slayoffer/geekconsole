@@ -6,4 +6,4 @@ deploy_dev:
     ENV_UPC: DEV
   only:
     refs:
-      - dev
+      - develop
