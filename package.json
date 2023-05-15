@@ -70,11 +70,6 @@
     "tailwindcss": "^3.3.2",
     "typescript": "^5.0.4"
   },
-  "husky": {
-    "hooks": {
-      "prepare-commit-msg": "exec < /dev/tty && npx cz --hook || true"
-    }
-  },
   "engines": {
     "node": ">=14"
   }
