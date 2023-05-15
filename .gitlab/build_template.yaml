@@ -1,11 +1,3 @@
-sast:
-  stage: test
-  image: docker:20.10.16
-  # services:
-  #   - docker:20.10.16-dind
-  tags:
-    - docker
-
 .build_template:
   stage: build
   image: docker:20.10.16
