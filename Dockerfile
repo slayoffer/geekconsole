@@ -1,8 +1,8 @@
 FROM node:18-alpine as BUILD
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+RUN pnpm ci
 COPY ./ .
-RUN npm run build
+RUN pnpm run build
 EXPOSE 3000
-CMD ["npm", "run", "start"]
+CMD ["pnpm", "run", "start"]
