@@ -1,5 +1,6 @@
 import type { V2_MetaFunction } from '@remix-run/node';
 import { Button } from '~/shared/ui/Button/Button';
+import { Input } from '~/shared/ui/Input/Input';
 
 export const meta: V2_MetaFunction = () => {
   return [{ title: 'Geek Console' }];
@@ -22,6 +23,7 @@ export default function Index() {
           Start tracking what you are reading and what you have read.
         </p>
       </div>
+      <Input placeholder="Test text" />
       <Button className="mt-4" size="large">
         TEST
       </Button>
