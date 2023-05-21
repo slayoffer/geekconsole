@@ -24,9 +24,7 @@ export default function Index() {
         </p>
       </div>
       <Input placeholder="Test text" />
-      <Button className="mt-4" size="large">
-        TEST
-      </Button>
+      <Button>Hey</Button>
     </div>
   );
 }
