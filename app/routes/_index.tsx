@@ -1,6 +1,4 @@
 import type { V2_MetaFunction } from '@remix-run/node';
-import { Button } from '~/shared/ui/Button/Button';
-import { Input } from '~/shared/ui/Input/Input';
 
 export const meta: V2_MetaFunction = () => {
   return [{ title: 'Geek Console' }];
@@ -17,14 +15,12 @@ export default function Index() {
         />
         <h1 className="text-xl mb-3 text-yellow-400">Welcome to GeekConsole</h1>
         <p className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
-          Take full control of your books.
+          Take full control of your material and digital stuff
         </p>
         <p className="mx-auto mt-5 max-w-xl text-xl text-gray-400">
           Start tracking what you are reading and what you have read.
         </p>
       </div>
-      <Input placeholder="Test text" />
-      <Button>Hey</Button>
     </div>
   );
 }
