@@ -11,6 +11,7 @@
   },
   "extends": [
     "plugin:react/recommended",
+    "plugin:tailwindcss/recommended",
     "standard-with-typescript",
     "plugin:react-hooks/recommended",
     "@remix-run/eslint-config",

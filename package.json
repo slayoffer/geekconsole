@@ -24,17 +24,23 @@
     "prepare": "husky install"
   },
   "dependencies": {
+    "@radix-ui/react-slot": "^1.0.1",
     "@remix-run/css-bundle": "^1.16.0",
     "@remix-run/node": "^1.16.0",
     "@remix-run/react": "^1.16.0",
     "@remix-run/serve": "^1.16.0",
     "@supabase/auth-ui-react": "^0.4.2",
     "@supabase/supabase-js": "^2.22.0",
+    "class-variance-authority": "^0.6.0",
+    "clsx": "^1.2.1",
     "flowbite": "^1.6.5",
     "flowbite-react": "^0.4.4",
     "isbot": "^3.6.8",
+    "lucide-react": "^0.220.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "tailwind-merge": "^1.12.0",
+    "tailwindcss-animate": "^1.0.5"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.21.5",
@@ -68,6 +74,7 @@
     "eslint-plugin-react": "^7.32.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-storybook": "^0.6.12",
+    "eslint-plugin-tailwindcss": "^3.12.0",
     "husky": "^8.0.3",
     "lint-staged": "^13.2.2",
     "npm-run-all": "^4.1.5",

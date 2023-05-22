@@ -13,9 +13,6 @@ import {
 import { Header } from './widgets/Header';
 import { Footer } from './widgets/Footer';
 
-import { Flowbite } from 'flowbite-react';
-import { theme } from './main/configs/theme';
-
 export const links: LinksFunction = () => [
   ...(cssBundleHref !== undefined
     ? [{ rel: 'stylesheet', href: cssBundleHref }]
@@ -28,7 +25,7 @@ export const links: LinksFunction = () => [
 
 export default function App() {
   return (
-    <html className="h-full" lang="en">
+    <html className="dark h-full" lang="en">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -40,18 +37,16 @@ export default function App() {
         />
         <Links />
       </head>
-      <Flowbite theme={{ theme }}>
-        <body className="min-h-full flex flex-col justify-between bg-[#1c1c1c]">
-          <Header />
-          <main className="container mx-auto flex flex-col items-center p-10">
-            <Outlet />
-          </main>
-          <Footer />
-          <ScrollRestoration />
-          <Scripts />
-          <LiveReload />
-        </body>
-      </Flowbite>
+      <body className="flex min-h-full flex-col justify-between">
+        <Header />
+        <main className="container mx-auto flex flex-col items-center p-10">
+          <Outlet />
+        </main>
+        <Footer />
+        <ScrollRestoration />
+        <Scripts />
+        <LiveReload />
+      </body>
     </html>
   );
 }
