@@ -1,4 +1,5 @@
 import type { V2_MetaFunction } from '@remix-run/node';
+import { supaClient } from '~/main/configs/supa-client.server';
 
 export const meta: V2_MetaFunction = () => {
   return [{ title: 'Geek Console' }];
@@ -23,4 +24,11 @@ export default function Index() {
       </div>
     </div>
   );
+}
+
+export async function loader() {
+  const { data: userProfiles } = supaClient.from('user_profiles').select('*');
+  console.log(userProfiles);
+
+  return 'hey';
 }
