@@ -13,9 +13,8 @@ if (process.env.NODE_ENV === 'production') {
   if (globalAny.db === undefined) {
     globalAny.db = createClient(supabaseUrl, supabaseKey);
   }
-  console.log('DB SUCCESSFULLY CONNECTED');
 
   supaClient = globalAny.db;
 }
 
-export { supaClient };
+export default supaClient;

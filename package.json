@@ -29,7 +29,7 @@
     "@remix-run/node": "^1.16.0",
     "@remix-run/react": "^1.16.0",
     "@remix-run/serve": "^1.16.0",
-    "@supabase/auth-ui-react": "^0.4.2",
+    "@supabase/auth-helpers-remix": "^0.1.9",
     "@supabase/supabase-js": "^2.22.0",
     "class-variance-authority": "^0.6.0",
     "clsx": "^1.2.1",

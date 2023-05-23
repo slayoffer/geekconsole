@@ -1,6 +1,5 @@
 import { cssBundleHref } from '@remix-run/css-bundle';
-import styles from './styles.css';
-import type { LinksFunction } from '@remix-run/node';
+import { type LinksFunction, json } from '@remix-run/node';
 import {
   Links,
   LiveReload,
@@ -8,10 +7,12 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
 } from '@remix-run/react';
 
-import { Header } from './widgets/Header';
-import { Footer } from './widgets/Footer';
+import styles from './styles.css';
+import { useState } from 'react';
+import { createBrowserClient } from '@supabase/auth-helpers-remix';
 
 export const links: LinksFunction = () => [
   ...(cssBundleHref !== undefined
@@ -24,6 +25,12 @@ export const links: LinksFunction = () => [
 ];
 
 export default function App() {
+  const { env } = useLoaderData();
+
+  const [supabase] = useState(() =>
+    createBrowserClient(env.SUPABASE_URL, env.SUPABASE_ANON_KEY),
+  );
+
   return (
     <html className="dark h-full" lang="en">
       <head>
@@ -37,12 +44,8 @@ export default function App() {
         />
         <Links />
       </head>
-      <body className="flex min-h-full flex-col justify-between">
-        <Header />
-        <main className="container mx-auto flex flex-col items-center p-10">
-          <Outlet />
-        </main>
-        <Footer />
+      <body className="flex h-full flex-col justify-between">
+        <Outlet context={{ supabase }} />
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
@@ -50,3 +53,12 @@ export default function App() {
     </html>
   );
 }
+
+export const loader = () => {
+  const env = {
+    SUPABASE_URL: process.env.SUPABASE_API_URL,
+    SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
+  };
+
+  return json({ env });
+};

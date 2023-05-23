@@ -13,4 +13,8 @@ module.exports = {
     v2_normalizeFormMethod: true,
     v2_routeConvention: true,
   },
+  serverDependenciesToBundle: [
+    '@supabase/auth-ui-react',
+    '@supabase/supabase-js',
+  ],
 };
