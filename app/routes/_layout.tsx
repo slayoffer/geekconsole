@@ -1,9 +1,8 @@
 import { Outlet } from '@remix-run/react';
 
-import { Footer } from '~/widgets/Footer';
-import { Header } from '~/widgets/Header';
+import { Footer, Header } from '~/core/components/layout';
 
-export default function Index() {
+export default function Layout() {
   return (
     <>
       <Header />

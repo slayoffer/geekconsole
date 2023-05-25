@@ -1,5 +1,7 @@
+import { useState } from 'react';
+
 import { cssBundleHref } from '@remix-run/css-bundle';
-import { type LinksFunction, json } from '@remix-run/node';
+import { json, type LinksFunction } from '@remix-run/node';
 import {
   Links,
   LiveReload,
@@ -9,20 +11,9 @@ import {
   ScrollRestoration,
   useLoaderData,
 } from '@remix-run/react';
-
-import styles from './styles.css';
-import { useState } from 'react';
 import { createBrowserClient } from '@supabase/auth-helpers-remix';
 
-export const links: LinksFunction = () => [
-  ...(cssBundleHref !== undefined
-    ? [{ rel: 'stylesheet', href: cssBundleHref }]
-    : []),
-  {
-    rel: 'stylesheet',
-    href: styles,
-  },
-];
+import styles from './styles.css';
 
 export default function App() {
   const { env } = useLoaderData();
@@ -53,6 +44,16 @@ export default function App() {
     </html>
   );
 }
+
+export const links: LinksFunction = () => [
+  ...(cssBundleHref !== undefined
+    ? [{ rel: 'stylesheet', href: cssBundleHref }]
+    : []),
+  {
+    rel: 'stylesheet',
+    href: styles,
+  },
+];
 
 export const loader = () => {
   const env = {

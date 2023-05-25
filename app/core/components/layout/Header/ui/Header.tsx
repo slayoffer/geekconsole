@@ -1,4 +1,5 @@
 import { Link } from '@remix-run/react';
+
 import { Button } from '~/shared/ui/Button/Button';
 
 export const Header = () => {
@@ -17,19 +18,19 @@ export const Header = () => {
           </div>
           <div className="ml-10 hidden space-x-4 lg:block">
             <Button asChild variant="link">
-              <Link to="/login">Sign in</Link>
+              <Link to="/auth?type=signin">Sign in</Link>
             </Button>
             <Button asChild variant="link">
-              <Link to="/register">Sign up</Link>
+              <Link to="/auth?type=register">Sign up</Link>
             </Button>
           </div>
         </div>
         <div className="flex flex-wrap justify-center space-x-6 py-4 lg:hidden">
           <Button asChild variant="link">
-            <Link to="/login">Sign in</Link>
+            <Link to="/auth?type=signin">Sign in</Link>
           </Button>
           <Button asChild variant="link">
-            <Link to="/register">Sign up</Link>
+            <Link to="/auth?type=register">Sign up</Link>
           </Button>
         </div>
       </nav>

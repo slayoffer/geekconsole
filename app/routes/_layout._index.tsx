@@ -1,16 +1,12 @@
-import { type LoaderArgs, type V2_MetaFunction, json } from '@remix-run/node';
-import { useLoaderData } from '@remix-run/react';
-import { createServerClient } from '@supabase/auth-helpers-remix';
+import { json, type LoaderArgs, type V2_MetaFunction } from '@remix-run/node';
+
+import { createSupabaseServerClient } from '~/core/server';
 
 export const meta: V2_MetaFunction = () => {
   return [{ title: 'Geek Console' }];
 };
 
 export default function Index() {
-  const { data } = useLoaderData();
-
-  console.log(data);
-
   return (
     <div className="mx-auto mt-16 flex h-full max-w-7xl flex-col items-center px-4 sm:px-6 lg:px-8">
       <div className="text-center">
@@ -34,11 +30,7 @@ export default function Index() {
 export const loader = async ({ request }: LoaderArgs) => {
   const response = new Response();
 
-  const supabaseClient = createServerClient(
-    process.env.SUPABASE_API_URL ?? '',
-    process.env.SUPABASE_ANON_KEY ?? '',
-    { request, response },
-  );
+  const supabaseClient = createSupabaseServerClient({ request, response });
 
   const { data } = await supabaseClient.from('user_profiles').select('*');
 
