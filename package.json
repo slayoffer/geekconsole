@@ -12,7 +12,7 @@
     "dev": "run-p dev:*",
     "dev:remix": "remix dev",
     "dev:tailwindcss": "tailwindcss -i ./app/core/styles/index.css -o ./app/styles.css --watch",
-    "typecheck": "tsc",
+    "typecheck": "npx tsc",
     "lint:ts": "npx eslint . --ext  .ts,.tsx ./app",
     "lint:ts:fix": "npx eslint . --ext .ts,.tsx ./app --fix",
     "storybook": "storybook dev -p 6006",
