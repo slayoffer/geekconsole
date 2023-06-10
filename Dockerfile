@@ -10,6 +10,7 @@ FROM base AS build
 WORKDIR /app
 COPY ./ .
 COPY --from=dependencies /app/node_modules ./node_modules
+RUN pnpm typecheck
 RUN pnpm build
 EXPOSE 3000
 CMD ["npm", "run", "start"]
