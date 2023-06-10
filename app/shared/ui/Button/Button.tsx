@@ -1,67 +1,56 @@
-import { type ButtonHTMLAttributes, type ReactNode, useMemo } from 'react';
-import { exhaustiveCheck } from '~/shared/lib/utils';
+import { forwardRef, type ButtonHTMLAttributes } from 'react';
+import { Slot } from '@radix-ui/react-slot';
+import { cva, type VariantProps } from 'class-variance-authority';
 
-type ButtonSize = 'small' | 'basic' | 'large';
+import { cn } from '~/shared/lib/utils';
 
-type ButtonVariant = 'primary';
+const buttonVariants = cva(
+  'inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+  {
+    variants: {
+      variant: {
+        default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+        destructive:
+          'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+        outline:
+          'border border-input hover:bg-accent hover:text-accent-foreground',
+        secondary:
+          'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+        ghost: 'hover:bg-accent hover:text-accent-foreground',
+        link: 'text-primary underline-offset-4 hover:underline',
+      },
+      size: {
+        default: 'h-10 px-4 py-2',
+        sm: 'h-9 rounded-md px-3',
+        lg: 'h-11 rounded-md px-8',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+      size: 'default',
+    },
+  },
+);
 
-type ButtonProps = {
-  children: ReactNode;
-  className?: string;
-  size?: ButtonSize;
-  variant?: ButtonVariant;
-} & ButtonHTMLAttributes<HTMLButtonElement>;
+export type ButtonProps = {
+  asChild?: boolean;
+} & ButtonHTMLAttributes<HTMLButtonElement> &
+  VariantProps<typeof buttonVariants>;
 
-const BASE_BUTTON_CLASSES = 'focus:ring-4 focus:outline-none rounded-lg';
+const Button = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) => {
+  const { className, variant, size, asChild = false, ...otherProps } = props;
 
-const getVariantClasses = (variant: ButtonVariant) => {
-  switch (variant) {
-    case 'primary': {
-      return 'bg-[--primary-color] text-color-900 hover:bg-[--primary-color]/90 focus:ring-[--primary-color]/50 font-bold';
-    }
-    default:
-      exhaustiveCheck(variant);
-  }
-};
-
-const getSizeClasses = (size: ButtonSize) => {
-  switch (size) {
-    case 'small': {
-      return 'h-8 px-4 text-sm';
-    }
-    case 'basic': {
-      return 'h-10 px-5';
-    }
-    case 'large': {
-      return 'h-12 px-6 text-lg';
-    }
-    default:
-      exhaustiveCheck(size);
-  }
-};
-
-export const Button = (props: ButtonProps) => {
-  const {
-    children,
-    className = '',
-    size = 'basic',
-    variant = 'primary',
-    ...otherProps
-  } = props;
-
-  const computedClasses = useMemo(() => {
-    const sizeClass = getSizeClasses(size);
-    const variantClass = getVariantClasses(variant);
-
-    return [sizeClass, variantClass, className].join(' ');
-  }, [size, variant, className]);
+  const Comp = asChild ? Slot : 'button';
 
   return (
-    <button
-      className={`${BASE_BUTTON_CLASSES} ${computedClasses}`}
+    <Comp
+      className={cn(buttonVariants({ variant, size, className }))}
+      ref={ref}
       {...otherProps}
-    >
-      {children}
-    </button>
+    />
   );
-};
+});
+
+Button.displayName = 'Button';
+
+export { Button, buttonVariants };

@@ -1,8 +1,8 @@
 export const Footer = () => {
   return (
-    <footer className="mt-auto p-4 py-16 bg-zinc-900">
+    <footer className="mt-auto bg-zinc-900 p-4 py-16">
       <div className="mx-auto max-w-screen-xl">
-        <div className="flex justify-between items-center">
+        <div className="flex items-center justify-between">
           <div>
             <div className="mb-6">
               <a href="/">
@@ -13,16 +13,16 @@ export const Footer = () => {
                 />
               </a>
             </div>
-            <p className="text-white text-sm">
+            <p className="text-sm text-white">
               © 2022 GeekConsole™. All Rights Reserved
             </p>
           </div>
 
-          <ul className="flex flex-wrap items-center mb-4 text-xl lg:mb-0 text-gray-400">
+          <ul className="mb-4 flex flex-wrap items-center text-xl text-gray-400 lg:mb-0">
             <li>
               <a
                 href="/"
-                className="mr-4 hover:underline hover:text-white transition duration-300 md:mr-6"
+                className="mr-4 transition duration-300 hover:text-white hover:underline md:mr-6"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -32,7 +32,7 @@ export const Footer = () => {
             <li>
               <a
                 href="https://roadmap.geekconsole.app"
-                className="mr-4 hover:underline hover:text-white transition duration-300 md:mr-6"
+                className="mr-4 transition duration-300 hover:text-white hover:underline md:mr-6"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -42,7 +42,7 @@ export const Footer = () => {
             <li>
               <a
                 href="https://github.com/vVolodya"
-                className="mr-4 hover:underline hover:text-white transition duration-300 md:mr-6"
+                className="mr-4 transition duration-300 hover:text-white hover:underline md:mr-6"
                 target="_blank"
                 rel="noopener noreferrer"
               >
