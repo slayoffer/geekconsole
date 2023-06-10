@@ -1,8 +1,20 @@
-import { Form, Link, useActionData, useSearchParams } from '@remix-run/react';
+import {
+  Form,
+  Link,
+  useActionData,
+  useNavigation,
+  useSearchParams,
+} from '@remix-run/react';
+import { Loader2 } from 'lucide-react';
+
+import { Button } from '~/shared/ui';
 
 export const AuthForm = () => {
   const [searchParams] = useSearchParams();
   const validationErrors = useActionData();
+  const navigation = useNavigation();
+
+  const isSubmitting = navigation.state !== 'idle';
 
   const authMode = searchParams.get('type') ?? 'signin';
 
@@ -94,12 +106,16 @@ export const AuthForm = () => {
                 </ul>
               )}
               <div>
-                <button
-                  type="submit"
-                  className="flex w-full justify-center rounded-md border border-transparent bg-[#F7BE38] px-4 py-2 text-sm font-bold text-gray-900 shadow-sm hover:bg-[#F7BE38]/90 focus:outline-none focus:ring-2 focus:ring-[#F7BE38]/50 focus:ring-offset-2"
-                >
-                  {submitBtnCaption}
-                </button>
+                <Button disabled={isSubmitting} className="w-full">
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Please wait
+                    </>
+                  ) : (
+                    submitBtnCaption
+                  )}
+                </Button>
                 <div className="mt-4 text-center text-sm">
                   <Link
                     to={

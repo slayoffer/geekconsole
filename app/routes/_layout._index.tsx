@@ -1,6 +1,4 @@
-import { json, type LoaderArgs, type V2_MetaFunction } from '@remix-run/node';
-
-import { createSupabaseServerClient } from '~/core/server';
+import { type V2_MetaFunction } from '@remix-run/node';
 
 export const meta: V2_MetaFunction = () => {
   return [{ title: 'Geek Console' }];
@@ -26,18 +24,3 @@ export default function Index() {
     </div>
   );
 }
-
-export const loader = async ({ request }: LoaderArgs) => {
-  const response = new Response();
-
-  const supabaseClient = createSupabaseServerClient({ request, response });
-
-  const { data } = await supabaseClient.from('user_profiles').select('*');
-
-  return json(
-    { data },
-    {
-      headers: response.headers,
-    },
-  );
-};

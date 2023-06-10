@@ -1,8 +1,17 @@
-import { Link } from '@remix-run/react';
+import { Link, useOutletContext } from '@remix-run/react';
 
-import { Button } from '~/shared/ui/Button/Button';
+import { type OutletContextValues } from '~/shared/models/common';
+import { Button } from '~/shared/ui';
 
 export const Header = () => {
+  const { session, supabase } = useOutletContext<OutletContextValues>();
+
+  const handleLogout = () => {
+    void (async () => {
+      await supabase.auth.signOut();
+    })();
+  };
+
   return (
     <header className="bg-zinc-900">
       <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" aria-label="Top">
@@ -16,7 +25,37 @@ export const Header = () => {
               />
             </Link>
           </div>
-          <div className="ml-10 hidden space-x-4 lg:block">
+          {session !== null ? (
+            <div className="ml-10 hidden space-x-4 lg:block">
+              <Button asChild variant="link">
+                <Link to="/books">Books</Link>
+              </Button>
+              <Button variant="outline" onClick={handleLogout}>
+                Logout
+              </Button>
+            </div>
+          ) : (
+            <div className="ml-10 hidden space-x-4 lg:block">
+              <Button asChild variant="link">
+                <Link to="/auth?type=signin">Sign in</Link>
+              </Button>
+              <Button asChild variant="link">
+                <Link to="/auth?type=register">Sign up</Link>
+              </Button>
+            </div>
+          )}
+        </div>
+        {session !== null ? (
+          <div className="flex flex-wrap justify-center space-x-6 py-4 lg:hidden">
+            <Button asChild variant="link">
+              <Link to="/books">Books</Link>
+            </Button>
+            <Button variant="outline" onClick={handleLogout}>
+              Logout
+            </Button>
+          </div>
+        ) : (
+          <div className="flex flex-wrap justify-center space-x-6 py-4 lg:hidden">
             <Button asChild variant="link">
               <Link to="/auth?type=signin">Sign in</Link>
             </Button>
@@ -24,15 +63,7 @@ export const Header = () => {
               <Link to="/auth?type=register">Sign up</Link>
             </Button>
           </div>
-        </div>
-        <div className="flex flex-wrap justify-center space-x-6 py-4 lg:hidden">
-          <Button asChild variant="link">
-            <Link to="/auth?type=signin">Sign in</Link>
-          </Button>
-          <Button asChild variant="link">
-            <Link to="/auth?type=register">Sign up</Link>
-          </Button>
-        </div>
+        )}
       </nav>
     </header>
   );

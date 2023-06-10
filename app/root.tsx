@@ -1,7 +1,6 @@
-import { useState } from 'react';
-
+import { useEffect, useState } from 'react';
 import { cssBundleHref } from '@remix-run/css-bundle';
-import { json, type LinksFunction } from '@remix-run/node';
+import { json, type LinksFunction, type LoaderArgs } from '@remix-run/node';
 import {
   Links,
   LiveReload,
@@ -10,17 +9,36 @@ import {
   Scripts,
   ScrollRestoration,
   useLoaderData,
+  useRevalidator,
 } from '@remix-run/react';
 import { createBrowserClient } from '@supabase/auth-helpers-remix';
 
+import { createSupabaseServerClient } from './core/server';
 import styles from './styles.css';
 
 export default function App() {
-  const { env } = useLoaderData();
+  const { env, session } = useLoaderData();
+  const { revalidate } = useRevalidator();
 
   const [supabase] = useState(() =>
     createBrowserClient(env.SUPABASE_URL, env.SUPABASE_ANON_KEY),
   );
+
+  const serverAccessToken = session?.access_token;
+
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_, session) => {
+      if (session?.access_token !== serverAccessToken) {
+        revalidate();
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [serverAccessToken, supabase, revalidate]);
 
   return (
     <html className="dark h-full" lang="en">
@@ -36,7 +54,7 @@ export default function App() {
         <Links />
       </head>
       <body className="flex h-full flex-col justify-between">
-        <Outlet context={{ supabase }} />
+        <Outlet context={{ supabase, session }} />
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
@@ -55,11 +73,19 @@ export const links: LinksFunction = () => [
   },
 ];
 
-export const loader = () => {
+export const loader = async ({ request }: LoaderArgs) => {
   const env = {
     SUPABASE_URL: process.env.SUPABASE_API_URL,
     SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
   };
 
-  return json({ env });
+  const response = new Response();
+
+  const supabaseClient = createSupabaseServerClient({ response, request });
+
+  const {
+    data: { session },
+  } = await supabaseClient.auth.getSession();
+
+  return json({ env, session }, { headers: response.headers });
 };
