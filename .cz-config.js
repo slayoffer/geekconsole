@@ -40,7 +40,6 @@ module.exports = {
     { name: 'infra' },
     { name: 'users' },
     { name: 'books' },
-    { name: 'settings' },
   ],
 
   scopeOverrides: {
