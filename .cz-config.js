@@ -37,10 +37,9 @@ module.exports = {
 
   scopes: [
     { name: 'ui' },
-    { name: 'android' },
-    { name: 'ios' },
-    { name: 'home' },
-    { name: 'planner' },
+    { name: 'infra' },
+    { name: 'users' },
+    { name: 'books' },
     { name: 'settings' },
   ],
 
