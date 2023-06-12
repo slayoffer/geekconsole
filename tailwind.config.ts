@@ -3,12 +3,7 @@ import { fontFamily } from 'tailwindcss/defaultTheme';
 
 export default {
   darkMode: ['class'],
-  content: [
-    './app/**/*.{js,jsx,ts,tsx}',
-    './public/**/*.html',
-    'node_modules/flowbite/**/*.js',
-    'node_modules/flowbite-react/**/*.{js,jsx,ts,tsx}',
-  ],
+  content: ['./app/**/*.{js,jsx,ts,tsx}', './public/**/*.html'],
   theme: {
     container: {
       center: true,
@@ -77,5 +72,5 @@ export default {
       },
     },
   },
-  plugins: [require('flowbite/plugin')],
+  plugins: [],
 } satisfies Config;

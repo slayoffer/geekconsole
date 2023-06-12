@@ -15,3 +15,15 @@ export const createSupabaseServerClient = (options: {
 
   return supaClient;
 };
+
+export const getSession = async (request: Request) => {
+  const response = new Response();
+
+  const supabaseClient = createSupabaseServerClient({ response, request });
+
+  const {
+    data: { session },
+  } = await supabaseClient.auth.getSession();
+
+  return session;
+};
