@@ -1,3 +1,4 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Form,
   Link,
@@ -6,15 +7,37 @@ import {
   useSearchParams,
 } from '@remix-run/react';
 import { Loader2 } from 'lucide-react';
+import * as z from 'zod';
 
 import { Button } from '~/shared/ui';
+
+const passwordRegex =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+const authFormSchema = z.object({
+  email: z
+    .string()
+    .min(1, { message: 'Email is required' })
+    .email({
+      message: 'Must be a valid email',
+    })
+    .transform((email) => email.trim()),
+  password: z.string().refine((pass) => passwordRegex.test(pass), {
+    message:
+      'Password must contain at least 8 characters, one uppercase, one lowercase, one number and one special character',
+  }),
+});
+
+type AuthFormData = z.infer<typeof authFormSchema>;
+
+const authFormResolver = zodResolver(authFormSchema);
 
 export const AuthForm = () => {
   const [searchParams] = useSearchParams();
   const validationErrors = useActionData();
   const navigation = useNavigation();
 
-  const isSubmitting = navigation.state !== 'idle';
+  const isSubmitting = navigation.state === 'submitting';
 
   const authMode = searchParams.get('type') ?? 'signin';
 

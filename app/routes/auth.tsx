@@ -7,8 +7,7 @@ import {
 } from '@remix-run/node';
 
 import { AuthForm } from '~/core/components/auth';
-import { createSupabaseServerClient } from '~/core/server';
-import { validateCredentials } from '~/core/server/auth/auth.server';
+import { createSupabaseServerClient, validateCredentials } from '~/core/server';
 
 export const meta: V2_MetaFunction = () => {
   return [{ title: 'Welcome, friend!' }];
@@ -65,7 +64,11 @@ export const action = async ({ request }: ActionArgs) => {
         await supabaseClient
           .from('user_profiles')
           .insert([{ id: data.user?.id }]);
+
+        return redirect('/auth?type=signin', { headers: response.headers });
       }
+
+      return json({ message: error.message });
     } else {
       const { error } = await supabaseClient.auth.signInWithPassword(
         credentials,
@@ -74,10 +77,10 @@ export const action = async ({ request }: ActionArgs) => {
       if (error !== null) {
         return json({ message: 'Invalid auth credentials' }, { status: 400 });
       }
+
+      return redirect('/books', { headers: response.headers });
     }
   } catch (error) {
     console.log(error);
   }
-
-  return redirect('/books', { headers: response.headers });
 };

@@ -1,4 +1,4 @@
-import { type CookieOptions } from '@remix-run/node';
+import { redirect, type CookieOptions } from '@remix-run/node';
 import { createServerClient } from '@supabase/auth-helpers-remix';
 import { type SupabaseClient } from '@supabase/supabase-js';
 
@@ -25,5 +25,9 @@ export const getSession = async (request: Request) => {
     data: { session },
   } = await supabaseClient.auth.getSession();
 
-  return session;
+  if (session === null) {
+    throw redirect('/auth?type=signin');
+  }
+
+  return { supabaseClient, session };
 };
