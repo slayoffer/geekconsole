@@ -7,6 +7,7 @@ import {
   useSearchParams,
 } from '@remix-run/react';
 import { Loader2 } from 'lucide-react';
+import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 import { Button } from '~/shared/ui';
@@ -50,6 +51,14 @@ export const AuthForm = () => {
     authMode === 'register'
       ? 'Already have an account?'
       : 'Do not have an account yet?';
+
+  const form = useForm<AuthFormData>({
+    resolver: zodResolver(authFormSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
 
   return (
     <div className="flex h-full">
