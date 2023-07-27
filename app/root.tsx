@@ -30,9 +30,7 @@ export default function App() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_, session) => {
-      if (session?.access_token !== serverAccessToken) {
-        revalidate();
-      }
+      if (session?.access_token !== serverAccessToken) revalidate();
     });
 
     return () => {

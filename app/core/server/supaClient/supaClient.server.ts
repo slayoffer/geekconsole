@@ -25,9 +25,7 @@ export const getSession = async (request: Request) => {
     data: { session },
   } = await supabaseClient.auth.getSession();
 
-  if (session === null) {
-    throw redirect('/auth?type=signin');
-  }
+  if (session === null) throw redirect('/auth?type=signin');
 
   return { supabaseClient, session };
 };

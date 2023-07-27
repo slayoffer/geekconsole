@@ -1,4 +1,4 @@
-import { zodResolver } from '@hookform/resolvers/zod';
+// import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Form,
   Link,
@@ -7,31 +7,32 @@ import {
   useSearchParams,
 } from '@remix-run/react';
 import { Loader2 } from 'lucide-react';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
+
+// import { useForm } from 'react-hook-form';
+// import * as z from 'zod';
 
 import { Button } from '~/shared/ui';
 
-const passwordRegex =
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+// const passwordRegex =
+//   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
-const authFormSchema = z.object({
-  email: z
-    .string()
-    .min(1, { message: 'Email is required' })
-    .email({
-      message: 'Must be a valid email',
-    })
-    .transform((email) => email.trim()),
-  password: z.string().refine((pass) => passwordRegex.test(pass), {
-    message:
-      'Password must contain at least 8 characters, one uppercase, one lowercase, one number and one special character',
-  }),
-});
+// const authFormSchema = z.object({
+//   email: z
+//     .string()
+//     .min(1, { message: 'Email is required' })
+//     .email({
+//       message: 'Must be a valid email',
+//     })
+//     .transform((email) => email.trim()),
+//   password: z.string().refine((pass) => passwordRegex.test(pass), {
+//     message:
+//       'Password must contain at least 8 characters, one uppercase, one lowercase, one number and one special character',
+//   }),
+// });
 
-type AuthFormData = z.infer<typeof authFormSchema>;
+// type AuthFormData = z.infer<typeof authFormSchema>;
 
-const authFormResolver = zodResolver(authFormSchema);
+// const authFormResolver = zodResolver(authFormSchema);
 
 export const AuthForm = () => {
   const [searchParams] = useSearchParams();
@@ -52,13 +53,13 @@ export const AuthForm = () => {
       ? 'Already have an account?'
       : 'Do not have an account yet?';
 
-  const form = useForm<AuthFormData>({
-    resolver: zodResolver(authFormSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
-  });
+  // const form = useForm<AuthFormData>({
+  //   resolver: zodResolver(authFormSchema),
+  //   defaultValues: {
+  //     email: '',
+  //     password: '',
+  //   },
+  // });
 
   return (
     <div className="flex h-full">

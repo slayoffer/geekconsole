@@ -10,20 +10,22 @@
     }
   },
   "extends": [
-    "plugin:react/recommended",
     "plugin:tailwindcss/recommended",
-    "standard-with-typescript",
     "plugin:react-hooks/recommended",
+    "plugin:storybook/recommended",
     "@remix-run/eslint-config",
     "@remix-run/eslint-config/node",
-    "plugin:storybook/recommended",
     "prettier"
   ],
-  "overrides": [],
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx"]
+    }
+  ],
   "parserOptions": {
     "ecmaVersion": "latest",
     "sourceType": "module",
-    "project": ["./tsconfig.json"],
+    "project": true,
     "ecmaFeatures": {
       "jsx": true
     }
