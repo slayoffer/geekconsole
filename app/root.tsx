@@ -14,6 +14,7 @@ import {
 import { createBrowserClient } from '@supabase/auth-helpers-remix';
 
 import { createSupabaseServerClient } from './core/server';
+import { Toaster } from './shared/ui';
 import styles from './styles.css';
 
 export default function App() {
@@ -53,6 +54,7 @@ export default function App() {
       </head>
       <body className="flex h-full flex-col justify-between">
         <Outlet context={{ supabase, session }} />
+        <Toaster />
         <ScrollRestoration />
         <Scripts />
         <LiveReload />

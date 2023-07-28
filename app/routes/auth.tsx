@@ -14,7 +14,11 @@ export const meta: V2_MetaFunction = () => {
 };
 
 export default function Auth() {
-  return <AuthForm />;
+  return (
+    <div className="flex h-full items-center justify-center">
+      <AuthForm />
+    </div>
+  );
 }
 
 export const loader = async ({ request }: LoaderArgs) => {
@@ -26,9 +30,7 @@ export const loader = async ({ request }: LoaderArgs) => {
     data: { session },
   } = await supabaseClient.auth.getSession();
 
-  if (session !== null) {
-    return redirect('/');
-  }
+  if (session !== null) return redirect('/');
 
   return json({ ok: true });
 };
@@ -46,14 +48,10 @@ export const action = async ({ request }: ActionArgs) => {
 
   if (authMode === 'register') {
     const errors = validateCredentials(credentials);
-
-    if (errors !== undefined) {
-      return errors;
-    }
+    if (errors !== undefined) return errors;
   }
 
   const response = new Response();
-
   const supabaseClient = createSupabaseServerClient({ response, request });
 
   try {
