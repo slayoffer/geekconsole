@@ -26,9 +26,9 @@ import {
 } from '~/shared/ui';
 
 const READING_STATUSES: { name: string; value: string }[] = [
-  { name: 'Want to read', value: 'wantToRead' },
+  { name: 'Want to read', value: 'want to read' },
   { name: 'Reading', value: 'reading' },
-  { name: 'Have read', value: 'haveRead' },
+  { name: 'Have read', value: 'have read' },
 ];
 
 const newBookFormSchema = z.object({
@@ -72,7 +72,7 @@ export default function NewBook() {
 
     bookFormData.append('title', data.title);
     bookFormData.append('author', data.author);
-    bookFormData.append('publishData', data.publishDate);
+    bookFormData.append('publishDate', data.publishDate);
     bookFormData.append('readingStatus', data.readingStatus);
     bookFormData.append('description', data.description);
     bookFormData.append('comments', data.comments ?? '');
@@ -249,8 +249,24 @@ export default function NewBook() {
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
 
-  console.log(formData);
-  return json({ ok: true });
+  const response = new Response();
+  const { supabaseClient, session } = await getSession(request);
+
+  const { error } = await supabaseClient.from('books').insert([
+    {
+      user_id: session?.user.id,
+      status: formData.get('readingStatus'),
+      title: formData.get('title'),
+      description: formData.get('description'),
+      comments: formData.get('comments'),
+      author: formData.get('author'),
+      year: formData.get('publishDate'),
+    },
+  ]);
+
+  if (error) return json({ message: error.message });
+
+  return redirect('/books', { headers: response.headers });
 };
 
 export const loader = ({ request }: LoaderArgs) => {

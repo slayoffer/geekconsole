@@ -1336,10 +1336,6 @@ body {
   font-weight: 500;
 }
 
-.file\:text-foreground::file-selector-button {
-  color: hsl(var(--foreground));
-}
-
 .file\:text-muted-foreground::file-selector-button {
   color: hsl(var(--muted-foreground));
 }

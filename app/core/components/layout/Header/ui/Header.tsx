@@ -28,6 +28,9 @@ export const Header = () => {
           {session !== null ? (
             <div className="ml-10 hidden space-x-4 lg:block">
               <Button asChild variant="link">
+                <Link to="/books/new">Add new book</Link>
+              </Button>
+              <Button asChild variant="link">
                 <Link to="/books">Books</Link>
               </Button>
               <Button variant="outline" onClick={handleLogout}>
