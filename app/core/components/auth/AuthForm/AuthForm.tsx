@@ -1,12 +1,16 @@
+import { useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
+  Link,
   Form as RemixForm,
+  useActionData,
   useNavigation,
   useSearchParams,
   useSubmit,
 } from '@remix-run/react';
 import { Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
+import { useSpinDelay } from 'spin-delay';
 import * as z from 'zod';
 
 import {
@@ -47,14 +51,28 @@ export const AuthForm = () => {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const navigation = useNavigation();
+  const validationErrors = useActionData();
   const submit = useSubmit();
 
-  const isSubmitting = navigation.state === 'submitting';
+  useEffect(() => {
+    if (validationErrors) {
+      toast({
+        title: validationErrors.message,
+        variant: 'destructive',
+      });
+    }
+  }, [validationErrors, toast]);
+
+  const isSubmitting = navigation.state !== 'idle';
+  const showSpinner = useSpinDelay(isSubmitting);
 
   const authMode = searchParams.get('type') ?? 'signin';
   const isRegister = authMode === 'register';
   const formTitle = isRegister ? 'Become a member' : 'Sign in to your account';
   const submitBtnCaption = isRegister ? 'Register' : 'Sign in';
+  const toggleBtnCaption = isRegister
+    ? 'Already have an account?'
+    : 'Do not have an account yet?';
 
   const form = useForm<AuthFormData>({
     resolver: authFormResolver,
@@ -135,16 +153,30 @@ export const AuthForm = () => {
                 )}
               />
             )}
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Please wait
-                </>
-              ) : (
-                submitBtnCaption
-              )}
-            </Button>
+            <div className="mt-2 flex flex-col space-y-3">
+              <Button type="submit" disabled={showSpinner}>
+                {showSpinner ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Please wait
+                  </>
+                ) : (
+                  submitBtnCaption
+                )}
+              </Button>
+              <Link
+                to={authMode === 'register' ? '?type=signin' : '?type=register'}
+                className="font-medium text-[#4250A8] hover:text-[#4250A8]/90"
+              >
+                {toggleBtnCaption}
+              </Link>
+              <Link
+                to={'/'}
+                className="font-medium text-[#4250A8] hover:text-[#4250A8]/90"
+              >
+                Go Home
+              </Link>
+            </div>
           </RemixForm>
         </Form>
       </CardContent>

@@ -44,6 +44,7 @@
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.45.2",
     "remix-hook-form": "^1.1.2",
+    "spin-delay": "^1.2.0",
     "tailwind-merge": "^1.14.0",
     "tailwindcss-animate": "^1.0.6",
     "zod": "^3.21.4"
