@@ -16,5 +16,6 @@ module.exports = {
   serverDependenciesToBundle: [
     '@supabase/auth-ui-react',
     '@supabase/supabase-js',
+    'nanoid',
   ],
 };

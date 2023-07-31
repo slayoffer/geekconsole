@@ -1,9 +1,9 @@
 import type { ChangeEvent } from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { json, redirect } from '@remix-run/node';
 import type { ActionArgs, LoaderArgs } from '@remix-run/node';
-import { Form as RemixForm, useSubmit } from '@remix-run/react';
+import { Form as RemixForm, useActionData, useSubmit } from '@remix-run/react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -23,6 +23,7 @@ import {
   RadioGroup,
   RadioGroupItem,
   Textarea,
+  useToast,
 } from '~/shared/ui';
 
 const READING_STATUSES: { name: string; value: string }[] = [
@@ -34,9 +35,9 @@ const READING_STATUSES: { name: string; value: string }[] = [
 const newBookFormSchema = z.object({
   title: z.string().min(1, { message: 'Please, provide a title' }),
   author: z.string().min(1, { message: 'Please, provide an author' }),
-  publishDate: z.string().min(1, { message: 'Please, provide a publish date' }),
-  coverImg: z.any(),
-  readingStatus: z.enum(['wantToRead', 'reading', 'haveRead'], {
+  year: z.string().min(1, { message: 'Please, provide a publish date' }),
+  image_url: z.any(),
+  status: z.enum(['want to read', 'reading', 'have read'], {
     required_error: 'You need to select a reading status',
   }),
   description: z
@@ -48,15 +49,26 @@ type NewBookFormData = z.infer<typeof newBookFormSchema>;
 const authFormResolver = zodResolver(newBookFormSchema);
 
 export default function NewBook() {
+  const { toast } = useToast();
   const submit = useSubmit();
   const [coverImg, setCoverImg] = useState<File | undefined>(undefined);
+  const errorMsg = useActionData();
+
+  useEffect(() => {
+    if (errorMsg) {
+      toast({
+        title: errorMsg.message,
+        variant: 'destructive',
+      });
+    }
+  }, [errorMsg, toast]);
 
   const form = useForm<NewBookFormData>({
     resolver: authFormResolver,
     defaultValues: {
       title: '',
       author: '',
-      publishDate: '',
+      year: '',
       description: '',
       comments: '',
     },
@@ -72,12 +84,14 @@ export default function NewBook() {
 
     bookFormData.append('title', data.title);
     bookFormData.append('author', data.author);
-    bookFormData.append('publishDate', data.publishDate);
-    bookFormData.append('readingStatus', data.readingStatus);
+    bookFormData.append('year', data.year);
+    bookFormData.append('status', data.status);
     bookFormData.append('description', data.description);
     bookFormData.append('comments', data.comments ?? '');
 
-    if (coverImg) bookFormData.append('File', coverImg, coverImg.name);
+    console.log(coverImg);
+
+    if (coverImg) bookFormData.append('coverImg', coverImg, coverImg.name);
 
     submit(bookFormData, { method: 'post' });
   };
@@ -96,8 +110,6 @@ export default function NewBook() {
           <Form {...form}>
             <RemixForm
               onSubmit={form.handleSubmit(onSubmit)}
-              action="/books/new-form"
-              method="post"
               className="flex flex-col justify-center space-y-8"
             >
               {/* TITLE */}
@@ -136,9 +148,9 @@ export default function NewBook() {
                   </FormItem>
                 )}
               />
-              {/* PUBLISH DATE */}
+              {/* YEAR */}
               <FormField
-                name="publishDate"
+                name="year"
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
@@ -152,7 +164,7 @@ export default function NewBook() {
               />
               {/* COVER IMG */}
               <FormField
-                name="coverImg"
+                name="image_url"
                 control={form.control}
                 render={() => (
                   <FormItem>
@@ -168,7 +180,7 @@ export default function NewBook() {
               />
               {/* READING STATUS */}
               <FormField
-                name="readingStatus"
+                name="status"
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
@@ -252,15 +264,30 @@ export const action = async ({ request }: ActionArgs) => {
   const response = new Response();
   const { supabaseClient, session } = await getSession(request);
 
+  const coverImg = formData.get('coverImg') as string;
+  const fileExt = coverImg.split('.').at(-1);
+
+  let imgPath: string | null = null;
+
+  if (coverImg) {
+    const { data, error } = await supabaseClient.storage
+      .from('books')
+      .upload(`${session?.user.id}/privet.${fileExt}`, coverImg);
+
+    if (data) imgPath = data.path;
+    else if (error) return json({ message: error.message });
+  }
+
   const { error } = await supabaseClient.from('books').insert([
     {
       user_id: session?.user.id,
-      status: formData.get('readingStatus'),
+      image_url: imgPath,
+      status: formData.get('status'),
       title: formData.get('title'),
       description: formData.get('description'),
       comments: formData.get('comments'),
       author: formData.get('author'),
-      year: formData.get('publishDate'),
+      year: formData.get('year'),
     },
   ]);
 
