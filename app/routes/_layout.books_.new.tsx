@@ -89,11 +89,9 @@ export default function NewBook() {
     bookFormData.append('description', data.description);
     bookFormData.append('comments', data.comments ?? '');
 
-    console.log(coverImg);
-
     if (coverImg) bookFormData.append('coverImg', coverImg, coverImg.name);
 
-    submit(bookFormData, { method: 'post' });
+    submit(bookFormData, { method: 'post', encType: 'multipart/form-data' });
   };
 
   return (
@@ -259,20 +257,23 @@ export default function NewBook() {
 }
 
 export const action = async ({ request }: ActionArgs) => {
+  const { randomUUID } = require('crypto');
+
   const formData = await request.formData();
 
   const response = new Response();
   const { supabaseClient, session } = await getSession(request);
 
-  const coverImg = formData.get('coverImg') as string;
-  const fileExt = coverImg.split('.').at(-1);
+  const coverImg = formData.get('coverImg');
 
   let imgPath: string | null = null;
 
-  if (coverImg) {
+  if (coverImg && coverImg instanceof File) {
+    const fileExt = coverImg.name.split('.').at(-1);
+
     const { data, error } = await supabaseClient.storage
       .from('books')
-      .upload(`${session?.user.id}/privet.${fileExt}`, coverImg);
+      .upload(`${session?.user.id}/${randomUUID()}.${fileExt}`, coverImg);
 
     if (data) imgPath = data.path;
     else if (error) return json({ message: error.message });
