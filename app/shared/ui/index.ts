@@ -23,3 +23,4 @@ export {
 } from './Card/Card';
 export { Toaster } from './Toast/toaster';
 export { useToast } from './Toast/use-toast';
+export { Badge } from './Badge/Badge';

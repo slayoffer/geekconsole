@@ -10,7 +10,7 @@ export default function Layout() {
     <>
       <Header />
       <main className="container mx-auto flex flex-col items-center p-10">
-        {<Outlet context={{ supabase, session }} />}
+        <Outlet context={{ supabase, session }} />
       </main>
       <Footer />
     </>
