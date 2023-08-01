@@ -3,11 +3,19 @@ import { useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { json, redirect } from '@remix-run/node';
 import type { ActionArgs, LoaderArgs } from '@remix-run/node';
-import { Form as RemixForm, useActionData, useSubmit } from '@remix-run/react';
+import {
+  Form as RemixForm,
+  useActionData,
+  useNavigation,
+  useSubmit,
+} from '@remix-run/react';
+import { Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
+import { useSpinDelay } from 'spin-delay';
 import { z } from 'zod';
 
 import { getSession } from '~/core/server';
+import { BUCKET_BOOKS_URL } from '~/shared/consts';
 import {
   Button,
   Card,
@@ -51,8 +59,12 @@ const authFormResolver = zodResolver(newBookFormSchema);
 export default function NewBook() {
   const { toast } = useToast();
   const submit = useSubmit();
+  const navigation = useNavigation();
   const [coverImg, setCoverImg] = useState<File | undefined>(undefined);
   const errorMsg = useActionData();
+
+  const isSubmitting = navigation.state !== 'idle';
+  const showSpinner = useSpinDelay(isSubmitting);
 
   useEffect(() => {
     if (errorMsg) {
@@ -245,8 +257,15 @@ export default function NewBook() {
                   </FormItem>
                 )}
               />
-              <Button type="submit">
-                Add this book to collection &#128230;
+              <Button type="submit" disabled={showSpinner}>
+                {showSpinner ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Please wait
+                  </>
+                ) : (
+                  'Add this book to collection'
+                )}
               </Button>
             </RemixForm>
           </Form>
@@ -282,7 +301,7 @@ export const action = async ({ request }: ActionArgs) => {
   const { error } = await supabaseClient.from('books').insert([
     {
       user_id: session?.user.id,
-      image_url: imgPath,
+      image_url: `${BUCKET_BOOKS_URL}/${imgPath}`,
       status: formData.get('status'),
       title: formData.get('title'),
       description: formData.get('description'),
@@ -300,9 +319,7 @@ export const action = async ({ request }: ActionArgs) => {
 export const loader = ({ request }: LoaderArgs) => {
   const session = getSession(request);
 
-  if (session === null) {
-    throw redirect('/', 401);
-  }
+  if (session === null) throw redirect('/', 401);
 
   return json({ ok: true });
 };

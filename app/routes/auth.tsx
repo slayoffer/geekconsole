@@ -54,31 +54,25 @@ export const action = async ({ request }: ActionArgs) => {
   const response = new Response();
   const supabaseClient = createSupabaseServerClient({ response, request });
 
-  try {
-    if (authMode === 'register') {
-      const { data, error } = await supabaseClient.auth.signUp(credentials);
+  if (authMode === 'register') {
+    const { data, error } = await supabaseClient.auth.signUp(credentials);
 
-      if (error === null) {
-        await supabaseClient
-          .from('user_profiles')
-          .insert([{ id: data.user?.id }]);
+    if (error === null) {
+      await supabaseClient
+        .from('user_profiles')
+        .insert([{ id: data.user?.id }]);
 
-        return redirect('/auth?type=signin', { headers: response.headers });
-      }
-
-      return json({ message: error.message });
-    } else {
-      const { error } = await supabaseClient.auth.signInWithPassword(
-        credentials,
-      );
-
-      if (error !== null) {
-        return json({ message: 'Invalid auth credentials' }, { status: 400 });
-      }
-
-      return redirect('/books', { headers: response.headers });
+      return redirect('/auth?type=signin', { headers: response.headers });
     }
-  } catch (error) {
-    console.log(error);
+
+    return json({ message: error.message });
+  } else {
+    const { error } = await supabaseClient.auth.signInWithPassword(credentials);
+
+    if (error !== null) {
+      return json({ message: 'Invalid auth credentials' }, { status: 400 });
+    }
+
+    return redirect('/books', { headers: response.headers });
   }
 };

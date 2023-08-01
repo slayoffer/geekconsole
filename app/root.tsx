@@ -14,6 +14,7 @@ import {
 import { createBrowserClient } from '@supabase/auth-helpers-remix';
 
 import { createSupabaseServerClient } from './core/server';
+import type { Database } from './shared/types';
 import { Toaster } from './shared/ui';
 import styles from './styles.css';
 
@@ -22,7 +23,7 @@ export default function App() {
   const { revalidate } = useRevalidator();
 
   const [supabase] = useState(() =>
-    createBrowserClient(env.SUPABASE_URL, env.SUPABASE_ANON_KEY),
+    createBrowserClient<Database>(env.SUPABASE_URL, env.SUPABASE_ANON_KEY),
   );
 
   const serverAccessToken = session?.access_token;
