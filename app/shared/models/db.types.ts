@@ -12,6 +12,7 @@ export type BookDTO = {
   status: ReadStatus;
   title: string;
   description: string;
+  comments: string;
   author: string;
   year: number;
   image_url: string;

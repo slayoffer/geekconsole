@@ -5,6 +5,7 @@ import {
   type LoaderArgs,
   type V2_MetaFunction,
 } from '@remix-run/node';
+import { badRequest } from 'remix-utils';
 
 import { AuthForm } from '~/core/components/auth';
 import { createSupabaseServerClient, validateCredentials } from '~/core/server';
@@ -30,7 +31,7 @@ export const loader = async ({ request }: LoaderArgs) => {
     data: { session },
   } = await supabaseClient.auth.getSession();
 
-  if (session !== null) return redirect('/');
+  if (session) return redirect('/');
 
   return json({ ok: true });
 };
@@ -57,20 +58,16 @@ export const action = async ({ request }: ActionArgs) => {
   if (authMode === 'register') {
     const { data, error } = await supabaseClient.auth.signUp(credentials);
 
-    if (error === null) {
-      await supabaseClient
-        .from('user_profiles')
-        .insert([{ id: data.user?.id }]);
+    if (error !== null) throw badRequest({ message: error.message });
 
-      return redirect('/auth?type=signin', { headers: response.headers });
-    }
+    await supabaseClient.from('user_profiles').insert([{ id: data.user?.id }]);
 
-    return json({ message: error.message });
+    return redirect('/auth?type=signin', { headers: response.headers });
   } else {
     const { error } = await supabaseClient.auth.signInWithPassword(credentials);
 
     if (error !== null) {
-      return json({ message: 'Invalid auth credentials' }, { status: 400 });
+      throw badRequest({ message: 'Invalid auth credentials' });
     }
 
     return redirect('/books', { headers: response.headers });

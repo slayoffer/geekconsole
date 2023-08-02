@@ -1,7 +1,9 @@
+import type { PropsWithChildren } from 'react';
 import { useEffect, useState } from 'react';
 import { cssBundleHref } from '@remix-run/css-bundle';
 import { json, type LinksFunction, type LoaderArgs } from '@remix-run/node';
 import {
+  isRouteErrorResponse,
   Links,
   LiveReload,
   Meta,
@@ -10,6 +12,7 @@ import {
   ScrollRestoration,
   useLoaderData,
   useRevalidator,
+  useRouteError,
 } from '@remix-run/react';
 import { createBrowserClient } from '@supabase/auth-helpers-remix';
 
@@ -17,6 +20,32 @@ import { createSupabaseServerClient } from './core/server';
 import type { Database } from './shared/types';
 import { Toaster } from './shared/ui';
 import styles from './styles.css';
+
+function Document({ children, title }: PropsWithChildren<{ title: string }>) {
+  return (
+    <html className="dark h-full" lang="en">
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <Meta />
+        <link
+          rel="icon"
+          type="image/png"
+          href="https://i.ibb.co/31W7B1y/Png-Item-1032462.png"
+        />
+        <title>{title}</title>
+        <Links />
+      </head>
+      <body className="flex h-full flex-col justify-between">
+        {children}
+        <Toaster />
+        <ScrollRestoration />
+        <Scripts />
+        <LiveReload />
+      </body>
+    </html>
+  );
+}
 
 export default function App() {
   const { env, session } = useLoaderData();
@@ -41,26 +70,9 @@ export default function App() {
   }, [serverAccessToken, supabase, revalidate]);
 
   return (
-    <html className="dark h-full" lang="en">
-      <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <Meta />
-        <link
-          rel="icon"
-          type="image/png"
-          href="https://i.ibb.co/31W7B1y/Png-Item-1032462.png"
-        />
-        <Links />
-      </head>
-      <body className="flex h-full flex-col justify-between">
-        <Outlet context={{ supabase, session }} />
-        <Toaster />
-        <ScrollRestoration />
-        <Scripts />
-        <LiveReload />
-      </body>
-    </html>
+    <Document title="Your favourite geek storage">
+      <Outlet context={{ supabase, session }} />
+    </Document>
   );
 }
 
@@ -90,3 +102,30 @@ export const loader = async ({ request }: LoaderArgs) => {
 
   return json({ env, session }, { headers: response.headers });
 };
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+
+  if (isRouteErrorResponse(error)) {
+    return (
+      <Document title={`${error.status} ${error.statusText}`}>
+        <div>
+          <h1>
+            {error.status} {error.statusText}
+          </h1>
+        </div>
+      </Document>
+    );
+  }
+
+  const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+  return (
+    <Document title="Ooops. Something went wrong">
+      <div>
+        <h1>App Error</h1>
+        <pre>{errorMessage}</pre>
+      </div>
+    </Document>
+  );
+}

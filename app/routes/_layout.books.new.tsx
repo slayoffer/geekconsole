@@ -1,12 +1,18 @@
 import { useEffect } from 'react';
 import { json, redirect } from '@remix-run/node';
 import type { ActionArgs, LoaderArgs } from '@remix-run/node';
-import { useActionData } from '@remix-run/react';
+import {
+  isRouteErrorResponse,
+  Link,
+  useActionData,
+  useRouteError,
+} from '@remix-run/react';
+import { badRequest, unauthorized } from 'remix-utils';
 
 import { NewBookForm } from '~/core/components/books';
 import { getSession } from '~/core/server';
 import { BUCKET_BOOKS_URL } from '~/shared/consts';
-import { useToast } from '~/shared/ui';
+import { Button, useToast } from '~/shared/ui';
 
 export default function NewBook() {
   const { toast } = useToast();
@@ -54,7 +60,7 @@ export const action = async ({ request }: ActionArgs) => {
       .upload(`${session?.user.id}/${randomUUID()}.${fileExt}`, coverImg);
 
     if (data) imgPath = data.path;
-    else if (error) return json({ message: error.message });
+    else if (error) throw badRequest({ message: error.message });
   }
 
   const { error } = await supabaseClient.from('books').insert([
@@ -70,15 +76,32 @@ export const action = async ({ request }: ActionArgs) => {
     },
   ]);
 
-  if (error) return json({ message: error.message });
+  if (error) throw badRequest({ message: error.message });
 
   return redirect('/books', { headers: response.headers });
 };
 
-export const loader = ({ request }: LoaderArgs) => {
-  const session = getSession(request);
+export const loader = async ({ request }: LoaderArgs) => {
+  const { session } = await getSession(request);
 
-  if (session === null) throw redirect('/', 401);
+  if (!session) throw unauthorized({ message: 'Unauthorized' });
 
   return json({ ok: true });
+};
+
+export const ErrorBoundary = () => {
+  const error = useRouteError();
+
+  if (isRouteErrorResponse(error) && error.status === 401) {
+    return (
+      <div className="flex flex-col items-center justify-center">
+        <p>You must be logged in to add a book.</p>
+        <Button asChild variant="link">
+          <Link to="/auth?type=signin">Login</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  return <div>Something unexpected went wrong. Sorry about that.</div>;
 };
