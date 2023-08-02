@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { json, redirect } from '@remix-run/node';
 import type { ActionArgs, LoaderArgs } from '@remix-run/node';
 import {
@@ -12,7 +13,13 @@ import { badRequest, unauthorized } from 'remix-utils';
 import { NewBookForm } from '~/core/components/books';
 import { getSession } from '~/core/server';
 import { BUCKET_BOOKS_URL } from '~/shared/consts';
-import { Button, useToast } from '~/shared/ui';
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+  Button,
+  useToast,
+} from '~/shared/ui';
 
 export default function NewBook() {
   const { toast } = useToast();
@@ -94,12 +101,16 @@ export const ErrorBoundary = () => {
 
   if (isRouteErrorResponse(error) && error.status === 401) {
     return (
-      <div className="flex flex-col items-center justify-center">
-        <p>You must be logged in to add a book.</p>
-        <Button asChild variant="link">
-          <Link to="/auth?type=signin">Login</Link>
-        </Button>
-      </div>
+      <Alert variant="destructive" className="w-2/4">
+        <ExclamationTriangleIcon className="h-4 w-4" />
+        <AlertTitle>Unauthorized</AlertTitle>
+        <AlertDescription>
+          You must be logged in to add a book.
+          <Button asChild variant="link">
+            <Link to="/auth?type=signin">Login</Link>
+          </Button>
+        </AlertDescription>
+      </Alert>
     );
   }
 

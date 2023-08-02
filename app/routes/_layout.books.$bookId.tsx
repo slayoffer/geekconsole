@@ -1,3 +1,4 @@
+import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { json, type LoaderFunction } from '@remix-run/node';
 import {
   isRouteErrorResponse,
@@ -10,7 +11,7 @@ import { notFound, unauthorized } from 'remix-utils';
 
 import { getSession } from '~/core/server';
 import type { BookDTO } from '~/shared/models';
-import { Button } from '~/shared/ui';
+import { Alert, AlertDescription, AlertTitle, Button } from '~/shared/ui';
 
 export default function BookOverview() {
   const book = useLoaderData<BookDTO>();
@@ -90,12 +91,16 @@ export function ErrorBoundary() {
 
   if (isRouteErrorResponse(error) && error.status === 401) {
     return (
-      <div className="flex flex-col items-center justify-center">
-        <p>You must be logged in to view your books</p>
-        <Button asChild variant="link">
-          <Link to="/auth?type=signin">Login</Link>
-        </Button>
-      </div>
+      <Alert variant="destructive" className="w-2/4">
+        <ExclamationTriangleIcon className="h-4 w-4" />
+        <AlertTitle>Unauthorized</AlertTitle>
+        <AlertDescription>
+          You must be logged in to view your books.
+          <Button asChild variant="link">
+            <Link to="/auth?type=signin">Login</Link>
+          </Button>
+        </AlertDescription>
+      </Alert>
     );
   }
 
