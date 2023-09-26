@@ -763,6 +763,10 @@ body {
   width: 25%;
 }
 
+.w-2\/4 {
+  width: 50%;
+}
+
 .w-3 {
   width: 0.75rem;
 }
@@ -797,10 +801,6 @@ body {
 
 .w-full {
   width: 100%;
-}
-
-.w-2\/4 {
-  width: 50%;
 }
 
 .max-w-7xl {
