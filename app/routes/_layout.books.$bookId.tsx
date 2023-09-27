@@ -10,11 +10,11 @@ import {
 import { notFound, unauthorized } from 'remix-utils';
 
 import { getSession } from '~/core/server';
-import type { BookDTO } from '~/shared/models';
+import type { BookDto } from '~/shared/types';
 import { Alert, AlertDescription, AlertTitle, Button } from '~/shared/ui';
 
 export default function BookOverview() {
-  const book = useLoaderData<BookDTO>();
+  const book = useLoaderData<BookDto>();
 
   return (
     <div>

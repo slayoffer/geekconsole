@@ -1,9 +1,5 @@
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
-import {
-  json,
-  type LoaderFunction,
-  type V2_MetaFunction,
-} from '@remix-run/node';
+import { json, type LoaderFunction, type MetaFunction } from '@remix-run/node';
 import {
   isRouteErrorResponse,
   Link,
@@ -14,15 +10,15 @@ import { notFound, unauthorized } from 'remix-utils';
 
 import { BookCard } from '~/core/components/books';
 import { getSession } from '~/core/server';
-import { type BookDTO } from '~/shared/models';
+import type { BookDto } from '~/shared/types';
 import { Alert, AlertDescription, AlertTitle, Button } from '~/shared/ui';
 
-export const meta: V2_MetaFunction = () => {
+export const meta: MetaFunction = () => {
   return [{ title: 'Your books collection' }];
 };
 
 export default function Books() {
-  const booksPreview = useLoaderData<BookDTO[]>();
+  const booksPreview = useLoaderData<BookDto[]>();
 
   return (
     <div className="grid grid-cols-5 gap-4">

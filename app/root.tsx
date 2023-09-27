@@ -1,7 +1,8 @@
 import type { PropsWithChildren } from 'react';
 import { useEffect, useState } from 'react';
 import { cssBundleHref } from '@remix-run/css-bundle';
-import { json, type LinksFunction, type LoaderArgs } from '@remix-run/node';
+import { json } from '@remix-run/node';
+import type { LinksFunction, LoaderFunctionArgs } from '@remix-run/node';
 import {
   isRouteErrorResponse,
   Links,
@@ -16,6 +17,7 @@ import {
 } from '@remix-run/react';
 import { createBrowserClient } from '@supabase/auth-helpers-remix';
 
+import { GlobalLoading } from './core/components/layout';
 import { createSupabaseServerClient } from './core/server';
 import type { Database } from './shared/types';
 import { Toaster } from './shared/ui';
@@ -38,6 +40,8 @@ function Document({ children, title }: PropsWithChildren<{ title: string }>) {
       </head>
       <body className="flex h-full flex-col justify-between">
         {children}
+
+        <GlobalLoading />
         <Toaster />
         <ScrollRestoration />
         <Scripts />
@@ -48,7 +52,7 @@ function Document({ children, title }: PropsWithChildren<{ title: string }>) {
 }
 
 export default function App() {
-  const { env, session } = useLoaderData();
+  const { env, session } = useLoaderData<any>();
   const { revalidate } = useRevalidator();
 
   const [supabase] = useState(() =>
@@ -86,7 +90,7 @@ export const links: LinksFunction = () => [
   },
 ];
 
-export const loader = async ({ request }: LoaderArgs) => {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
   const env = {
     SUPABASE_URL: process.env.SUPABASE_API_URL,
     SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,

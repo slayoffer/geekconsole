@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
+import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
-import type { ActionArgs, LoaderArgs } from '@remix-run/node';
 import {
   isRouteErrorResponse,
   Link,
@@ -23,7 +23,7 @@ import {
 
 export default function NewBook() {
   const { toast } = useToast();
-  const errorMsg = useActionData();
+  const errorMsg = useActionData<any>();
 
   useEffect(() => {
     if (errorMsg) {
@@ -47,7 +47,7 @@ export default function NewBook() {
   );
 }
 
-export const action = async ({ request }: ActionArgs) => {
+export const action = async ({ request }: ActionFunctionArgs) => {
   const { randomUUID } = require('crypto');
 
   const formData = await request.formData();
@@ -88,7 +88,7 @@ export const action = async ({ request }: ActionArgs) => {
   return redirect('/books', { headers: response.headers });
 };
 
-export const loader = async ({ request }: LoaderArgs) => {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { session } = await getSession(request);
 
   if (!session) throw unauthorized({ message: 'Unauthorized' });

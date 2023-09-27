@@ -1,16 +1,16 @@
 import {
   json,
   redirect,
-  type ActionArgs,
-  type LoaderArgs,
-  type V2_MetaFunction,
+  type ActionFunctionArgs,
+  type LoaderFunctionArgs,
+  type MetaFunction,
 } from '@remix-run/node';
 import { badRequest } from 'remix-utils';
 
 import { AuthForm } from '~/core/components/auth';
 import { createSupabaseServerClient, validateCredentials } from '~/core/server';
 
-export const meta: V2_MetaFunction = () => {
+export const meta: MetaFunction = () => {
   return [{ title: 'Welcome, friend!' }];
 };
 
@@ -22,7 +22,7 @@ export default function Auth() {
   );
 }
 
-export const loader = async ({ request }: LoaderArgs) => {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
   const response = new Response();
 
   const supabaseClient = createSupabaseServerClient({ response, request });
@@ -36,7 +36,7 @@ export const loader = async ({ request }: LoaderArgs) => {
   return json({ ok: true });
 };
 
-export const action = async ({ request }: ActionArgs) => {
+export const action = async ({ request }: ActionFunctionArgs) => {
   const { searchParams } = new URL(request.url);
   const authMode = searchParams.get('type');
 

@@ -1,8 +1,8 @@
-import { redirect, type LoaderArgs } from '@remix-run/node';
+import { redirect, type LoaderFunctionArgs } from '@remix-run/node';
 
 import { createSupabaseServerClient } from '~/core/server';
 
-export const loader = async ({ request }: LoaderArgs) => {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
   const response = new Response();
   const url = new URL(request.url);
   const code = url.searchParams.get('code');
