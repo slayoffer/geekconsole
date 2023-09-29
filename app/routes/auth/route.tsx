@@ -5,10 +5,10 @@ import {
   type LoaderFunctionArgs,
   type MetaFunction,
 } from '@remix-run/node';
-import { badRequest } from 'remix-utils';
+import { badRequest } from 'remix-utils/build/server/responses';
 
-import { AuthForm } from '~/core/components/auth';
 import { createSupabaseServerClient, validateCredentials } from '~/core/server';
+import { AuthForm } from './components';
 
 export const meta: MetaFunction = () => {
   return [{ title: 'Welcome, friend!' }];

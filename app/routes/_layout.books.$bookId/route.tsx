@@ -7,7 +7,7 @@ import {
   useParams,
   useRouteError,
 } from '@remix-run/react';
-import { notFound, unauthorized } from 'remix-utils';
+import { notFound, unauthorized } from 'remix-utils/build/server/responses';
 
 import { getSession } from '~/core/server';
 import type { BookDto } from '~/shared/types';

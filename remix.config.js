@@ -8,9 +8,5 @@ module.exports = {
   // publicPath: "/build/",
   serverModuleFormat: 'cjs',
   future: {},
-  serverDependenciesToBundle: [
-    '@supabase/auth-ui-react',
-    '@supabase/supabase-js',
-    'nanoid',
-  ],
+  serverDependenciesToBundle: ['@supabase/supabase-js'],
 };

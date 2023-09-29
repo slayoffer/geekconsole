@@ -6,12 +6,12 @@ import {
   useLoaderData,
   useRouteError,
 } from '@remix-run/react';
-import { notFound, unauthorized } from 'remix-utils';
+import { notFound, unauthorized } from 'remix-utils/build/server/responses';
 
-import { BookCard } from '~/core/components/books';
 import { getSession } from '~/core/server';
 import type { BookDto } from '~/shared/types';
 import { Alert, AlertDescription, AlertTitle, Button } from '~/shared/ui';
+import { BookCard } from './components';
 
 export const meta: MetaFunction = () => {
   return [{ title: 'Your books collection' }];

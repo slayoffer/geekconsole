@@ -8,9 +8,8 @@ import {
   useActionData,
   useRouteError,
 } from '@remix-run/react';
-import { badRequest, unauthorized } from 'remix-utils';
+import { badRequest, unauthorized } from 'remix-utils/build/server/responses';
 
-import { NewBookForm } from '~/core/components/books';
 import { getSession } from '~/core/server';
 import { BUCKET_BOOKS_URL } from '~/shared/consts';
 import {
@@ -20,6 +19,7 @@ import {
   Button,
   useToast,
 } from '~/shared/ui';
+import { NewBookForm } from './components';
 
 export default function NewBook() {
   const { toast } = useToast();

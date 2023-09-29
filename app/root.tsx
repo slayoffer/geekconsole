@@ -17,10 +17,8 @@ import {
 } from '@remix-run/react';
 import { createBrowserClient } from '@supabase/auth-helpers-remix';
 
-import { GlobalLoading } from './core/components/layout';
 import { createSupabaseServerClient } from './core/server';
 import type { Database } from './shared/types';
-import { Toaster } from './shared/ui';
 import styles from './styles.css';
 
 function Document({ children, title }: PropsWithChildren<{ title: string }>) {
@@ -41,8 +39,6 @@ function Document({ children, title }: PropsWithChildren<{ title: string }>) {
       <body className="flex h-full flex-col justify-between">
         {children}
 
-        <GlobalLoading />
-        <Toaster />
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
