@@ -5,7 +5,6 @@ import {
   type LoaderFunctionArgs,
   type MetaFunction,
 } from '@remix-run/node';
-import { badRequest } from 'remix-utils/build/server/responses';
 
 import { createSupabaseServerClient, validateCredentials } from '~/core/server';
 import { AuthForm } from './components';
@@ -58,7 +57,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   if (authMode === 'register') {
     const { data, error } = await supabaseClient.auth.signUp(credentials);
 
-    if (error !== null) throw badRequest({ message: error.message });
+    if (error !== null) throw new Response(error.message, { status: 400 });
 
     await supabaseClient.from('user_profiles').insert([{ id: data.user?.id }]);
 
@@ -67,7 +66,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     const { error } = await supabaseClient.auth.signInWithPassword(credentials);
 
     if (error !== null) {
-      throw badRequest({ message: 'Invalid auth credentials' });
+      throw new Response(error.message, { status: 400 });
     }
 
     return redirect('/books', { headers: response.headers });

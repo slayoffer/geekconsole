@@ -2,15 +2,10 @@ import { Link, useOutletContext } from '@remix-run/react';
 
 import { type OutletContextValues } from '~/shared/models/common';
 import { Button } from '~/shared/ui';
+import { UserNav } from './components/UserNav';
 
 export const Header = () => {
-  const { session, supabase } = useOutletContext<OutletContextValues>();
-
-  const handleLogout = () => {
-    void (async () => {
-      await supabase.auth.signOut();
-    })();
-  };
+  const { session } = useOutletContext<OutletContextValues>();
 
   return (
     <header className="bg-zinc-900">
@@ -27,15 +22,7 @@ export const Header = () => {
           </div>
           {session !== null ? (
             <div className="ml-10 hidden space-x-4 lg:block">
-              <Button asChild variant="link">
-                <Link to="/books/new">Add new book</Link>
-              </Button>
-              <Button asChild variant="link">
-                <Link to="/books">Books</Link>
-              </Button>
-              <Button variant="outline" onClick={handleLogout}>
-                Logout
-              </Button>
+              <UserNav />
             </div>
           ) : (
             <div className="ml-10 hidden space-x-4 lg:block">
@@ -43,30 +30,11 @@ export const Header = () => {
                 <Link to="/auth?type=signin">Sign in</Link>
               </Button>
               <Button asChild variant="link">
-                <Link to="/auth?type=register">Sign up</Link>
+                <Link to="/auth?type=register">Get started today</Link>
               </Button>
             </div>
           )}
         </div>
-        {session !== null ? (
-          <div className="flex flex-wrap justify-center space-x-6 py-4 lg:hidden">
-            <Button asChild variant="link">
-              <Link to="/books">Books</Link>
-            </Button>
-            <Button variant="outline" onClick={handleLogout}>
-              Logout
-            </Button>
-          </div>
-        ) : (
-          <div className="flex flex-wrap justify-center space-x-6 py-4 lg:hidden">
-            <Button asChild variant="link">
-              <Link to="/auth?type=signin">Sign in</Link>
-            </Button>
-            <Button asChild variant="link">
-              <Link to="/auth?type=register">Sign up</Link>
-            </Button>
-          </div>
-        )}
       </nav>
     </header>
   );

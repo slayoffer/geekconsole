@@ -8,7 +8,6 @@ import {
   useActionData,
   useRouteError,
 } from '@remix-run/react';
-import { badRequest, unauthorized } from 'remix-utils/build/server/responses';
 
 import { getSession } from '~/core/server';
 import { BUCKET_BOOKS_URL } from '~/shared/consts';
@@ -67,7 +66,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       .upload(`${session?.user.id}/${randomUUID()}.${fileExt}`, coverImg);
 
     if (data) imgPath = data.path;
-    else if (error) throw badRequest({ message: error.message });
+    else if (error) throw new Response(error.message, { status: 400 });
   }
 
   const { error } = await supabaseClient.from('books').insert([
@@ -83,7 +82,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     },
   ]);
 
-  if (error) throw badRequest({ message: error.message });
+  if (error) throw new Response(error.message, { status: 400 });
 
   return redirect('/books', { headers: response.headers });
 };
@@ -91,7 +90,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { session } = await getSession(request);
 
-  if (!session) throw unauthorized({ message: 'Unauthorized' });
+  if (!session) throw new Response('Unauthorized', { status: 401 });
 
   return json({ ok: true });
 };

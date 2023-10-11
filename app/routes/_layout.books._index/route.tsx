@@ -6,7 +6,6 @@ import {
   useLoaderData,
   useRouteError,
 } from '@remix-run/react';
-import { notFound, unauthorized } from 'remix-utils/build/server/responses';
 
 import { getSession } from '~/core/server';
 import type { BookDto } from '~/shared/types';
@@ -34,7 +33,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 
   const { supabaseClient, session } = await getSession(request);
 
-  if (!session) throw unauthorized({ message: 'Unauthorized' });
+  if (!session) throw new Response('Unauthorized', { status: 401 });
 
   const { data: books } = await supabaseClient
     .from('books')
@@ -42,7 +41,7 @@ export const loader: LoaderFunction = async ({ request }) => {
     .eq('user_id', session.user.id);
 
   if (!books || books.length === 0) {
-    throw notFound({ message: 'Not found' });
+    throw new Response('Not found', { status: 404 });
   }
 
   return json(books, { headers: response.headers });

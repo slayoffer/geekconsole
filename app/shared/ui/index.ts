@@ -9,3 +9,5 @@ export * from './Toast/toaster';
 export * from './Toast/use-toast';
 export * from './Badge/Badge';
 export * from './Alert/Alert';
+export * from './DropdownMenu/DropdownMenu';
+export * from './Avatar/Avatar';
