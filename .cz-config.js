@@ -36,10 +36,9 @@ module.exports = {
   ],
 
   scopes: [
-    { name: 'ui' },
     { name: 'infra' },
     { name: 'users' },
-    { name: 'books' },
+    { name: 'content' },
     { name: 'settings' },
   ],
 
