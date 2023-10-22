@@ -1,5 +1,5 @@
 import type { PropsWithChildren } from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { cssBundleHref } from '@remix-run/css-bundle';
 import { json } from '@remix-run/node';
 import type { LinksFunction, LoaderFunctionArgs } from '@remix-run/node';
@@ -48,12 +48,15 @@ function Document({ children, title }: PropsWithChildren<{ title: string }>) {
 }
 
 export default function App() {
-  const { env, session } = useLoaderData<any>();
+  const { env, session, userProfile } = useLoaderData<any>();
   const { revalidate } = useRevalidator();
 
-  const [supabase] = useState(() =>
-    createBrowserClient<Database>(env.SUPABASE_URL, env.SUPABASE_ANON_KEY),
-  );
+  const supabase = useMemo(() => {
+    return createBrowserClient<Database>(
+      env.SUPABASE_URL,
+      env.SUPABASE_ANON_KEY,
+    );
+  }, [env.SUPABASE_URL, env.SUPABASE_ANON_KEY]);
 
   const serverAccessToken = session?.access_token;
 
@@ -71,7 +74,7 @@ export default function App() {
 
   return (
     <Document title="Your favourite geek storage">
-      <Outlet context={{ supabase, session }} />
+      <Outlet context={{ supabase, session, userProfile }} />
     </Document>
   );
 }
@@ -100,7 +103,13 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     data: { session },
   } = await supabaseClient.auth.getSession();
 
-  return json({ env, session }, { headers: response.headers });
+  const { data: userProfile } = await supabaseClient
+    .from('user_profiles')
+    .select('*')
+    .eq('id', session?.user.id)
+    .single();
+
+  return json({ env, session, userProfile }, { headers: response.headers });
 };
 
 export function ErrorBoundary() {

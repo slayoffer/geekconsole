@@ -5,7 +5,8 @@ import { Toaster } from '~/shared/ui';
 import { Footer, GlobalLoading, Header } from './components';
 
 export default function Layout() {
-  const { session, supabase } = useOutletContext<OutletContextValues>();
+  const { session, supabase, userProfile } =
+    useOutletContext<OutletContextValues>();
 
   return (
     <>
@@ -14,7 +15,7 @@ export default function Layout() {
 
       <Header />
       <main className="container mx-auto flex flex-col items-center p-10">
-        <Outlet context={{ supabase, session }} />
+        <Outlet context={{ supabase, session, userProfile }} />
       </main>
       <Footer />
     </>

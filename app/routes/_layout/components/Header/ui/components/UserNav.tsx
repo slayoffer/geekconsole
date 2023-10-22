@@ -1,4 +1,4 @@
-import { useOutletContext } from '@remix-run/react';
+import { Link, useOutletContext } from '@remix-run/react';
 
 import type { OutletContextValues } from '~/shared/models';
 import {
@@ -12,14 +12,11 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '~/shared/ui';
 
 export const UserNav = () => {
-  const { session, supabase } = useOutletContext<OutletContextValues>();
-
-  console.log(session);
+  const { userProfile, supabase } = useOutletContext<OutletContextValues>();
 
   const handleLogout = () => {
     void (async () => {
@@ -30,43 +27,44 @@ export const UserNav = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="relative h-8 w-8 rounded-full">
+        <Button variant="outline" className="relative h-12 w-12 rounded-full">
           <Avatar className="h-12 w-12">
-            <AvatarImage src="/avatars/01.png" alt="User Avatar" />
-            <AvatarFallback></AvatarFallback>
+            <AvatarImage
+              src={
+                userProfile.avatarUrl ??
+                `https://robohash.org/${userProfile.username}.png`
+              }
+              alt="User Avatar"
+            />
+            <AvatarFallback />
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">shadcn</p>
+            <p className="text-sm font-medium leading-none">
+              {userProfile.username}
+            </p>
             <p className="text-xs leading-none text-muted-foreground">
-              m@example.com
+              {userProfile.email}
             </p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
-            Profile
-            <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+          <DropdownMenuItem asChild>
+            <Link to="/profile">Profile</Link>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            Billing
-            <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
+          <DropdownMenuItem asChild>
+            <Link to="/dashboard">Dashboard</Link>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            Settings
-            <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
+          <DropdownMenuItem asChild>
+            <Link to="/settings">Settings</Link>
           </DropdownMenuItem>
-          <DropdownMenuItem>New Team</DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout}>
-          Log out
-          <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
-        </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
