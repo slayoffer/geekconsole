@@ -1,4 +1,4 @@
-FROM node:18-alpine AS base
+FROM node:20-alpine AS base
 RUN npm i -g pnpm
 
 FROM base AS dependencies
@@ -13,7 +13,7 @@ COPY --from=dependencies /app/node_modules ./node_modules
 RUN pnpm typecheck && \
     pnpm build
 EXPOSE 3000
-CMD ["npm", "run", "start"]
+CMD ["pnpm", "run", "start"]
 
 # RUN pnpm prune --prod
 # FROM base AS deploy

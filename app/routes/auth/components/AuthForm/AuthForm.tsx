@@ -51,17 +51,17 @@ export const AuthForm = () => {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const navigation = useNavigation();
-  const validationErrors = useActionData();
+  const validationError = useActionData<{ message: string }>();
   const submit = useSubmit();
 
   useEffect(() => {
-    if (validationErrors) {
+    if (validationError && validationError) {
       toast({
-        title: validationErrors.message,
+        title: validationError.message,
         variant: 'destructive',
       });
     }
-  }, [validationErrors, toast]);
+  }, [validationError, toast]);
 
   const isSubmitting = navigation.state !== 'idle';
   const showSpinner = useSpinDelay(isSubmitting);

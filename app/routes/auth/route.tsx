@@ -57,16 +57,27 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   if (authMode === 'register') {
     const { data, error } = await supabaseClient.auth.signUp(credentials);
 
-    if (error !== null) throw new Response(error.message, { status: 400 });
+    if (error !== null) return json(error.message, { status: 400 });
 
-    await supabaseClient.from('user_profiles').insert([{ id: data.user?.id }]);
+    const { error: insertError } = await supabaseClient
+      .from('user_profiles')
+      .insert([
+        {
+          id: data.user?.id,
+          username: data.user?.email,
+          email: data.user?.email,
+        },
+      ]);
+
+    if (insertError !== null)
+      throw new Response(insertError.message, { status: 500 });
 
     return redirect('/auth?type=signin', { headers: response.headers });
   } else {
     const { error } = await supabaseClient.auth.signInWithPassword(credentials);
 
     if (error !== null) {
-      throw new Response(error.message, { status: 400 });
+      return json(error.message, { status: 400 });
     }
 
     return redirect('/books', { headers: response.headers });

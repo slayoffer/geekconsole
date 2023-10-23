@@ -5,7 +5,7 @@
   "private": true,
   "sideEffects": false,
   "scripts": {
-    "start": "remix-serve build",
+    "start": "remix-serve ./build/index.js",
     "build": "run-s build:*",
     "build:remix": "remix build",
     "build:tailwindcss": "tailwindcss -i ./app/core/styles/index.css --minify -o ./app/styles.css",
@@ -31,6 +31,7 @@
     "@radix-ui/react-label": "^2.0.2",
     "@radix-ui/react-radio-group": "^1.1.3",
     "@radix-ui/react-slot": "^1.0.2",
+    "@radix-ui/react-tabs": "^1.0.4",
     "@radix-ui/react-toast": "^1.1.5",
     "@remix-run/css-bundle": "^2.0.1",
     "@remix-run/node": "^2.0.1",

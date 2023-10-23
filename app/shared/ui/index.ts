@@ -1,4 +1,5 @@
 export * from './Button/Button';
+export * from './Tabs/Tabs';
 export * from './Input/Input';
 export * from './Textarea/Textarea';
 export * from './RadioGroup/RadioGroup';
