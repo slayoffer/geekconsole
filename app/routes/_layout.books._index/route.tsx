@@ -1,15 +1,24 @@
+import { useEffect } from 'react';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { json, type LoaderFunction, type MetaFunction } from '@remix-run/node';
 import {
   isRouteErrorResponse,
   Link,
+  useActionData,
   useLoaderData,
   useRouteError,
 } from '@remix-run/react';
 
 import { getSession } from '~/core/server';
+import { SUCCESS_DELETE_COOKIE_NAME } from '~/shared/consts';
 import type { BookDto } from '~/shared/types';
-import { Alert, AlertDescription, AlertTitle, Button } from '~/shared/ui';
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+  Button,
+  useToast,
+} from '~/shared/ui';
 import { BookCard } from './components';
 
 export const meta: MetaFunction = () => {
@@ -17,18 +26,56 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Books() {
-  const booksPreview = useLoaderData<BookDto[]>();
+  const { books, success } = useLoaderData<{
+    books: BookDto[];
+    success: boolean | undefined;
+  }>();
+  const { toast } = useToast();
+  const response = useActionData<{
+    error: string;
+  }>();
+
+  useEffect(() => {
+    if (response && response.error) {
+      toast({
+        title: response.error,
+        variant: 'destructive',
+      });
+    }
+
+    if (success) {
+      toast({
+        title: 'Book has been successfully deleted',
+        variant: 'default',
+      });
+    }
+  }, [response, success, toast]);
 
   return (
-    <div className="grid grid-cols-5 gap-4">
-      {booksPreview.map((book) => (
-        <BookCard key={book.id} book={book} />
-      ))}
-    </div>
+    <>
+      {books.length > 0 ? (
+        <div className="grid grid-cols-5 gap-4">
+          {books.map((book) => (
+            <BookCard key={book.id} book={book} />
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center">
+          <p>There are no books to display.</p>
+          <Button asChild variant="link">
+            <Link to="/books/new">Add your own</Link>
+          </Button>
+        </div>
+      )}
+    </>
   );
 }
 
 export const loader: LoaderFunction = async ({ request }) => {
+  const headers = new Headers(request.headers);
+  const cookies = headers.get('cookie');
+  const isDeleted = cookies?.includes('deleteSuccess=true');
+
   const response = new Response();
 
   const { supabaseClient, session } = await getSession(request);
@@ -40,26 +87,19 @@ export const loader: LoaderFunction = async ({ request }) => {
     .select('id, status, title, image_url')
     .eq('user_id', session.user.id);
 
-  if (!books || books.length === 0) {
-    throw new Response('Not found', { status: 404 });
-  }
-
-  return json(books, { headers: response.headers });
+  return json(
+    { books, success: isDeleted },
+    {
+      headers: {
+        ...response.headers,
+        'Set-Cookie': `${SUCCESS_DELETE_COOKIE_NAME}; expires=Thu, 01 Jan 1970 00:00:00 GMT`,
+      },
+    },
+  );
 };
 
 export const ErrorBoundary = () => {
   const error = useRouteError();
-
-  if (isRouteErrorResponse(error) && error.status === 404) {
-    return (
-      <div className="flex flex-col items-center justify-center">
-        <p>There are no books to display.</p>
-        <Button asChild variant="link">
-          <Link to="/books/new">Add your own</Link>
-        </Button>
-      </div>
-    );
-  }
 
   if (isRouteErrorResponse(error) && error.status === 401) {
     return (
