@@ -5,7 +5,7 @@
   "private": true,
   "sideEffects": false,
   "scripts": {
-    "start": "remix-serve build",
+    "start": "remix-serve ./build/index.js",
     "build": "run-s build:*",
     "build:remix": "remix build",
     "build:tailwindcss": "tailwindcss -i ./app/core/styles/index.css --minify -o ./app/styles.css",
