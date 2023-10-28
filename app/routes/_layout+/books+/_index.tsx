@@ -9,6 +9,7 @@ import {
   useRouteError,
 } from '@remix-run/react';
 
+import { BookCard } from '~/core/components/booksIndexComponents';
 import { getSession } from '~/core/server';
 import { SUCCESS_DELETE_COOKIE_NAME } from '~/shared/consts';
 import type { BookDto } from '~/shared/types';
@@ -19,7 +20,6 @@ import {
   Button,
   useToast,
 } from '~/shared/ui';
-import { BookCard } from './components';
 
 export const meta: MetaFunction = () => {
   return [{ title: 'Your books collection' }];

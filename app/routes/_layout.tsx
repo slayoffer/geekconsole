@@ -1,8 +1,12 @@
 import { Outlet, useOutletContext } from '@remix-run/react';
 
+import {
+  Footer,
+  GlobalLoading,
+  Header,
+} from '~/core/components/layoutComponents';
 import { type OutletContextValues } from '~/shared/models/common';
 import { Toaster } from '~/shared/ui';
-import { Footer, GlobalLoading, Header } from './components';
 
 export default function Layout() {
   const { session, supabase, userProfile } =
