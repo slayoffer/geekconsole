@@ -21,6 +21,21 @@ import { createSupabaseServerClient } from './core/server';
 import type { Database } from './shared/types';
 import styles from './styles.css';
 
+export const links: LinksFunction = () => [
+  ...(cssBundleHref !== undefined
+    ? [{ rel: 'stylesheet', href: cssBundleHref }]
+    : []),
+  {
+    rel: 'stylesheet',
+    href: styles,
+  },
+  {
+    rel: 'icon',
+    type: 'image/png',
+    href: 'https://i.ibb.co/31W7B1y/Png-Item-1032462.png',
+  },
+];
+
 function Document({ children, title }: PropsWithChildren<{ title: string }>) {
   return (
     <html className="dark h-full" lang="en">
@@ -28,13 +43,8 @@ function Document({ children, title }: PropsWithChildren<{ title: string }>) {
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <Meta />
-        <link
-          rel="icon"
-          type="image/png"
-          href="https://i.ibb.co/31W7B1y/Png-Item-1032462.png"
-        />
-        <title>{title}</title>
         <Links />
+        <title>{title}</title>
       </head>
       <body className="flex h-full flex-col justify-between">
         {children}
@@ -78,16 +88,6 @@ export default function App() {
     </Document>
   );
 }
-
-export const links: LinksFunction = () => [
-  ...(cssBundleHref !== undefined
-    ? [{ rel: 'stylesheet', href: cssBundleHref }]
-    : []),
-  {
-    rel: 'stylesheet',
-    href: styles,
-  },
-];
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const env = {
