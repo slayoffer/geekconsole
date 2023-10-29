@@ -1,19 +1,19 @@
-import { useEffect } from 'react';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
-import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
-import { json, redirect } from '@remix-run/node';
+import { type DataFunctionArgs, json, redirect } from '@remix-run/node';
 import {
+	type MetaFunction,
 	isRouteErrorResponse,
 	Link,
 	useActionData,
 	useRouteError,
 } from '@remix-run/react';
+import { useEffect } from 'react';
 
 import { NewBookForm } from '~/core/components/newBookComponents/index.ts';
 import { getSession } from '~/core/server/index.ts';
 import { BUCKET_BOOKS_URL } from '~/shared/consts/index.ts';
 import { invariantResponse } from '~/shared/lib/utils/index.ts';
-import type { ReadingStatus } from '~/shared/types/index.ts';
+import { type ReadingStatus } from '~/shared/types/index.ts';
 import {
 	Alert,
 	AlertDescription,
@@ -21,6 +21,13 @@ import {
 	Button,
 	useToast,
 } from '~/shared/ui/index.ts';
+
+export const meta: MetaFunction = () => {
+	return [
+		{ title: 'New book | Geek Console' },
+		{ name: 'description', content: 'Add new book to your collection' },
+	];
+};
 
 export default function NewBook() {
 	const { toast } = useToast();
@@ -48,7 +55,7 @@ export default function NewBook() {
 	);
 }
 
-export const action = async ({ request }: ActionFunctionArgs) => {
+export const action = async ({ request }: DataFunctionArgs) => {
 	const { randomUUID } = require('crypto');
 
 	const formData = await request.formData();
@@ -105,7 +112,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 	return redirect('/books', { headers: response.headers });
 };
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
+export const loader = async ({ request }: DataFunctionArgs) => {
 	const { session } = await getSession(request);
 
 	invariantResponse(session, 'Unauthorized', { status: 401 });

@@ -26,7 +26,10 @@ import {
 } from '~/shared/ui/index.ts';
 
 export const meta: MetaFunction = () => {
-	return [{ title: 'Your books collection' }];
+	return [
+		{ title: 'Books collection | Geek Console' },
+		{ name: 'description', content: 'Your full books collection' },
+	];
 };
 
 export default function Books() {

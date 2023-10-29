@@ -13,39 +13,39 @@ export type Database = {
 				Row: {
 					author: string;
 					comments: string | null;
-					created_at: string | null;
+					created_at: string;
 					description: string;
 					id: string;
 					image_url: string | null;
 					status: Database['public']['Enums']['Reading status'];
 					title: string;
-					updated_at: string | null;
+					updated_at: string;
 					user_id: string;
 					year: number;
 				};
 				Insert: {
 					author: string;
 					comments?: string | null;
-					created_at?: string | null;
+					created_at?: string;
 					description: string;
 					id?: string;
 					image_url?: string | null;
-					status: Database['public']['Enums']['Reading status'];
+					status?: Database['public']['Enums']['Reading status'];
 					title: string;
-					updated_at?: string | null;
+					updated_at?: string;
 					user_id: string;
 					year: number;
 				};
 				Update: {
 					author?: string;
 					comments?: string | null;
-					created_at?: string | null;
+					created_at?: string;
 					description?: string;
 					id?: string;
 					image_url?: string | null;
 					status?: Database['public']['Enums']['Reading status'];
 					title?: string;
-					updated_at?: string | null;
+					updated_at?: string;
 					user_id?: string;
 					year?: number;
 				};
@@ -60,22 +60,22 @@ export type Database = {
 			};
 			user_profiles: {
 				Row: {
-					created_at: string | null;
+					created_at: string;
 					email: string;
 					id: string;
-					username: string | null;
+					username: string;
 				};
 				Insert: {
-					created_at?: string | null;
+					created_at?: string;
 					email?: string;
 					id: string;
-					username?: string | null;
+					username: string;
 				};
 				Update: {
-					created_at?: string | null;
+					created_at?: string;
 					email?: string;
 					id?: string;
-					username?: string | null;
+					username?: string;
 				};
 				Relationships: [
 					{

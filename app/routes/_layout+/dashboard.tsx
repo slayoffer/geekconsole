@@ -1,3 +1,4 @@
+import { type MetaFunction } from '@remix-run/react';
 import {
 	Card,
 	CardContent,
@@ -9,6 +10,13 @@ import {
 	TabsList,
 	TabsTrigger,
 } from '~/shared/ui/index.ts';
+
+export const meta: MetaFunction = () => {
+	return [
+		{ title: 'Dashboard | Geek Console' },
+		{ name: 'description', content: 'This is your dashboard' },
+	];
+};
 
 export default function Dashboard() {
 	return (

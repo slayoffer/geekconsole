@@ -1,7 +1,7 @@
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
-import { json } from '@remix-run/node';
-import type { DataFunctionArgs } from '@remix-run/node';
+import { json, type DataFunctionArgs } from '@remix-run/node';
 import {
+	type MetaFunction,
 	isRouteErrorResponse,
 	Link,
 	useLoaderData,
@@ -18,6 +18,19 @@ import {
 	AlertTitle,
 	Button,
 } from '~/shared/ui/index.ts';
+
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+	const bookName = data?.book.title ?? 'Book';
+	const bookSummary =
+		data && data.book.description.length > 100
+			? data.book.description.slice(0, 97) + '...'
+			: 'No description';
+
+	return [
+		{ title: `${bookName} | Geek Console` },
+		{ name: 'description', content: bookSummary },
+	];
+};
 
 export default function BookOverview() {
 	const { book } = useLoaderData<typeof loader>();

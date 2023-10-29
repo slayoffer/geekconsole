@@ -1,8 +1,8 @@
 import { cssBundleHref } from '@remix-run/css-bundle';
 import {
+	type DataFunctionArgs,
 	json,
 	type LinksFunction,
-	type LoaderFunctionArgs,
 } from '@remix-run/node';
 import {
 	isRouteErrorResponse,
@@ -46,10 +46,13 @@ function Document({ children, title }: PropsWithChildren<{ title: string }>) {
 	return (
 		<html className="dark h-full" lang="en">
 			<head>
-				<meta charSet="utf-8" />
-				<meta name="viewport" content="width=device-width,initial-scale=1" />
 				<Meta />
 				<Links />
+
+				<meta charSet="utf-8" />
+				<meta name="description" content="Your favourite geek storage" />
+				<meta name="viewport" content="width=device-width,initial-scale=1" />
+
 				<title>{title}</title>
 			</head>
 			<body className="flex h-full flex-col justify-between">
@@ -95,13 +98,13 @@ export default function App() {
 	}, [serverAccessToken, supabase, revalidate]);
 
 	return (
-		<Document title="Your favourite geek storage">
+		<Document title="Geek Console">
 			<Outlet context={{ supabase, session, userProfile }} />
 		</Document>
 	);
 }
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
+export const loader = async ({ request }: DataFunctionArgs) => {
 	const supabaseEnv = {
 		SUPABASE_URL: process.env.SUPABASE_API_URL,
 		SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,

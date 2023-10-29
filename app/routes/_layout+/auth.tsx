@@ -1,8 +1,7 @@
 import {
+	type DataFunctionArgs,
 	json,
 	redirect,
-	type ActionFunctionArgs,
-	type LoaderFunctionArgs,
 	type MetaFunction,
 } from '@remix-run/node';
 
@@ -25,7 +24,7 @@ export default function Auth() {
 	);
 }
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
+export const loader = async ({ request }: DataFunctionArgs) => {
 	const response = new Response();
 
 	const supabaseClient = createSupabaseServerClient({ response, request });
@@ -39,7 +38,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 	return json({ ok: true });
 };
 
-export const action = async ({ request }: ActionFunctionArgs) => {
+export const action = async ({ request }: DataFunctionArgs) => {
 	const { searchParams } = new URL(request.url);
 	const authMode = searchParams.get('type');
 
@@ -69,9 +68,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 			.from('user_profiles')
 			.insert([
 				{
-					id: data.user?.id ?? '',
-					username: data.user?.email,
-					email: data.user?.email,
+					id: data.user!.id,
+					username: data.user!.email!,
+					email: data.user!.email,
 				},
 			]);
 
