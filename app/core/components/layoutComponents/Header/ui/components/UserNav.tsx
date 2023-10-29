@@ -1,6 +1,6 @@
 import { Link, useOutletContext } from '@remix-run/react';
 
-import type { OutletContextValues } from '~/shared/models/index.ts';
+import { type OutletContextValues } from '~/shared/models/index.ts';
 import {
 	Avatar,
 	AvatarFallback,
@@ -54,13 +54,19 @@ export const UserNav = () => {
 				<DropdownMenuSeparator />
 				<DropdownMenuGroup>
 					<DropdownMenuItem asChild>
-						<Link to="/profile">Profile</Link>
+						<Link to="/profile" prefetch="intent">
+							Profile
+						</Link>
 					</DropdownMenuItem>
 					<DropdownMenuItem asChild>
-						<Link to="/dashboard">Dashboard</Link>
+						<Link to="/dashboard" prefetch="intent">
+							Dashboard
+						</Link>
 					</DropdownMenuItem>
 					<DropdownMenuItem asChild>
-						<Link to="/settings">Settings</Link>
+						<Link to="/settings" prefetch="intent">
+							Settings
+						</Link>
 					</DropdownMenuItem>
 				</DropdownMenuGroup>
 				<DropdownMenuSeparator />

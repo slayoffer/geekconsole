@@ -1,5 +1,6 @@
 export * from './Button/Button.tsx';
 export * from './Tabs/Tabs.tsx';
+export * from './StatusButton/StatusButton.tsx';
 export * from './Input/Input.tsx';
 export * from './Textarea/Textarea.tsx';
 export * from './RadioGroup/RadioGroup.tsx';
@@ -7,7 +8,7 @@ export * from './Label/Label.tsx';
 export * from './Form/Form.tsx';
 export * from './Card/Card.tsx';
 export * from './Toast/toaster.tsx';
-export * from './Toast/use-toast.tsx';
+export * from './Toast/use-toast.ts';
 export * from './Badge/Badge.tsx';
 export * from './Alert/Alert.tsx';
 export * from './DropdownMenu/DropdownMenu.tsx';

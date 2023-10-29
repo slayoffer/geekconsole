@@ -1,8 +1,9 @@
-import type { PropsWithChildren } from 'react';
-import { useEffect, useMemo } from 'react';
 import { cssBundleHref } from '@remix-run/css-bundle';
-import { json } from '@remix-run/node';
-import type { LinksFunction, LoaderFunctionArgs } from '@remix-run/node';
+import {
+	json,
+	type LinksFunction,
+	type LoaderFunctionArgs,
+} from '@remix-run/node';
 import {
 	isRouteErrorResponse,
 	Links,
@@ -16,11 +17,12 @@ import {
 	useRouteError,
 } from '@remix-run/react';
 import { createBrowserClient } from '@supabase/auth-helpers-remix';
+import { useEffect, useMemo, type PropsWithChildren } from 'react';
 
-import { createSupabaseServerClient } from './core/server/index.ts';
+import { createSupabaseServerClient, getEnv } from './core/server/index.ts';
 import fonts from './core/styles/fonts.css';
 import styles from './core/styles/styles.css';
-import type { Database } from './shared/types/index.ts';
+import { type Database } from './shared/types/index.ts';
 
 export const links: LinksFunction = () => [
 	...(cssBundleHref !== undefined
@@ -39,6 +41,8 @@ export const links: LinksFunction = () => [
 ];
 
 function Document({ children, title }: PropsWithChildren<{ title: string }>) {
+	const data = useLoaderData<typeof loader>();
+
 	return (
 		<html className="dark h-full" lang="en">
 			<head>
@@ -54,21 +58,27 @@ function Document({ children, title }: PropsWithChildren<{ title: string }>) {
 				<ScrollRestoration />
 				<Scripts />
 				<LiveReload />
+
+				<script
+					dangerouslySetInnerHTML={{
+						__html: `window.ENV = ${JSON.stringify(data.ENV)}`,
+					}}
+				/>
 			</body>
 		</html>
 	);
 }
 
 export default function App() {
-	const { env, session, userProfile } = useLoaderData<any>();
+	const { supabaseEnv, session, userProfile } = useLoaderData<typeof loader>();
 	const { revalidate } = useRevalidator();
 
 	const supabase = useMemo(() => {
 		return createBrowserClient<Database>(
-			env.SUPABASE_URL,
-			env.SUPABASE_ANON_KEY,
+			supabaseEnv.SUPABASE_URL!,
+			supabaseEnv.SUPABASE_ANON_KEY!,
 		);
-	}, [env.SUPABASE_URL, env.SUPABASE_ANON_KEY]);
+	}, [supabaseEnv.SUPABASE_URL, supabaseEnv.SUPABASE_ANON_KEY]);
 
 	const serverAccessToken = session?.access_token;
 
@@ -92,7 +102,7 @@ export default function App() {
 }
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-	const env = {
+	const supabaseEnv = {
 		SUPABASE_URL: process.env.SUPABASE_API_URL,
 		SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
 	};
@@ -111,7 +121,10 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 		.eq('id', session?.user.id ?? '')
 		.single();
 
-	return json({ env, session, userProfile }, { headers: response.headers });
+	return json(
+		{ ENV: getEnv(), supabaseEnv, session, userProfile },
+		{ headers: response.headers },
+	);
 };
 
 export function ErrorBoundary() {

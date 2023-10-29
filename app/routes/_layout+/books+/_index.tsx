@@ -1,7 +1,9 @@
-import { useEffect } from 'react';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
-import { json } from '@remix-run/node';
-import type { DataFunctionArgs, MetaFunction } from '@remix-run/node';
+import {
+	json,
+	type DataFunctionArgs,
+	type MetaFunction,
+} from '@remix-run/node';
 import {
 	isRouteErrorResponse,
 	Link,
@@ -9,6 +11,7 @@ import {
 	useLoaderData,
 	useRouteError,
 } from '@remix-run/react';
+import { useEffect } from 'react';
 
 import { BookCard } from '~/core/components/booksIndexComponents/index.ts';
 import { getSession } from '~/core/server/index.ts';
@@ -61,7 +64,9 @@ export default function Books() {
 				<div className="flex flex-col items-center justify-center">
 					<p>There are no books to display.</p>
 					<Button asChild variant="link">
-						<Link to="/books/new">Add your own</Link>
+						<Link to="/books/new" prefetch="intent">
+							Add your own
+						</Link>
 					</Button>
 				</div>
 			)}

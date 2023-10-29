@@ -1,11 +1,11 @@
-import type { ChangeEvent } from 'react';
-import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Form as RemixForm, useNavigation, useSubmit } from '@remix-run/react';
+import { Form as RemixForm, useSubmit } from '@remix-run/react';
 import { Loader2 } from 'lucide-react';
+import { useState, type ChangeEvent } from 'react';
 import { useForm } from 'react-hook-form';
 import { useSpinDelay } from 'spin-delay';
 import { z } from 'zod';
+import { useIsSubmitting } from '~/shared/lib/utils/index.ts';
 
 import {
 	Button,
@@ -47,10 +47,9 @@ const authFormResolver = zodResolver(newBookFormSchema);
 
 export const NewBookForm = () => {
 	const submit = useSubmit();
-	const navigation = useNavigation();
 	const [coverImg, setCoverImg] = useState<File | undefined>(undefined);
 
-	const isSubmitting = navigation.state !== 'idle';
+	const isSubmitting = useIsSubmitting();
 	const showSpinner = useSpinDelay(isSubmitting);
 
 	const form = useForm<NewBookFormData>({

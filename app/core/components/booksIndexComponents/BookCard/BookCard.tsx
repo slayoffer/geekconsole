@@ -1,7 +1,7 @@
 import { Pencil2Icon } from '@radix-ui/react-icons';
 import { Form, Link } from '@remix-run/react';
 
-import type { ReadingStatus } from '~/shared/types/index.ts';
+import { type ReadingStatus } from '~/shared/types/index.ts';
 import {
 	Badge,
 	Button,
@@ -33,7 +33,7 @@ export const BookCard = ({ book }: BookCardProps) => {
 			<CardHeader className="flex-row items-center gap-4">
 				<p>{title}</p>
 				<Button variant="link" size="icon" asChild className="mt-0">
-					<Link to={`${id}/edit`}>
+					<Link to={`${id}/edit`} prefetch="intent">
 						<Pencil2Icon />
 					</Link>
 				</Button>
@@ -48,7 +48,9 @@ export const BookCard = ({ book }: BookCardProps) => {
 			</CardContent>
 			<CardFooter>
 				<Button asChild variant="link">
-					<Link to={`${id}`}>See more</Link>
+					<Link to={`${id}`} prefetch="intent">
+						See more
+					</Link>
 				</Button>
 				<Form action={`${id}/destroy`} method="POST" onSubmit={onSubmit}>
 					<Button type="submit" variant="destructive">
