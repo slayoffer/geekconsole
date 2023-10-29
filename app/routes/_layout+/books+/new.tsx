@@ -9,18 +9,18 @@ import {
   useRouteError,
 } from '@remix-run/react';
 
-import { NewBookForm } from '~/core/components/newBookComponents';
-import { getSession } from '~/core/server';
-import { BUCKET_BOOKS_URL } from '~/shared/consts';
-import { invariantResponse } from '~/shared/lib/utils';
-import type { ReadingStatus } from '~/shared/types';
+import { NewBookForm } from '~/core/components/newBookComponents/index.ts';
+import { getSession } from '~/core/server/index.ts';
+import { BUCKET_BOOKS_URL } from '~/shared/consts/index.ts';
+import { invariantResponse } from '~/shared/lib/utils/index.ts';
+import type { ReadingStatus } from '~/shared/types/index.ts';
 import {
   Alert,
   AlertDescription,
   AlertTitle,
   Button,
   useToast,
-} from '~/shared/ui';
+} from '~/shared/ui/index.ts';
 
 export default function NewBook() {
   const { toast } = useToast();

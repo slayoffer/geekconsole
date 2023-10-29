@@ -21,7 +21,7 @@ import {
   RadioGroup,
   RadioGroupItem,
   Textarea,
-} from '~/shared/ui';
+} from '~/shared/ui/index.ts';
 
 const READING_STATUSES: { name: string; value: string }[] = [
   { name: 'Want to read', value: 'want to read' },

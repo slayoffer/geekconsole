@@ -17,9 +17,10 @@ import {
 } from '@remix-run/react';
 import { createBrowserClient } from '@supabase/auth-helpers-remix';
 
-import { createSupabaseServerClient } from './core/server';
-import type { Database } from './shared/types';
-import styles from './styles.css';
+import { createSupabaseServerClient } from './core/server/index.ts';
+import fonts from './core/styles/fonts.css';
+import styles from './core/styles/styles.css';
+import type { Database } from './shared/types/index.ts';
 
 export const links: LinksFunction = () => [
   ...(cssBundleHref !== undefined
@@ -29,6 +30,7 @@ export const links: LinksFunction = () => [
     rel: 'stylesheet',
     href: styles,
   },
+  { rel: 'stylesheet', href: fonts },
   {
     rel: 'icon',
     type: 'image/png',

@@ -2,8 +2,8 @@ import type { ActionFunctionArgs } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
 import invariant from 'tiny-invariant';
 
-import { createSupabaseServerClient } from '~/core/server';
-import { SUCCESS_DELETE_COOKIE_NAME } from '~/shared/consts';
+import { createSupabaseServerClient } from '~/core/server/index.ts';
+import { SUCCESS_DELETE_COOKIE_NAME } from '~/shared/consts/index.ts';
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
   invariant(params.bookId, 'Missing bookId param');

@@ -1,6 +1,6 @@
 import { type Session, type SupabaseClient } from '@supabase/supabase-js';
 
-import type { UserProfile } from '../types';
+import type { UserProfile } from '../types/index.ts';
 
 export type OutletContextValues = {
   session: Session;

@@ -10,9 +10,14 @@ import {
 } from '@remix-run/react';
 import invariant from 'tiny-invariant';
 
-import { getSession } from '~/core/server';
-import { invariantResponse } from '~/shared/lib/utils';
-import { Alert, AlertDescription, AlertTitle, Button } from '~/shared/ui';
+import { getSession } from '~/core/server/index.ts';
+import { invariantResponse } from '~/shared/lib/utils/index.ts';
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+  Button,
+} from '~/shared/ui/index.ts';
 
 export default function BookOverview() {
   const { book } = useLoaderData<typeof loader>();

@@ -8,7 +8,7 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
-} from '~/shared/ui';
+} from '~/shared/ui/index.ts';
 
 export default function Dashboard() {
   return (

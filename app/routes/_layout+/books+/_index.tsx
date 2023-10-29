@@ -10,17 +10,17 @@ import {
   useRouteError,
 } from '@remix-run/react';
 
-import { BookCard } from '~/core/components/booksIndexComponents';
-import { getSession } from '~/core/server';
-import { SUCCESS_DELETE_COOKIE_NAME } from '~/shared/consts';
-import { invariantResponse } from '~/shared/lib/utils';
+import { BookCard } from '~/core/components/booksIndexComponents/index.ts';
+import { getSession } from '~/core/server/index.ts';
+import { SUCCESS_DELETE_COOKIE_NAME } from '~/shared/consts/index.ts';
+import { invariantResponse } from '~/shared/lib/utils/index.ts';
 import {
   Alert,
   AlertDescription,
   AlertTitle,
   Button,
   useToast,
-} from '~/shared/ui';
+} from '~/shared/ui/index.ts';
 
 export const meta: MetaFunction = () => {
   return [{ title: 'Your books collection' }];

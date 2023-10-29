@@ -1,1 +1,1 @@
-export { NewBookForm } from './NewBookForm';
+export { NewBookForm } from './NewBookForm/NewBookForm.tsx';

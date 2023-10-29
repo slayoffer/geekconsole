@@ -1,8 +1,8 @@
 import { Link, useOutletContext } from '@remix-run/react';
 
-import { type OutletContextValues } from '~/shared/models/common';
-import { Button } from '~/shared/ui';
-import { UserNav } from './components/UserNav';
+import { type OutletContextValues } from '~/shared/models/common.ts';
+import { Button } from '~/shared/ui/index.ts';
+import { UserNav } from './components/UserNav.tsx';
 
 export const Header = () => {
   const { session, userProfile } = useOutletContext<OutletContextValues>();

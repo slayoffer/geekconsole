@@ -7,9 +7,7 @@
   "type": "module",
   "scripts": {
     "start": "remix-serve ./build/index.js",
-    "build": "run-s build:*",
-    "build:remix": "remix build",
-    "build:tailwindcss": "tailwindcss -i ./app/core/styles/index.css --minify -o ./app/styles.css",
+    "build": "remix build",
     "dev": "remix dev",
     "typecheck": "npx tsc",
     "lint:ts": "npx eslint --no-error-on-unmatched-pattern . --ext .ts,.tsx ./app",
@@ -39,6 +37,7 @@
     "@remix-run/serve": "^2.1.0",
     "@supabase/auth-helpers-remix": "^0.2.2",
     "@supabase/supabase-js": "^2.38.4",
+    "@total-typescript/ts-reset": "^0.5.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "isbot": "^3.7.0",

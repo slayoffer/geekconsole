@@ -1,3 +1,3 @@
-export { Header } from './Header';
-export { Footer } from './Footer';
-export { GlobalLoading } from './GlobalLoading';
+export { Header } from './Header/index.ts';
+export { Footer } from './Footer/index.ts';
+export { GlobalLoading } from './GlobalLoading/index.ts';

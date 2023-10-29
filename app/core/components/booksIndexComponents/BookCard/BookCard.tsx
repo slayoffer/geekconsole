@@ -1,7 +1,7 @@
 import { Pencil2Icon } from '@radix-ui/react-icons';
 import { Form, Link } from '@remix-run/react';
 
-import type { ReadingStatus } from '~/shared/types';
+import type { ReadingStatus } from '~/shared/types/index.ts';
 import {
   Badge,
   Button,
@@ -9,7 +9,7 @@ import {
   CardContent,
   CardFooter,
   CardHeader,
-} from '~/shared/ui';
+} from '~/shared/ui/index.ts';
 
 type BookCardProps = {
   book: {

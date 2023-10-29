@@ -6,9 +6,12 @@ import {
   type MetaFunction,
 } from '@remix-run/node';
 
-import { AuthForm } from '~/core/components/authComponents';
-import { createSupabaseServerClient, validateCredentials } from '~/core/server';
-import { invariantResponse } from '~/shared/lib/utils';
+import { AuthForm } from '~/core/components/authComponents/index.ts';
+import {
+  createSupabaseServerClient,
+  validateCredentials,
+} from '~/core/server/index.ts';
+import { invariantResponse } from '~/shared/lib/utils/index.ts';
 
 export const meta: MetaFunction = () => {
   return [{ title: 'Welcome, friend!' }];

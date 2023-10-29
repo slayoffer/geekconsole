@@ -26,7 +26,7 @@ import {
   FormMessage,
   Input,
   useToast,
-} from '~/shared/ui';
+} from '~/shared/ui/index.ts';
 
 const passwordRegex =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;

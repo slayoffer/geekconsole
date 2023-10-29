@@ -1,6 +1,6 @@
 import { useNavigation } from '@remix-run/react';
 
-import { cn } from '~/shared/lib/utils';
+import { cn } from '~/shared/lib/utils/index.ts';
 
 export function GlobalLoading() {
   const transition = useNavigation();
@@ -12,7 +12,7 @@ export function GlobalLoading() {
       aria-valuetext={active ? 'Loading' : undefined}
       aria-hidden={!active}
       className={cn(
-        'pointer-events-none fixed left-0 bottom-0 z-50 p-4 transition-all duration-500 ease-out',
+        'pointer-events-none fixed bottom-0 left-0 z-50 p-4 transition-all duration-500 ease-out',
         active ? 'translate-y-0' : 'translate-y-full',
       )}
     >

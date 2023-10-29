@@ -4,9 +4,9 @@ import {
   Footer,
   GlobalLoading,
   Header,
-} from '~/core/components/layoutComponents';
-import { type OutletContextValues } from '~/shared/models/common';
-import { Toaster } from '~/shared/ui';
+} from '~/core/components/layoutComponents/index.ts';
+import { type OutletContextValues } from '~/shared/models/index.ts';
+import { Toaster } from '~/shared/ui/index.ts';
 
 export default function Layout() {
   const { session, supabase, userProfile } =
