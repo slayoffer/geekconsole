@@ -15,9 +15,9 @@ export type Database = {
           comments: string | null;
           created_at: string | null;
           description: string;
-          id: number;
+          id: string;
           image_url: string | null;
-          status: string;
+          status: Database['public']['Enums']['Reading status'];
           title: string;
           updated_at: string | null;
           user_id: string;
@@ -28,9 +28,9 @@ export type Database = {
           comments?: string | null;
           created_at?: string | null;
           description: string;
-          id?: number;
+          id?: string;
           image_url?: string | null;
-          status: string;
+          status: Database['public']['Enums']['Reading status'];
           title: string;
           updated_at?: string | null;
           user_id: string;
@@ -41,9 +41,9 @@ export type Database = {
           comments?: string | null;
           created_at?: string | null;
           description?: string;
-          id?: number;
+          id?: string;
           image_url?: string | null;
-          status?: string;
+          status?: Database['public']['Enums']['Reading status'];
           title?: string;
           updated_at?: string | null;
           user_id?: string;
@@ -61,16 +61,19 @@ export type Database = {
       user_profiles: {
         Row: {
           created_at: string | null;
+          email: string;
           id: string;
           username: string | null;
         };
         Insert: {
           created_at?: string | null;
+          email?: string;
           id: string;
           username?: string | null;
         };
         Update: {
           created_at?: string | null;
+          email?: string;
           id?: string;
           username?: string | null;
         };
@@ -91,7 +94,7 @@ export type Database = {
       [_ in never]: never;
     };
     Enums: {
-      [_ in never]: never;
+      'Reading status': 'want to read' | 'reading' | 'have read';
     };
     CompositeTypes: {
       [_ in never]: never;

@@ -9,7 +9,7 @@ export const createSupabaseServerClient = (options: {
   response: Response;
   options?: any;
   cookieOptions?: CookieOptions | undefined;
-}): SupabaseClient => {
+}): SupabaseClient<Database> => {
   const supabaseUrl = process.env.SUPABASE_API_URL ?? '';
   const supabaseKey = process.env.SUPABASE_ANON_KEY ?? '';
 

@@ -1,5 +1,6 @@
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
-import { json, type LoaderFunction } from '@remix-run/node';
+import { json } from '@remix-run/node';
+import type { DataFunctionArgs } from '@remix-run/node';
 import {
   isRouteErrorResponse,
   Link,
@@ -7,13 +8,14 @@ import {
   useParams,
   useRouteError,
 } from '@remix-run/react';
+import invariant from 'tiny-invariant';
 
 import { getSession } from '~/core/server';
-import type { BookDto } from '~/shared/types';
+import { invariantResponse } from '~/shared/lib/utils';
 import { Alert, AlertDescription, AlertTitle, Button } from '~/shared/ui';
 
 export default function BookOverview() {
-  const book = useLoaderData<BookDto>();
+  const { book } = useLoaderData<typeof loader>();
 
   return (
     <div>
@@ -62,24 +64,24 @@ export default function BookOverview() {
   );
 }
 
-export const loader: LoaderFunction = async ({ request, params }) => {
+export const loader = async ({ request, params }: DataFunctionArgs) => {
   const response = new Response();
   const { bookId } = params;
+  invariant(bookId, 'Missing bookId param');
 
   const { supabaseClient, session } = await getSession(request);
 
-  if (!session) throw new Response('Unauthorized', { status: 401 });
+  invariantResponse(session, 'Unauthorized', { status: 401 });
 
   const { data: book } = await supabaseClient
     .from('books')
     .select('*')
-    .eq('id', bookId);
+    .eq('id', bookId)
+    .single();
 
-  if (!book || book.length === 0) {
-    throw new Response('Not found', { status: 404 });
-  }
+  invariantResponse(book, 'Book is not found', { status: 404 });
 
-  return json(book[0], { headers: response.headers });
+  return json({ book: book }, { headers: response.headers });
 };
 
 export function ErrorBoundary() {

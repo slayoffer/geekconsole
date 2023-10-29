@@ -12,7 +12,12 @@ import {
 } from '~/shared/ui';
 
 type BookCardProps = {
-  book: { id: string; title: string; status: ReadingStatus; image_url: string };
+  book: {
+    id: string;
+    title: string;
+    status: ReadingStatus;
+    image_url: string | null;
+  };
 };
 
 export const BookCard = ({ book }: BookCardProps) => {
@@ -36,7 +41,7 @@ export const BookCard = ({ book }: BookCardProps) => {
       <CardContent className="flex flex-col items-center gap-2">
         <img
           className="h-40 w-40 max-w-full rounded-xl align-middle"
-          src={image_url}
+          src={image_url ?? ''}
           alt={title}
         />
         <Badge variant="outline">{status}</Badge>

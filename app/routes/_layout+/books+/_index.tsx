@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
-import { json, type LoaderFunction, type MetaFunction } from '@remix-run/node';
+import { json } from '@remix-run/node';
+import type { DataFunctionArgs, MetaFunction } from '@remix-run/node';
 import {
   isRouteErrorResponse,
   Link,
@@ -12,7 +13,7 @@ import {
 import { BookCard } from '~/core/components/booksIndexComponents';
 import { getSession } from '~/core/server';
 import { SUCCESS_DELETE_COOKIE_NAME } from '~/shared/consts';
-import type { BookDto } from '~/shared/types';
+import { invariantResponse } from '~/shared/lib/utils';
 import {
   Alert,
   AlertDescription,
@@ -26,14 +27,11 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Books() {
-  const { books, success } = useLoaderData<{
-    books: BookDto[];
-    success: boolean | undefined;
-  }>();
-  const { toast } = useToast();
+  const { books, success } = useLoaderData<typeof loader>();
   const response = useActionData<{
     error: string;
   }>();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (response && response.error) {
@@ -53,7 +51,7 @@ export default function Books() {
 
   return (
     <>
-      {books.length > 0 ? (
+      {books && books.length > 0 ? (
         <div className="grid grid-cols-5 gap-4">
           {books.map((book) => (
             <BookCard key={book.id} book={book} />
@@ -71,7 +69,7 @@ export default function Books() {
   );
 }
 
-export const loader: LoaderFunction = async ({ request }) => {
+export const loader = async ({ request }: DataFunctionArgs) => {
   const headers = new Headers(request.headers);
   const cookies = headers.get('cookie');
   const isDeleted = cookies?.includes('deleteSuccess=true');
@@ -80,7 +78,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 
   const { supabaseClient, session } = await getSession(request);
 
-  if (!session) throw new Response('Unauthorized', { status: 401 });
+  invariantResponse(session, 'Unauthorized', { status: 401 });
 
   const { data: books } = await supabaseClient
     .from('books')

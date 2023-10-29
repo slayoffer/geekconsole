@@ -106,7 +106,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { data: userProfile } = await supabaseClient
     .from('user_profiles')
     .select('*')
-    .eq('id', session?.user.id)
+    .eq('id', session?.user.id ?? '')
     .single();
 
   return json({ env, session, userProfile }, { headers: response.headers });

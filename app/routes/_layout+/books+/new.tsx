@@ -12,6 +12,8 @@ import {
 import { NewBookForm } from '~/core/components/newBookComponents';
 import { getSession } from '~/core/server';
 import { BUCKET_BOOKS_URL } from '~/shared/consts';
+import { invariantResponse } from '~/shared/lib/utils';
+import type { ReadingStatus } from '~/shared/types';
 import {
   Alert,
   AlertDescription,
@@ -66,23 +68,31 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       .upload(`${session?.user.id}/${randomUUID()}.${fileExt}`, coverImg);
 
     if (data) imgPath = data.path;
-    else if (error) throw new Response(error.message, { status: 400 });
+
+    invariantResponse(!error, error?.message, { status: 500 });
   }
+
+  const status = formData.get('status') as ReadingStatus;
+  const title = formData.get('title') as string;
+  const description = formData.get('description') as string;
+  const comments = formData.get('comments') as string;
+  const author = formData.get('author') as string;
+  const year = Number(formData.get('year'));
 
   const { error } = await supabaseClient.from('books').insert([
     {
-      user_id: session?.user.id,
+      user_id: session?.user.id ?? '',
       image_url: `${BUCKET_BOOKS_URL}/${imgPath}`,
-      status: formData.get('status'),
-      title: formData.get('title'),
-      description: formData.get('description'),
-      comments: formData.get('comments'),
-      author: formData.get('author'),
-      year: formData.get('year'),
+      status: status,
+      title: title,
+      description: description,
+      comments: comments,
+      author: author,
+      year: year,
     },
   ]);
 
-  if (error) throw new Response(error.message, { status: 400 });
+  invariantResponse(!error, error?.message, { status: 500 });
 
   return redirect('/books', { headers: response.headers });
 };
@@ -90,7 +100,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { session } = await getSession(request);
 
-  if (!session) throw new Response('Unauthorized', { status: 401 });
+  invariantResponse(session, 'Unauthorized', { status: 401 });
 
   return json({ ok: true });
 };
