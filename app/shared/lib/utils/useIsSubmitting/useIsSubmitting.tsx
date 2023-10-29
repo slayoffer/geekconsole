@@ -5,18 +5,18 @@ import { useFormAction, useNavigation } from '@remix-run/react';
  * form. Defaults to the current route's form action and method POST.
  */
 export function useIsSubmitting({
-  formAction,
-  formMethod = 'POST',
+	formAction,
+	formMethod = 'POST',
 }: {
-  formAction?: string;
-  formMethod?: 'POST' | 'GET' | 'PUT' | 'PATCH' | 'DELETE';
+	formAction?: string;
+	formMethod?: 'POST' | 'GET' | 'PUT' | 'PATCH' | 'DELETE';
 } = {}) {
-  const contextualFormAction = useFormAction();
-  const navigation = useNavigation();
+	const contextualFormAction = useFormAction();
+	const navigation = useNavigation();
 
-  return (
-    navigation.state === 'submitting' &&
-    navigation.formAction === (formAction ?? contextualFormAction) &&
-    navigation.formMethod === formMethod
-  );
+	return (
+		navigation.state === 'submitting' &&
+		navigation.formAction === (formAction ?? contextualFormAction) &&
+		navigation.formMethod === formMethod
+	);
 }
