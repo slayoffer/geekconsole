@@ -8,7 +8,7 @@
 	"scripts": {
 		"start": "remix-serve build",
 		"build": "run-s build:*",
-		"build:remix": "remix build --sourcemap",
+		"build:remix": "remix build",
 		"build:server": "tsx ./other/build-server.ts",
 		"dev": "remix dev --manual -c \"node ./server/dev-server.js\"",
 		"test": "playwright test",
@@ -129,16 +129,16 @@
 	"engines": {
 		"node": ">=14"
 	},
-	"config": {
-		"cz-customizable": {
-			"config": ".cz-config.cjs"
-		}
-	},
 	"eslintIgnore": [
 		"/node_modules",
 		"/build",
 		"/public/build",
 		"/playwright-report",
 		"/server-build"
-	]
+	],
+	"config": {
+		"cz-customizable": {
+			"config": "cz-config.cjs"
+		}
+	}
 }
