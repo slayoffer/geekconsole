@@ -6,7 +6,7 @@
 	"sideEffects": false,
 	"type": "module",
 	"scripts": {
-		"start": "remix-serve build",
+		"start": "remix-serve build/index.js",
 		"build": "run-s build:*",
 		"build:remix": "remix build",
 		"build:server": "tsx ./other/build-server.ts",
