@@ -3,8 +3,8 @@ import { useNavigation } from '@remix-run/react';
 import { cn } from '~/shared/lib/utils/index.ts';
 
 export function GlobalLoading() {
-	const transition = useNavigation();
-	const active = transition.state !== 'idle';
+	const navigation = useNavigation();
+	const active = navigation.state === 'loading';
 
 	return (
 		<div

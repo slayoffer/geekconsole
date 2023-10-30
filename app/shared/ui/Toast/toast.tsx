@@ -1,7 +1,7 @@
-import * as React from 'react';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import * as ToastPrimitives from '@radix-ui/react-toast';
 import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
 
 import { cn } from '~/shared/lib/utils/index.ts';
 
@@ -29,7 +29,7 @@ const toastVariants = cva(
 			variant: {
 				default: 'border bg-background',
 				destructive:
-					'destructive group border-destructive bg-destructive text-destructive-foreground',
+					'group border-destructive bg-destructive text-destructive-foreground',
 			},
 		},
 		defaultVariants: {

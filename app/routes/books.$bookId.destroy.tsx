@@ -1,5 +1,4 @@
-import type { ActionFunctionArgs } from '@remix-run/node';
-import { json, redirect } from '@remix-run/node';
+import { type ActionFunctionArgs, json, redirect } from '@remix-run/node';
 import invariant from 'tiny-invariant';
 
 import { createSupabaseServerClient } from '~/core/server/index.ts';
