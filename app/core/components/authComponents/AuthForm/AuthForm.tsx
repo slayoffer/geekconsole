@@ -1,18 +1,18 @@
-import { useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
 	Link,
 	Form as RemixForm,
 	useActionData,
-	useNavigation,
 	useSearchParams,
 	useSubmit,
 } from '@remix-run/react';
 import { Loader2 } from 'lucide-react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useSpinDelay } from 'spin-delay';
 import * as z from 'zod';
 
+import { useHydrated, useSubmitting } from '~/shared/lib/hooks/index.ts';
 import {
 	Button,
 	Card,
@@ -50,12 +50,11 @@ const authFormResolver = zodResolver(authFormSchema);
 export const AuthForm = () => {
 	const { toast } = useToast();
 	const [searchParams] = useSearchParams();
-	const navigation = useNavigation();
 	const validationError = useActionData<{ message: string }>();
 	const submit = useSubmit();
 
 	useEffect(() => {
-		if (validationError && validationError) {
+		if (validationError && validationError.message) {
 			toast({
 				title: validationError.message,
 				variant: 'destructive',
@@ -63,7 +62,8 @@ export const AuthForm = () => {
 		}
 	}, [validationError, toast]);
 
-	const isSubmitting = navigation.state !== 'idle';
+	const isHydrated = useHydrated();
+	const isSubmitting = useSubmitting();
 	const showSpinner = useSpinDelay(isSubmitting);
 
 	const authMode = searchParams.get('type') ?? 'signin';
@@ -102,6 +102,7 @@ export const AuthForm = () => {
 				<Form {...form}>
 					<RemixForm
 						method="POST"
+						noValidate={isHydrated}
 						onSubmit={form.handleSubmit(onSubmit)}
 						className="space-y-3"
 					>

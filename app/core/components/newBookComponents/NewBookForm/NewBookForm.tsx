@@ -5,7 +5,7 @@ import { useState, type ChangeEvent } from 'react';
 import { useForm } from 'react-hook-form';
 import { useSpinDelay } from 'spin-delay';
 import { z } from 'zod';
-import { useIsSubmitting } from '~/shared/lib/utils/index.ts';
+import { useHydrated, useSubmitting } from '~/shared/lib/hooks/index.ts';
 
 import {
 	Button,
@@ -49,7 +49,8 @@ export const NewBookForm = () => {
 	const submit = useSubmit();
 	const [coverImg, setCoverImg] = useState<File | undefined>(undefined);
 
-	const isSubmitting = useIsSubmitting();
+	const isHydrated = useHydrated();
+	const isSubmitting = useSubmitting();
 	const showSpinner = useSpinDelay(isSubmitting);
 
 	const form = useForm<NewBookFormData>({
@@ -89,6 +90,7 @@ export const NewBookForm = () => {
 				<Form {...form}>
 					<RemixForm
 						onSubmit={form.handleSubmit(onSubmit)}
+						noValidate={isHydrated}
 						className="flex flex-col justify-center space-y-8"
 					>
 						{/* TITLE */}
@@ -102,6 +104,8 @@ export const NewBookForm = () => {
 										<Input
 											placeholder="Romeo & Juliet"
 											type="text"
+											required
+											maxLength={100}
 											{...field}
 										/>
 									</FormControl>
@@ -120,6 +124,8 @@ export const NewBookForm = () => {
 										<Input
 											placeholder="William Shakespear"
 											type="text"
+											required
+											maxLength={100}
 											{...field}
 										/>
 									</FormControl>
@@ -135,7 +141,12 @@ export const NewBookForm = () => {
 								<FormItem>
 									<FormLabel>Publish Date</FormLabel>
 									<FormControl>
-										<Input placeholder="1597" type="number" {...field} />
+										<Input
+											placeholder="1597"
+											type="number"
+											required
+											{...field}
+										/>
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -151,6 +162,7 @@ export const NewBookForm = () => {
 									<Input
 										type="file"
 										accept="image/jpg, image/jpeg, image/png, image/webp"
+										required
 										onChange={onChangeCoverImg}
 									/>
 									<FormMessage />
@@ -167,6 +179,7 @@ export const NewBookForm = () => {
 									<FormControl>
 										<RadioGroup
 											className="flex flex-col space-y-1"
+											required
 											onValueChange={field.onChange}
 											{...field}
 										>
@@ -201,6 +214,8 @@ export const NewBookForm = () => {
 										<Textarea
 											{...field}
 											rows={6}
+											required
+											maxLength={10000}
 											placeholder="Book description"
 										/>
 									</FormControl>
@@ -219,6 +234,7 @@ export const NewBookForm = () => {
 										<Textarea
 											{...field}
 											rows={6}
+											maxLength={10000}
 											placeholder="Share your thoughts about this book or leave some comments for your future reference"
 										/>
 									</FormControl>

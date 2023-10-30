@@ -4,7 +4,7 @@ import { useFormAction, useNavigation } from '@remix-run/react';
  * Returns true if the current navigation is submitting the current route's
  * form. Defaults to the current route's form action and method POST.
  */
-export function useIsSubmitting({
+export function useSubmitting({
 	formAction,
 	formMethod = 'POST',
 }: {
