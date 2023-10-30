@@ -53,6 +53,9 @@ importers:
       '@remix-run/react':
         specifier: ^2.1.0
         version: 2.1.0(react-dom@18.2.0)(react@18.2.0)(typescript@5.2.2)
+      '@remix-run/router':
+        specifier: ^1.10.0
+        version: 1.10.0
       '@remix-run/serve':
         specifier: ^2.1.0
         version: 2.1.0(typescript@5.2.2)
@@ -112,7 +115,7 @@ importers:
         version: 7.47.0(react@18.2.0)
       remix-utils:
         specifier: ^7.1.0
-        version: 7.1.0(@remix-run/node@2.1.0)(@remix-run/react@2.1.0)(react@18.2.0)(zod@3.22.4)
+        version: 7.1.0(@remix-run/node@2.1.0)(@remix-run/react@2.1.0)(@remix-run/router@1.10.0)(react@18.2.0)(zod@3.22.4)
       spin-delay:
         specifier: ^1.2.0
         version: 1.2.0(react@18.2.0)
@@ -13668,7 +13671,7 @@ packages:
       minimatch: 5.1.6
     dev: true
 
-  /remix-utils@7.1.0(@remix-run/node@2.1.0)(@remix-run/react@2.1.0)(react@18.2.0)(zod@3.22.4):
+  /remix-utils@7.1.0(@remix-run/node@2.1.0)(@remix-run/react@2.1.0)(@remix-run/router@1.10.0)(react@18.2.0)(zod@3.22.4):
     resolution: {integrity: sha512-cceintceWvmNvgLLFeAUkWRcdWuOHGDLaWh0aeL0bLGWnMPBilIyT74Rira1az/ImS9owfh8tjLL4w/22AXJiA==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
@@ -13706,6 +13709,7 @@ packages:
     dependencies:
       '@remix-run/node': 2.1.0(typescript@5.2.2)
       '@remix-run/react': 2.1.0(react-dom@18.2.0)(react@18.2.0)(typescript@5.2.2)
+      '@remix-run/router': 1.10.0
       react: 18.2.0
       type-fest: 4.6.0
       zod: 3.22.4

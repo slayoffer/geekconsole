@@ -11,6 +11,7 @@ import {
 	validateCredentials,
 } from '~/core/server/index.ts';
 import { invariantResponse } from '~/shared/lib/utils/index.ts';
+import { GeneralErrorBoundary } from '~/shared/ui/index.ts';
 
 export const meta: MetaFunction = () => {
 	return [{ title: 'Welcome, friend!' }];
@@ -87,3 +88,18 @@ export const action = async ({ request }: DataFunctionArgs) => {
 		return redirect('/books', { headers: response.headers });
 	}
 };
+
+export function ErrorBoundary() {
+	return (
+		<GeneralErrorBoundary
+			statusHandlers={{
+				500: () => (
+					<p>
+						Shoot. Something bad happened on our side. Sorry. Try again later
+					</p>
+				),
+			}}
+			unexpectedErrorHandler={() => <div>Error trying to log in. Sorry</div>}
+		/>
+	);
+}

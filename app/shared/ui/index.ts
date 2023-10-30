@@ -13,3 +13,4 @@ export * from './Badge/Badge.tsx';
 export * from './Alert/Alert.tsx';
 export * from './DropdownMenu/DropdownMenu.tsx';
 export * from './Avatar/Avatar.tsx';
+export * from './GeneralErrorBoundary/GeneralErrorBoundary.tsx';

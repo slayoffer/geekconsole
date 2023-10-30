@@ -1,13 +1,6 @@
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { json, type DataFunctionArgs } from '@remix-run/node';
-import {
-	type MetaFunction,
-	isRouteErrorResponse,
-	Link,
-	useLoaderData,
-	useParams,
-	useRouteError,
-} from '@remix-run/react';
+import { type MetaFunction, Link, useLoaderData } from '@remix-run/react';
 import invariant from 'tiny-invariant';
 
 import { getSession } from '~/core/server/index.ts';
@@ -17,6 +10,7 @@ import {
 	AlertDescription,
 	AlertTitle,
 	Button,
+	GeneralErrorBoundary,
 } from '~/shared/ui/index.ts';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
@@ -103,27 +97,26 @@ export const loader = async ({ request, params }: DataFunctionArgs) => {
 };
 
 export function ErrorBoundary() {
-	const { bookId } = useParams();
-	const error = useRouteError();
-
-	if (isRouteErrorResponse(error) && error.status === 404) {
-		return <div>Huh? What the heck is "{bookId}"?</div>;
-	}
-
-	if (isRouteErrorResponse(error) && error.status === 401) {
-		return (
-			<Alert variant="destructive" className="w-2/4">
-				<ExclamationTriangleIcon className="h-4 w-4" />
-				<AlertTitle>Unauthorized</AlertTitle>
-				<AlertDescription>
-					You must be logged in to view your books.
-					<Button asChild variant="link">
-						<Link to="/auth?type=signin">Login</Link>
-					</Button>
-				</AlertDescription>
-			</Alert>
-		);
-	}
-
-	return <div>There was an error loading book by the id {bookId}. Sorry.</div>;
+	return (
+		<GeneralErrorBoundary
+			statusHandlers={{
+				404: ({ params }) => <p>Huh? What the heck is "{params.bookId}"?</p>,
+				401: () => (
+					<Alert variant="destructive" className="w-2/4">
+						<ExclamationTriangleIcon className="h-4 w-4" />
+						<AlertTitle>Unauthorized</AlertTitle>
+						<AlertDescription>
+							You must be logged in to view your books.
+							<Button asChild variant="link">
+								<Link to="/auth?type=signin">Login</Link>
+							</Button>
+						</AlertDescription>
+					</Alert>
+				),
+			}}
+			unexpectedErrorHandler={() => (
+				<div>There was an error loading book. Sorry.</div>
+			)}
+		/>
+	);
 }

@@ -5,7 +5,6 @@ import {
 	type LinksFunction,
 } from '@remix-run/node';
 import {
-	isRouteErrorResponse,
 	Links,
 	LiveReload,
 	Meta,
@@ -14,15 +13,15 @@ import {
 	ScrollRestoration,
 	useLoaderData,
 	useRevalidator,
-	useRouteError,
 } from '@remix-run/react';
 import { createBrowserClient } from '@supabase/auth-helpers-remix';
 import { useEffect, useMemo, type PropsWithChildren } from 'react';
 
 import { createSupabaseServerClient, getEnv } from './core/server/index.ts';
 import fonts from './core/styles/fonts.css';
-import styles from './core/styles/styles.css';
+import twStyles from './core/styles/twStyles.css';
 import { type Database } from './shared/types/index.ts';
+import { GeneralErrorBoundary } from './shared/ui/index.ts';
 
 export const links: LinksFunction = () => [
 	...(cssBundleHref !== undefined
@@ -30,7 +29,7 @@ export const links: LinksFunction = () => [
 		: []),
 	{
 		rel: 'stylesheet',
-		href: styles,
+		href: twStyles,
 	},
 	{ rel: 'stylesheet', href: fonts },
 	{
@@ -41,10 +40,8 @@ export const links: LinksFunction = () => [
 ];
 
 function Document({ children, title }: PropsWithChildren<{ title: string }>) {
-	const data = useLoaderData<typeof loader>();
-
 	return (
-		<html className="dark h-full" lang="en">
+		<html className="dark h-full overflow-x-hidden" lang="en">
 			<head>
 				<Meta />
 				<Links />
@@ -61,19 +58,14 @@ function Document({ children, title }: PropsWithChildren<{ title: string }>) {
 				<ScrollRestoration />
 				<Scripts />
 				<LiveReload />
-
-				<script
-					dangerouslySetInnerHTML={{
-						__html: `window.ENV = ${JSON.stringify(data.ENV)}`,
-					}}
-				/>
 			</body>
 		</html>
 	);
 }
 
 export default function App() {
-	const { supabaseEnv, session, userProfile } = useLoaderData<typeof loader>();
+	const { ENV, supabaseEnv, session, userProfile } =
+		useLoaderData<typeof loader>();
 	const { revalidate } = useRevalidator();
 
 	const supabase = useMemo(() => {
@@ -100,6 +92,12 @@ export default function App() {
 	return (
 		<Document title="Geek Console">
 			<Outlet context={{ supabase, session, userProfile }} />
+
+			<script
+				dangerouslySetInnerHTML={{
+					__html: `window.ENV = ${JSON.stringify(ENV)}`,
+				}}
+			/>
 		</Document>
 	);
 }
@@ -131,28 +129,9 @@ export const loader = async ({ request }: DataFunctionArgs) => {
 };
 
 export function ErrorBoundary() {
-	const error = useRouteError();
-
-	if (isRouteErrorResponse(error)) {
-		return (
-			<Document title={`${error.status} ${error.statusText}`}>
-				<div>
-					<h1>
-						{error.status} {error.statusText}
-					</h1>
-				</div>
-			</Document>
-		);
-	}
-
-	const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-
 	return (
-		<Document title="Ooops. Something went wrong">
-			<div>
-				<h1>App Error</h1>
-				<pre>{errorMessage}</pre>
-			</div>
+		<Document title="Oops. Something went wrong">
+			<GeneralErrorBoundary />
 		</Document>
 	);
 }
