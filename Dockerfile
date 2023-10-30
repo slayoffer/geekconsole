@@ -11,7 +11,7 @@ WORKDIR /app
 COPY ./ .
 COPY --from=dependencies /app/node_modules ./node_modules
 RUN pnpm typecheck && \
-    pnpm build
+    npm build
 EXPOSE 3000
 CMD ["pnpm", "run", "start"]
 
