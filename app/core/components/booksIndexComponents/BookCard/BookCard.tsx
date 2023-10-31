@@ -1,5 +1,8 @@
 import { Pencil2Icon } from '@radix-ui/react-icons';
 import { Form, Link } from '@remix-run/react';
+import { Loader2 } from 'lucide-react';
+import { useSpinDelay } from 'spin-delay';
+import { useSubmitting } from '~/shared/lib/hooks/index.ts';
 
 import { type ReadingStatus } from '~/shared/types/index.ts';
 import {
@@ -20,8 +23,13 @@ type BookCardProps = {
 	};
 };
 
+const getFormAction = (id: string) => `/books/${id}/destroy`;
+
 export const BookCard = ({ book }: BookCardProps) => {
 	const { id, title, status, image_url } = book;
+
+	const isSubmitting = useSubmitting({ formAction: getFormAction(id) });
+	const showSpinner = useSpinDelay(isSubmitting);
 
 	const onSubmit = (event: any) => {
 		const response = confirm('Please confirm you want to delete this book.');
@@ -52,9 +60,16 @@ export const BookCard = ({ book }: BookCardProps) => {
 						See more
 					</Link>
 				</Button>
-				<Form action={`${id}/destroy`} method="POST" onSubmit={onSubmit}>
-					<Button type="submit" variant="destructive">
-						Delete
+				<Form action={getFormAction(id)} method="post" onSubmit={onSubmit}>
+					<Button type="submit" variant="destructive" disabled={showSpinner}>
+						{showSpinner ? (
+							<>
+								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+								Deleting...
+							</>
+						) : (
+							'Delete'
+						)}
 					</Button>
 				</Form>
 			</CardFooter>

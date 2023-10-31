@@ -122,7 +122,6 @@ export default function Auth() {
 							<Label htmlFor={fields.email.id}>Email</Label>
 							<Input
 								autoFocus
-								type="email"
 								{...conform.input(fields.email, { type: 'email' })}
 							/>
 							<div className="min-h-[32px] px-4 pb-3 pt-1">

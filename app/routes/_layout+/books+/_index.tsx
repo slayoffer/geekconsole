@@ -15,6 +15,7 @@ import { useEffect } from 'react';
 
 import { BookCard } from '~/core/components/booksIndexComponents/index.ts';
 import { getSession } from '~/core/server/index.ts';
+import { type action } from '~/routes/books.$bookId.destroy.tsx';
 import { SUCCESS_DELETE_COOKIE_NAME } from '~/shared/consts/index.ts';
 import { invariantResponse } from '~/shared/lib/utils/index.ts';
 import {
@@ -34,9 +35,7 @@ export const meta: MetaFunction = () => {
 
 export default function Books() {
 	const { books, success } = useLoaderData<typeof loader>();
-	const response = useActionData<{
-		error: string;
-	}>();
+	const response = useActionData<typeof action>();
 	const { toast } = useToast();
 
 	useEffect(() => {

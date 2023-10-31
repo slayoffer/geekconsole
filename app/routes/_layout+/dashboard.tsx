@@ -1,5 +1,6 @@
-import { type MetaFunction } from '@remix-run/react';
+import { Link, type MetaFunction } from '@remix-run/react';
 import {
+	Button,
 	Card,
 	CardContent,
 	CardDescription,
@@ -29,9 +30,7 @@ export default function Dashboard() {
 					<Tabs defaultValue="overview" className="space-y-4">
 						<TabsList>
 							<TabsTrigger value="overview">Overview</TabsTrigger>
-							<TabsTrigger value="books" disabled>
-								Books
-							</TabsTrigger>
+							<TabsTrigger value="books">Books</TabsTrigger>
 							<TabsTrigger value="movies" disabled>
 								Movies
 							</TabsTrigger>
@@ -176,6 +175,18 @@ export default function Dashboard() {
 										culpa et culpa duis.
 									</CardContent>
 								</Card>
+							</div>
+						</TabsContent>
+
+						<TabsContent value="books" className="space-y-4">
+							<div className="flex flex-col space-y-2">
+								<Button asChild variant="link">
+									<Link to="/books">Your books collection</Link>
+								</Button>
+
+								<Button asChild variant="link">
+									<Link to="/books/new">Add new book</Link>
+								</Button>
 							</div>
 						</TabsContent>
 					</Tabs>
