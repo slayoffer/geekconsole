@@ -16,7 +16,6 @@ export type Database = {
 					created_at: string;
 					description: string;
 					id: string;
-					image_url: string | null;
 					status: Database['public']['Enums']['Reading status'];
 					title: string;
 					updated_at: string;
@@ -29,7 +28,6 @@ export type Database = {
 					created_at?: string;
 					description: string;
 					id?: string;
-					image_url?: string | null;
 					status?: Database['public']['Enums']['Reading status'];
 					title: string;
 					updated_at?: string;
@@ -42,7 +40,6 @@ export type Database = {
 					created_at?: string;
 					description?: string;
 					id?: string;
-					image_url?: string | null;
 					status?: Database['public']['Enums']['Reading status'];
 					title?: string;
 					updated_at?: string;
@@ -54,6 +51,40 @@ export type Database = {
 						foreignKeyName: 'books_user_id_fkey';
 						columns: ['user_id'];
 						referencedRelation: 'user_profiles';
+						referencedColumns: ['id'];
+					},
+				];
+			};
+			books_images: {
+				Row: {
+					alt_text: string;
+					book_id: string;
+					created_at: string;
+					id: string;
+					updated_at: string;
+					url: string;
+				};
+				Insert: {
+					alt_text: string;
+					book_id: string;
+					created_at?: string;
+					id?: string;
+					updated_at?: string;
+					url: string;
+				};
+				Update: {
+					alt_text?: string;
+					book_id?: string;
+					created_at?: string;
+					id?: string;
+					updated_at?: string;
+					url?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'books_images_book_id_fkey';
+						columns: ['book_id'];
+						referencedRelation: 'books';
 						referencedColumns: ['id'];
 					},
 				];

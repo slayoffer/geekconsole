@@ -38,8 +38,8 @@ export default function BookOverview() {
 				<div className="w-1/4">
 					<img
 						className="h-full w-full rounded-lg"
-						src={book.image_url ? book.image_url : '../images/noCover.gif'}
-						alt={book.title}
+						src={book.books_images?.url ?? 'images/noCover.gif'}
+						alt={book.books_images?.alt_text ?? book.title}
 					/>
 				</div>
 				<div className="w-3/4">
@@ -87,13 +87,25 @@ export const loader = async ({ request, params }: DataFunctionArgs) => {
 
 	const { data: book } = await supabaseClient
 		.from('books')
-		.select('*')
+		.select(
+			`
+        *,
+        books_images (id, alt_text, url)
+      `,
+		)
 		.eq('id', bookId)
 		.single();
 
 	invariantResponse(book, 'Book is not found', { status: 404 });
 
-	return json({ book: book }, { headers: response.headers });
+	const mappedBook = {
+		...book,
+		books_images: Array.isArray(book.books_images)
+			? book.books_images[0]
+			: book.books_images,
+	};
+
+	return json({ book: mappedBook }, { headers: response.headers });
 };
 
 export function ErrorBoundary() {

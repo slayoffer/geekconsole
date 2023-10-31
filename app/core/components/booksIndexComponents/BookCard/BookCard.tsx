@@ -17,16 +17,20 @@ import {
 type BookCardProps = {
 	book: {
 		id: string;
-		title: string;
 		status: ReadingStatus;
-		image_url: string | null;
+		title: string;
+		books_images: {
+			id: string;
+			alt_text: string;
+			url: string;
+		} | null;
 	};
 };
 
 const getFormAction = (id: string) => `/books/${id}/destroy`;
 
 export const BookCard = ({ book }: BookCardProps) => {
-	const { id, title, status, image_url } = book;
+	const { id, title, status, books_images } = book;
 
 	const isSubmitting = useSubmitting({ formAction: getFormAction(id) });
 	const showSpinner = useSpinDelay(isSubmitting);
@@ -49,8 +53,8 @@ export const BookCard = ({ book }: BookCardProps) => {
 			<CardContent className="flex flex-col items-center gap-2">
 				<img
 					className="h-40 w-40 max-w-full rounded-xl align-middle"
-					src={image_url ?? ''}
-					alt={title}
+					src={books_images ? books_images.url : 'images/noCover.gif'}
+					alt={books_images ? books_images.alt_text : book.title}
 				/>
 				<Badge variant="outline">{status}</Badge>
 			</CardContent>

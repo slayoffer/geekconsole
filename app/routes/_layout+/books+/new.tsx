@@ -11,13 +11,14 @@ import {
 } from '@remix-run/node';
 import { type MetaFunction, Link, useActionData, Form } from '@remix-run/react';
 import { Loader2 } from 'lucide-react';
+import { useState } from 'react';
 import { useSpinDelay } from 'spin-delay';
 import { z } from 'zod';
 
 import { getSession } from '~/core/server/index.ts';
 import { BUCKET_BOOKS_URL } from '~/shared/consts/index.ts';
 import { useSubmitting } from '~/shared/lib/hooks/index.ts';
-import { invariantResponse } from '~/shared/lib/utils/index.ts';
+import { cn, invariantResponse } from '~/shared/lib/utils/index.ts';
 import { type ReadingStatus } from '~/shared/types/index.ts';
 import {
 	Alert,
@@ -32,6 +33,7 @@ import {
 	Label,
 	RadioGroup,
 	RadioGroupItem,
+	Textarea,
 } from '~/shared/ui/index.ts';
 
 export const meta: MetaFunction = () => {
@@ -65,6 +67,7 @@ const newBookFormSchema = z.object({
 			'File size must be less than 3MB',
 		)
 		.optional(),
+	altText: z.string().optional(),
 	readingStatus: z.string(),
 	description: z
 		.string()
@@ -156,20 +159,9 @@ export default function NewBook() {
 							</div>
 						</div>
 
-						{/* COVER IMG */}
-						<div>
-							<Label htmlFor={fields.coverImg.id}>Upload Cover Image</Label>
-							<Input
-								type="file"
-								accept="image/jpg, image/jpeg, image/png, image/webp"
-								{...conform.input(fields.coverImg, { type: 'file' })}
-							/>
-							<div className="min-h-[32px] px-4 pb-3 pt-1">
-								<ErrorList
-									id={fields.coverImg.errorId}
-									errors={fields.coverImg.errors}
-								/>
-							</div>
+						<div className="mb-4">
+							<Label>Upload cover image</Label>
+							<ImageChooser />
 						</div>
 
 						{/* READING STATUS */}
@@ -232,6 +224,8 @@ export default function NewBook() {
 							</div>
 						</div>
 
+						<ErrorList id={form.errorId} errors={form.errors} />
+
 						<Button type="submit" disabled={showSpinner}>
 							{showSpinner ? (
 								<>
@@ -263,39 +257,56 @@ export const action = async ({ request }: DataFunctionArgs) => {
 		return json({ status: 'error', submission } as const, { status: 400 });
 	}
 
-	const { title, author, year, readingStatus, description, comments } =
+	const { title, author, year, readingStatus, description, comments, altText } =
 		submission.value;
+
+	const { data: bookData, error: booksInsertError } = await supabaseClient
+		.from('books')
+		.insert([
+			{
+				user_id: session?.user.id ?? '',
+				status: readingStatus as ReadingStatus,
+				title,
+				description,
+				comments,
+				author,
+				year,
+			},
+		])
+		.select('id')
+		.single();
+
+	invariantResponse(!booksInsertError, booksInsertError?.message, {
+		status: 500,
+	});
 
 	const coverImg = submission.value.coverImg;
 
-	let imgPath: string | null = null;
-
-	if (coverImg && coverImg instanceof File) {
+	if (coverImg) {
 		const fileExt = coverImg.name.split('.').at(-1);
 
-		const { data, error } = await supabaseClient.storage
+		const { data, error: storageInstertError } = await supabaseClient.storage
 			.from('books')
 			.upload(`${session?.user.id}/${randomUUID()}.${fileExt}`, coverImg);
 
-		if (data) imgPath = data.path;
+		invariantResponse(!storageInstertError, storageInstertError?.message, {
+			status: 500,
+		});
 
-		invariantResponse(!error, error?.message, { status: 500 });
+		const { error: bookImageInsertError } = await supabaseClient
+			.from('books_images')
+			.insert([
+				{
+					book_id: bookData.id,
+					alt_text: altText ?? title,
+					url: `${BUCKET_BOOKS_URL}/${data.path}`,
+				},
+			]);
+
+		invariantResponse(!bookImageInsertError, bookImageInsertError?.message, {
+			status: 500,
+		});
 	}
-
-	const { error } = await supabaseClient.from('books').insert([
-		{
-			user_id: session?.user.id ?? '',
-			image_url: `${BUCKET_BOOKS_URL}/${imgPath}`,
-			status: readingStatus as ReadingStatus,
-			title,
-			description,
-			comments,
-			author,
-			year,
-		},
-	]);
-
-	invariantResponse(!error, error?.message, { status: 500 });
 
 	return redirect('/books', { headers: response.headers });
 };
@@ -340,3 +351,86 @@ export const ErrorBoundary = () => {
 		/>
 	);
 };
+
+function ImageChooser({
+	image,
+}: {
+	image?: { id: string; altText?: string | null };
+}) {
+	const existingImage = Boolean(image);
+	const [previewImage, setPreviewImage] = useState<string | null>(
+		existingImage ? `/resources/images/${image?.id}` : null,
+	);
+	const [altText, setAltText] = useState(image?.altText ?? '');
+
+	return (
+		<fieldset>
+			<div className="flex gap-3">
+				<div className="w-32">
+					<div className="relative h-32 w-32">
+						<label
+							htmlFor="image-input"
+							className={cn('group absolute h-32 w-32 rounded-lg', {
+								'bg-accent opacity-40 focus-within:opacity-100 hover:opacity-100':
+									!previewImage,
+								'cursor-pointer focus-within:ring-4': !existingImage,
+							})}
+						>
+							{previewImage ? (
+								<div className="relative">
+									<img
+										src={previewImage}
+										alt={altText ?? ''}
+										className="h-32 w-32 rounded-lg object-cover"
+									/>
+									{existingImage ? null : (
+										<div className="pointer-events-none absolute -right-0.5 -top-0.5 rotate-12 rounded-sm bg-secondary px-2 py-1 text-xs text-secondary-foreground shadow-md">
+											new
+										</div>
+									)}
+								</div>
+							) : (
+								<div className="flex h-32 w-32 items-center justify-center rounded-lg border border-muted-foreground text-4xl text-muted-foreground">
+									➕
+								</div>
+							)}
+							{existingImage ? (
+								<input name="imageId" type="hidden" value={image?.id} />
+							) : null}
+							<input
+								id="image-input"
+								aria-label="Image"
+								className="absolute left-0 top-0 z-0 h-32 w-32 cursor-pointer opacity-0"
+								onChange={(event) => {
+									const file = event.target.files?.[0];
+
+									if (file) {
+										const reader = new FileReader();
+
+										reader.onloadend = () => {
+											setPreviewImage(reader.result as string);
+										};
+
+										reader.readAsDataURL(file);
+									} else setPreviewImage(null);
+								}}
+								name="coverImg"
+								type="file"
+								accept="image/*"
+							/>
+						</label>
+					</div>
+				</div>
+				<div className="flex-1">
+					<Label htmlFor="alt-text">Alt Text</Label>
+					<Textarea
+						id="alt-text"
+						name="altText"
+						defaultValue={altText}
+						onChange={(e) => setAltText(e.currentTarget.value)}
+					/>
+				</div>
+			</div>
+		</fieldset>
+	);
+}

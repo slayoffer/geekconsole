@@ -34,7 +34,7 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Books() {
-	const { books, success } = useLoaderData<typeof loader>();
+	const { mappedBooks, success } = useLoaderData<typeof loader>();
 	const response = useActionData<typeof action>();
 	const { toast } = useToast();
 
@@ -56,9 +56,9 @@ export default function Books() {
 
 	return (
 		<>
-			{books && books.length > 0 ? (
+			{mappedBooks && mappedBooks.length > 0 ? (
 				<div className="grid grid-cols-5 gap-4">
-					{books.map((book) => (
+					{mappedBooks.map((book) => (
 						<BookCard key={book.id} book={book} />
 					))}
 				</div>
@@ -87,13 +87,37 @@ export const loader = async ({ request }: DataFunctionArgs) => {
 
 	invariantResponse(session, 'Unauthorized', { status: 401 });
 
-	const { data: books } = await supabaseClient
+	const { data: books, error: getBooksError } = await supabaseClient
 		.from('books')
-		.select('id, status, title, image_url')
+		.select(
+			`
+        id,
+        status,
+        title,
+        books_images (id, alt_text, url)
+      `,
+		)
 		.eq('user_id', session.user.id);
 
+	invariantResponse(!getBooksError, getBooksError?.message, { status: 500 });
+
+	const mappedBooks = [];
+
+	if (books && books.length > 0) {
+		for (const book of books) {
+			const bookImg = Array.isArray(book.books_images)
+				? book.books_images[0]
+				: book.books_images;
+
+			mappedBooks.push({
+				...book,
+				books_images: bookImg,
+			});
+		}
+	}
+
 	return json(
-		{ books, success: isDeleted },
+		{ mappedBooks, success: isDeleted },
 		{
 			headers: {
 				...response.headers,
