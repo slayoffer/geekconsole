@@ -8,10 +8,12 @@ import {
 } from '@remix-run/node';
 import { Form, Link, useActionData, useSearchParams } from '@remix-run/react';
 import { Loader2 } from 'lucide-react';
+import { HoneypotInputs } from 'remix-utils/honeypot/react';
+import { SpamError } from 'remix-utils/honeypot/server';
 import { useSpinDelay } from 'spin-delay';
 import { z } from 'zod';
 
-import { createSupabaseServerClient } from '~/core/server/index.ts';
+import { createSupabaseServerClient, honeypot } from '~/core/server/index.ts';
 import { useSubmitting } from '~/shared/lib/hooks/index.ts';
 import { invariantResponse } from '~/shared/lib/utils/index.ts';
 import {
@@ -118,6 +120,8 @@ export default function Auth() {
 				<CardHeader>{formTitle}</CardHeader>
 				<CardContent>
 					<Form method="post" {...form.props}>
+						<HoneypotInputs />
+
 						<div>
 							<Label htmlFor={fields.email.id}>Email</Label>
 							<Input
@@ -215,6 +219,17 @@ export const action = async ({ request }: DataFunctionArgs) => {
 	const supabaseClient = createSupabaseServerClient({ response, request });
 
 	const formData = await request.formData();
+
+	try {
+		honeypot.check(formData);
+	} catch (error) {
+		if (error instanceof SpamError) {
+			throw new Response('Form not submitted properly', { status: 400 });
+		}
+
+		throw error;
+	}
+
 	const submission = await parse(formData, {
 		schema: (intent) =>
 			authMode === 'register'

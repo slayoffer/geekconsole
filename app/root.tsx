@@ -17,7 +17,13 @@ import {
 import { createBrowserClient } from '@supabase/auth-helpers-remix';
 import { useEffect, useMemo, type PropsWithChildren } from 'react';
 
-import { createSupabaseServerClient, getEnv } from './core/server/index.ts';
+import { HoneypotProvider } from 'remix-utils/honeypot/react';
+import {
+	createSupabaseServerClient,
+	csrf,
+	getEnv,
+	honeypot,
+} from './core/server/index.ts';
 import fonts from './core/styles/fonts.css';
 import twStyles from './core/styles/twStyles.css';
 import { type Database } from './shared/types/index.ts';
@@ -39,31 +45,17 @@ export const links: LinksFunction = () => [
 	},
 ];
 
-function Document({ children, title }: PropsWithChildren<{ title: string }>) {
+export default function AppWithProviders() {
+	const { honeyProps } = useLoaderData<typeof loader>();
+
 	return (
-		<html className="dark h-full overflow-x-hidden" lang="en">
-			<head>
-				<Meta />
-				<Links />
-
-				<meta charSet="utf-8" />
-				<meta name="description" content="Your favourite geek storage" />
-				<meta name="viewport" content="width=device-width,initial-scale=1" />
-
-				<title>{title}</title>
-			</head>
-			<body className="flex h-full flex-col justify-between">
-				{children}
-
-				<ScrollRestoration />
-				<Scripts />
-				<LiveReload />
-			</body>
-		</html>
+		<HoneypotProvider {...honeyProps}>
+			<App />
+		</HoneypotProvider>
 	);
 }
 
-export default function App() {
+function App() {
 	const { ENV, supabaseEnv, session, userProfile } =
 		useLoaderData<typeof loader>();
 	const { revalidate } = useRevalidator();
@@ -102,7 +94,34 @@ export default function App() {
 	);
 }
 
+function Document({ children, title }: PropsWithChildren<{ title: string }>) {
+	return (
+		<html className="dark h-full overflow-x-hidden" lang="en">
+			<head>
+				<Meta />
+				<Links />
+
+				<meta charSet="utf-8" />
+				<meta name="description" content="Your favourite geek storage" />
+				<meta name="viewport" content="width=device-width,initial-scale=1" />
+
+				<title>{title}</title>
+			</head>
+			<body className="flex h-full flex-col justify-between">
+				{children}
+
+				<ScrollRestoration />
+				<Scripts />
+				<LiveReload />
+			</body>
+		</html>
+	);
+}
+
 export const loader = async ({ request }: DataFunctionArgs) => {
+	const honeyProps = honeypot.getInputProps();
+	const [csrfToken, csrfCookieHeader] = await csrf.commitToken(request);
+
 	const supabaseEnv = {
 		SUPABASE_URL: process.env.SUPABASE_API_URL,
 		SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
@@ -123,8 +142,13 @@ export const loader = async ({ request }: DataFunctionArgs) => {
 		.single();
 
 	return json(
-		{ ENV: getEnv(), supabaseEnv, session, userProfile },
-		{ headers: response.headers },
+		{ ENV: getEnv(), honeyProps, csrfToken, supabaseEnv, session, userProfile },
+		{
+			headers: {
+				...response.headers,
+				'set-cookie': csrfCookieHeader ? csrfCookieHeader : '',
+			},
+		},
 	);
 };
 
