@@ -16,6 +16,7 @@ import {
 } from '@remix-run/react';
 import { createBrowserClient } from '@supabase/auth-helpers-remix';
 import { useEffect, useMemo, type PropsWithChildren } from 'react';
+import { AuthenticityTokenProvider } from 'remix-utils/csrf/react';
 
 import { HoneypotProvider } from 'remix-utils/honeypot/react';
 import {
@@ -46,12 +47,14 @@ export const links: LinksFunction = () => [
 ];
 
 export default function AppWithProviders() {
-	const { honeyProps } = useLoaderData<typeof loader>();
+	const { honeyProps, csrfToken } = useLoaderData<typeof loader>();
 
 	return (
-		<HoneypotProvider {...honeyProps}>
-			<App />
-		</HoneypotProvider>
+		<AuthenticityTokenProvider token={csrfToken}>
+			<HoneypotProvider {...honeyProps}>
+				<App />
+			</HoneypotProvider>
+		</AuthenticityTokenProvider>
 	);
 }
 

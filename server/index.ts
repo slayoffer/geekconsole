@@ -8,6 +8,7 @@ import chalk from 'chalk';
 import closeWithGrace from 'close-with-grace';
 import compression from 'compression';
 import express from 'express';
+import rateLimit from 'express-rate-limit';
 import getPort, { portNumbers } from 'get-port';
 import morgan from 'morgan';
 
@@ -82,6 +83,44 @@ function getRequestHandler(build: ServerBuild): RequestHandler {
 	}
 	return createRequestHandler({ build, mode: MODE, getLoadContext });
 }
+
+// When running tests or running in development, we want to effectively disable
+// rate limiting because playwright tests are very fast and we don't want to
+// have to wait for the rate limit to reset between tests.
+const maxMultiple = process.env.TESTING ? 10_000 : 1;
+
+const rateLimitDefault = {
+	windowMs: 60 * 1000,
+	max: 1000 * maxMultiple,
+	standardHeaders: true,
+	legacyHeaders: false,
+};
+
+const strongRateLimit = rateLimit({
+	...rateLimitDefault,
+	max: 100 * maxMultiple,
+});
+
+const strongestRateLimit = rateLimit({
+	...rateLimitDefault,
+	max: 10 * maxMultiple,
+});
+
+const generalRateLimit = rateLimit(rateLimitDefault);
+
+app.use((req, res, next) => {
+	const strongPaths = ['/auth'];
+
+	if (req.method !== 'GET' && req.method !== 'HEAD') {
+		if (strongPaths.some((p) => req.path.includes(p))) {
+			return strongestRateLimit(req, res, next);
+		}
+
+		return strongRateLimit(req, res, next);
+	}
+
+	return generalRateLimit(req, res, next);
+});
 
 app.all(
 	'*',

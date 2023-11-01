@@ -5,7 +5,6 @@ export * from './Input/Input.tsx';
 export * from './Textarea/Textarea.tsx';
 export * from './RadioGroup/RadioGroup.tsx';
 export * from './Label/Label.tsx';
-export * from './Form/Form.tsx';
 export * from './Card/Card.tsx';
 export * from './Toast/toaster.tsx';
 export * from './Toast/use-toast.ts';

@@ -1,6 +1,7 @@
 import { Pencil2Icon } from '@radix-ui/react-icons';
 import { Form, Link } from '@remix-run/react';
 import { Loader2 } from 'lucide-react';
+import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
 import { useSpinDelay } from 'spin-delay';
 import { useSubmitting } from '~/shared/lib/hooks/index.ts';
 
@@ -65,6 +66,7 @@ export const BookCard = ({ book }: BookCardProps) => {
 					</Link>
 				</Button>
 				<Form action={getFormAction(id)} method="post" onSubmit={onSubmit}>
+					<AuthenticityTokenInput />
 					<Button type="submit" variant="destructive" disabled={showSpinner}>
 						{showSpinner ? (
 							<>
