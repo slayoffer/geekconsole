@@ -4,13 +4,7 @@ import {
 	type DataFunctionArgs,
 	type MetaFunction,
 } from '@remix-run/node';
-import {
-	isRouteErrorResponse,
-	Link,
-	useActionData,
-	useLoaderData,
-	useRouteError,
-} from '@remix-run/react';
+import { Link, useActionData, useLoaderData } from '@remix-run/react';
 import { useEffect } from 'react';
 
 import { BookCard } from '~/core/components/booksIndexComponents/index.ts';
@@ -23,6 +17,7 @@ import {
 	AlertDescription,
 	AlertTitle,
 	Button,
+	GeneralErrorBoundary,
 	useToast,
 } from '~/shared/ui/index.ts';
 
@@ -128,22 +123,34 @@ export const loader = async ({ request }: DataFunctionArgs) => {
 };
 
 export const ErrorBoundary = () => {
-	const error = useRouteError();
-
-	if (isRouteErrorResponse(error) && error.status === 401) {
-		return (
-			<Alert variant="destructive" className="w-2/4">
-				<ExclamationTriangleIcon className="h-4 w-4" />
-				<AlertTitle>Unauthorized</AlertTitle>
-				<AlertDescription>
-					You must be logged in to view your books.
-					<Button asChild variant="link">
-						<Link to="/auth?type=signin">Login</Link>
-					</Button>
-				</AlertDescription>
-			</Alert>
-		);
-	}
-
-	return <div>Oops, can not load your books. Sorry.</div>;
+	return (
+		<GeneralErrorBoundary
+			statusHandlers={{
+				401: () => (
+					<Alert variant="destructive" className="w-2/4">
+						<ExclamationTriangleIcon className="h-4 w-4" />
+						<AlertTitle>Unauthorized</AlertTitle>
+						<AlertDescription>
+							You must be logged in to view your books.
+							<Button asChild variant="link">
+								<Link to="/auth?type=signin">Login</Link>
+							</Button>
+						</AlertDescription>
+					</Alert>
+				),
+				500: () => (
+					<Alert variant="destructive" className="w-2/4">
+						<ExclamationTriangleIcon className="h-4 w-4" />
+						<AlertTitle>Server error</AlertTitle>
+						<AlertDescription>
+							Looks like something bad happened on our server. Already fixing!
+						</AlertDescription>
+					</Alert>
+				),
+			}}
+			unexpectedErrorHandler={() => (
+				<div>Something unexpected happened. Sorry about that.</div>
+			)}
+		/>
+	);
 };
