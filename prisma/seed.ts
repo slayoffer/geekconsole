@@ -146,7 +146,10 @@ async function seed() {
 	console.time(`🐨 Created user "volodya"`);
 
 	const volodyaImages = await promiseHash({
-		volodyaUser: img({ filepath: './tests/fixtures/images/user/kody.png' }),
+		volodyaUser: img({
+			filepath: './tests/fixtures/images/user/kody.png',
+			altText: 'My profile image, lol',
+		}),
 		cuteKoala: img({
 			altText: 'an adorable koala cartoon illustration',
 			filepath: './tests/fixtures/images/my-books/cute-koala.png',

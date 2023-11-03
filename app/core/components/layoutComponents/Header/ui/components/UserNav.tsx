@@ -16,13 +16,7 @@ import {
 } from '~/shared/ui/index.ts';
 
 export const UserNav = () => {
-	const { userProfile, supabase } = useOutletContext<OutletContextValues>();
-
-	const handleLogout = () => {
-		void (async () => {
-			await supabase.auth.signOut();
-		})();
-	};
+	const { userProfile } = useOutletContext<OutletContextValues>();
 
 	return (
 		<DropdownMenu>
@@ -31,8 +25,8 @@ export const UserNav = () => {
 					<Avatar className="h-12 w-12">
 						<AvatarImage
 							src={
-								userProfile.avatarUrl ??
-								`https://robohash.org/${userProfile.username}.png`
+								// TODO! fix this nonsense
+								null ?? `https://robohash.org/${userProfile.username}.png`
 							}
 							alt="User Avatar"
 						/>
@@ -70,7 +64,9 @@ export const UserNav = () => {
 					</DropdownMenuItem>
 				</DropdownMenuGroup>
 				<DropdownMenuSeparator />
-				<DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
+				<DropdownMenuItem onClick={() => console.log('TODO LOG OUT')}>
+					Log out
+				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);

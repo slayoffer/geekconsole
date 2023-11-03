@@ -12,22 +12,15 @@ import {
 	Scripts,
 	ScrollRestoration,
 	useLoaderData,
-	useRevalidator,
 } from '@remix-run/react';
-import { createBrowserClient } from '@supabase/auth-helpers-remix';
-import { useEffect, useMemo, type PropsWithChildren } from 'react';
+import { type PropsWithChildren } from 'react';
 import { AuthenticityTokenProvider } from 'remix-utils/csrf/react';
 
 import { HoneypotProvider } from 'remix-utils/honeypot/react';
-import {
-	createSupabaseServerClient,
-	csrf,
-	getEnv,
-	honeypot,
-} from './core/server/index.ts';
+import { csrf, getEnv, honeypot } from './core/server/index.ts';
 import fonts from './core/styles/fonts.css';
 import twStyles from './core/styles/twStyles.css';
-import { type Database } from './shared/types/index.ts';
+import { prisma } from './shared/lib/utils/index.ts';
 import { GeneralErrorBoundary } from './shared/ui/index.ts';
 
 export const links: LinksFunction = () => [
@@ -59,34 +52,11 @@ export default function AppWithProviders() {
 }
 
 function App() {
-	const { ENV, supabaseEnv, session, userProfile } =
-		useLoaderData<typeof loader>();
-	const { revalidate } = useRevalidator();
-
-	const supabase = useMemo(() => {
-		return createBrowserClient<Database>(
-			supabaseEnv.SUPABASE_URL!,
-			supabaseEnv.SUPABASE_ANON_KEY!,
-		);
-	}, [supabaseEnv.SUPABASE_URL, supabaseEnv.SUPABASE_ANON_KEY]);
-
-	const serverAccessToken = session?.access_token;
-
-	useEffect(() => {
-		const {
-			data: { subscription },
-		} = supabase.auth.onAuthStateChange((_, session) => {
-			if (session?.access_token !== serverAccessToken) revalidate();
-		});
-
-		return () => {
-			subscription.unsubscribe();
-		};
-	}, [serverAccessToken, supabase, revalidate]);
+	const { ENV, userProfile } = useLoaderData<typeof loader>();
 
 	return (
 		<Document title="Geek Console">
-			<Outlet context={{ supabase, session, userProfile }} />
+			<Outlet context={{ userProfile }} />
 
 			<script
 				dangerouslySetInnerHTML={{
@@ -130,27 +100,27 @@ export const loader = async ({ request }: DataFunctionArgs) => {
 		SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
 	};
 
-	const response = new Response();
-
-	const supabaseClient = createSupabaseServerClient({ response, request });
-
-	const {
-		data: { session },
-	} = await supabaseClient.auth.getSession();
-
-	const { data: userProfile } = await supabaseClient
-		.from('user_profiles')
-		.select('*')
-		.eq('id', session?.user.id ?? '')
-		.single();
+	const volodya = await prisma.user.findUnique({
+		select: {
+			name: true,
+			username: true,
+			email: true,
+			createdAt: true,
+			image: { select: { id: true, blob: true } },
+		},
+		where: {
+			username: 'vVolodya',
+		},
+	});
 
 	return json(
-		{ ENV: getEnv(), honeyProps, csrfToken, supabaseEnv, session, userProfile },
+		{ ENV: getEnv(), honeyProps, csrfToken, supabaseEnv, userProfile: volodya },
 		{
-			headers: {
-				...response.headers,
-				'set-cookie': csrfCookieHeader ? csrfCookieHeader : '',
-			},
+			headers: csrfCookieHeader
+				? {
+						'set-cookie': csrfCookieHeader,
+				  }
+				: {},
 		},
 	);
 };
