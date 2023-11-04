@@ -9,8 +9,7 @@ import { type OutletContextValues } from '~/shared/models/index.ts';
 import { Toaster } from '~/shared/ui/index.ts';
 
 export default function Layout() {
-	const { session, supabase, userProfile } =
-		useOutletContext<OutletContextValues>();
+	const { userProfile } = useOutletContext<OutletContextValues>();
 
 	return (
 		<>
@@ -19,7 +18,7 @@ export default function Layout() {
 
 			<Header />
 			<main className="container mx-auto flex flex-col items-center p-10">
-				<Outlet context={{ supabase, session, userProfile }} />
+				<Outlet context={{ userProfile }} />
 			</main>
 			<Footer />
 		</>

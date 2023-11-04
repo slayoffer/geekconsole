@@ -5,7 +5,7 @@ import { Button } from '~/shared/ui/index.ts';
 import { UserNav } from './components/UserNav.tsx';
 
 export const Header = () => {
-	const { session, userProfile } = useOutletContext<OutletContextValues>();
+	const { userProfile } = useOutletContext<OutletContextValues>();
 
 	return (
 		<header className="bg-zinc-900">
@@ -20,7 +20,7 @@ export const Header = () => {
 							/>
 						</Link>
 					</div>
-					{session !== null && userProfile !== null ? (
+					{userProfile !== null ? (
 						<div className="ml-10 hidden space-x-4 lg:block">
 							<UserNav />
 						</div>

@@ -311,11 +311,7 @@ export const action = async ({ request }: DataFunctionArgs) => {
 	return redirect('/books', { headers: response.headers });
 };
 
-export const loader = async ({ request }: DataFunctionArgs) => {
-	const { session } = await getSession(request);
-
-	invariantResponse(session, 'Unauthorized', { status: 401 });
-
+export const loader = async (_: DataFunctionArgs) => {
 	return json({ ok: true });
 };
 
