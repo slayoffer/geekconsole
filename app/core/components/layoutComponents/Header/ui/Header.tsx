@@ -2,10 +2,10 @@ import { Link, useOutletContext } from '@remix-run/react';
 
 import { type OutletContextValues } from '~/shared/models/common.ts';
 import { Button } from '~/shared/ui/index.ts';
-import { UserNav } from './components/UserNav.tsx';
+import { ThemeSwitcher, UserNav } from './components/index.ts';
 
 export const Header = () => {
-	const { userProfile } = useOutletContext<OutletContextValues>();
+	const { userProfile, theme } = useOutletContext<OutletContextValues>();
 
 	return (
 		<header className="bg-zinc-900">
@@ -20,20 +20,23 @@ export const Header = () => {
 							/>
 						</Link>
 					</div>
-					{userProfile !== null ? (
-						<div className="ml-10 hidden space-x-4 lg:block">
-							<UserNav />
-						</div>
-					) : (
-						<div className="ml-10 hidden space-x-4 lg:block">
-							<Button asChild variant="link">
-								<Link to="/auth?type=signin">Sign in</Link>
-							</Button>
-							<Button asChild variant="link">
-								<Link to="/auth?type=register">Get started today</Link>
-							</Button>
-						</div>
-					)}
+					<div className="flex items-center justify-center gap-4">
+						{userProfile !== null ? (
+							<div className="ml-10 hidden space-x-4 lg:block">
+								<UserNav />
+							</div>
+						) : (
+							<div className="ml-10 hidden space-x-4 lg:block">
+								<Button asChild variant="link">
+									<Link to="/auth?type=signin">Sign in</Link>
+								</Button>
+								<Button asChild variant="link">
+									<Link to="/auth?type=register">Get started today</Link>
+								</Button>
+							</div>
+						)}
+						<ThemeSwitcher userPreference={theme} />
+					</div>
 				</div>
 			</nav>
 		</header>

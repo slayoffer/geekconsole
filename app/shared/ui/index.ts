@@ -14,3 +14,4 @@ export * from './DropdownMenu/DropdownMenu.tsx';
 export * from './Avatar/Avatar.tsx';
 export * from './GeneralErrorBoundary/GeneralErrorBoundary.tsx';
 export * from './ErrorList/ErrorList.tsx';
+export * from './Icons/Icon.tsx';

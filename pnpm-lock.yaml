@@ -204,6 +204,9 @@ importers:
       '@types/compression':
         specifier: ^1.7.4
         version: 1.7.4
+      '@types/cookie':
+        specifier: ^0.5.3
+        version: 0.5.3
       '@types/eslint':
         specifier: ^8.44.6
         version: 8.44.6
@@ -237,6 +240,9 @@ importers:
       commitlint-config-gitmoji:
         specifier: ^2.3.1
         version: 2.3.1
+      cookie:
+        specifier: ^0.5.0
+        version: 0.5.0
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3
@@ -5602,6 +5608,10 @@ packages:
 
   /@types/cookie@0.4.1:
     resolution: {integrity: sha512-XW/Aa8APYr6jSVVA1y/DEIZX0/GMKLEVekNG727R8cs56ahETkRAy/3DR7+fJyh7oUgGwNQaRfXCun0+KbWY7Q==}
+
+  /@types/cookie@0.5.3:
+    resolution: {integrity: sha512-SLg07AS9z1Ab2LU+QxzU8RCmzsja80ywjf/t5oqw+4NSH20gIGlhLOrBDm1L3PBWzPa4+wkgFQVZAjE6Ioj2ug==}
+    dev: true
 
   /@types/cross-spawn@6.0.4:
     resolution: {integrity: sha512-GGLpeThc2Bu8FBGmVn76ZU3lix17qZensEI4/MPty0aZpm2CHfgEMis31pf5X5EiudYKcPAsWciAsCALoPo5dw==}
