@@ -13,7 +13,7 @@
 		"build:server": "tsx ./other/build-server.ts",
 		"dev": "remix dev --manual -c \"node ./server/dev-server.js\"",
 		"test": "playwright test",
-		"typecheck": "npx tsc",
+		"typecheck": "tsc",
 		"lint:ts": "npx eslint --no-error-on-unmatched-pattern . --ext .ts,.tsx ./app",
 		"lint:ts:fix": "npx eslint --no-error-on-unmatched-pattern . --ext .ts,.tsx ./app --fix",
 		"storybook": "storybook dev -p 6006",

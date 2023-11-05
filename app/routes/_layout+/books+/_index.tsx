@@ -104,19 +104,10 @@ export const action = async ({ request }: DataFunctionArgs) => {
 };
 
 export const loader = async (args: DataFunctionArgs) => {
-	const response = new Response();
-
 	// TODO fix this later for particular user
 	const allBooks = await prisma.book.findMany();
 
-	return json(
-		{ allBooks },
-		{
-			headers: {
-				...response.headers,
-			},
-		},
-	);
+	return json({ allBooks });
 };
 
 export const ErrorBoundary = () => {
