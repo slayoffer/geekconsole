@@ -12,14 +12,15 @@ import { type OutletContextValues } from '~/shared/models/index.ts';
 function ShowToast({ toast }: { toast: any }) {
 	const { id, type, title, description } = toast as {
 		id: string;
-		type: 'success' | 'message';
+		type: 'success' | 'error' | 'message';
 		title: string;
 		description: string;
 	};
 
 	useEffect(() => {
 		setTimeout(() => {
-			showToast[type](title, { id, description });
+			if (type === 'error') showToast[type](title);
+			else showToast[type](title, { id, description });
 		}, 0);
 	}, [id, type, title, description]);
 
@@ -39,7 +40,7 @@ export default function Layout() {
 
 			<GlobalLoading />
 
-			<Toaster closeButton position="top-center" />
+			<Toaster richColors closeButton position="bottom-right" />
 			{toast ? <ShowToast toast={toast} /> : null}
 		</>
 	);
