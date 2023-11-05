@@ -15,7 +15,7 @@ const prisma = remember('prisma', () => {
 		],
 	});
 
-	client.$on('query', async (e) => {
+	client.$on('query', async (e: any) => {
 		// uncomment if you want to hide all queries
 		// if (e.duration < logThreshold) return;
 
