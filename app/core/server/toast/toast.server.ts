@@ -21,7 +21,7 @@ export type OptionalToast = Omit<Toast, 'id' | 'type'> & {
 
 export const toastSessionStorage = createCookieSessionStorage({
 	cookie: {
-		name: 'en_toast',
+		name: 'gk_toast',
 		sameSite: 'lax',
 		path: '/',
 		httpOnly: true,

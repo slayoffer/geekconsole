@@ -5,7 +5,7 @@ import { Button } from '~/shared/ui/index.ts';
 import { ThemeSwitcher, UserNav } from './components/index.ts';
 
 export const Header = () => {
-	const { userProfile, theme } = useOutletContext<OutletContextValues>();
+	const { user, theme } = useOutletContext<OutletContextValues>();
 
 	return (
 		<header className="bg-zinc-900">
@@ -21,7 +21,7 @@ export const Header = () => {
 						</Link>
 					</div>
 					<div className="flex items-center justify-center gap-4">
-						{userProfile !== null ? (
+						{user !== null ? (
 							<div className="ml-10 hidden space-x-4 lg:block">
 								<UserNav />
 							</div>

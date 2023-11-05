@@ -26,8 +26,9 @@ import {
 	honeypot,
 	setTheme,
 	getTheme,
-	toastSessionStorage,
 	prisma,
+	getToast,
+	authSessionStorage,
 } from './core/server/index.ts';
 import fonts from './core/styles/fonts.css';
 import twStyles from './core/styles/twStyles.css';
@@ -64,12 +65,12 @@ export default function AppWithProviders() {
 }
 
 function App() {
-	const { ENV, userProfile, toast } = useLoaderData<typeof loader>();
+	const { ENV, user, toast } = useLoaderData<typeof loader>();
 	const theme = useTheme();
 
 	return (
 		<Document title="Geek Console" theme={theme}>
-			<Outlet context={{ userProfile, theme, toast }} />
+			<Outlet context={{ user, theme, toast }} />
 
 			<script
 				dangerouslySetInnerHTML={{
@@ -142,27 +143,23 @@ export const loader = async ({ request }: DataFunctionArgs) => {
 	const honeyProps = honeypot.getInputProps();
 	const [csrfToken, csrfCookieHeader] = await csrf.commitToken(request);
 
+	const { toast, headers: toastHeaders } = await getToast(request);
+
+	const cookieSession = await authSessionStorage.getSession(
+		request.headers.get('cookie'),
+	);
+	const userId = cookieSession.get('userId');
+	const user = userId
+		? await prisma.user.findUnique({
+				select: { id: true, name: true, username: true, email: true },
+				where: { id: userId },
+		  })
+		: null;
+
 	const supabaseEnv = {
 		SUPABASE_URL: process.env.SUPABASE_API_URL,
 		SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
 	};
-
-	const toastCookieSession = await toastSessionStorage.getSession(
-		request.headers.get('cookie'),
-	);
-
-	const volodya = await prisma.user.findUnique({
-		select: {
-			name: true,
-			username: true,
-			email: true,
-			createdAt: true,
-			image: { select: { id: true, blob: true } },
-		},
-		where: {
-			username: 'vVolodya',
-		},
-	});
 
 	return json(
 		{
@@ -170,17 +167,14 @@ export const loader = async ({ request }: DataFunctionArgs) => {
 			honeyProps,
 			csrfToken,
 			theme: getTheme(request),
-			toast: toastCookieSession.get('toast'),
-			userProfile: volodya,
+			toast,
+			user,
 			supabaseEnv,
 		},
 		{
 			headers: combineHeaders(
 				csrfCookieHeader ? { 'set-cookie': csrfCookieHeader } : null,
-				{
-					'set-cookie':
-						await toastSessionStorage.commitSession(toastCookieSession),
-				},
+				toastHeaders,
 			),
 		},
 	);

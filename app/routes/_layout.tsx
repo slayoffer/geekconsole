@@ -9,13 +9,13 @@ import { type OutletContextValues } from '~/shared/models/index.ts';
 import { CustomToaster } from '~/shared/ui/index.ts';
 
 export default function Layout() {
-	const { userProfile, toast } = useOutletContext<OutletContextValues>();
+	const { user, toast } = useOutletContext<OutletContextValues>();
 
 	return (
 		<>
 			<Header />
 			<main className="container mx-auto flex flex-col items-center p-10">
-				<Outlet context={{ userProfile }} />
+				<Outlet context={{ user }} />
 			</main>
 			<Footer />
 

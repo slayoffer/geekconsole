@@ -16,7 +16,7 @@ import {
 } from '~/shared/ui/index.ts';
 
 export const UserNav = () => {
-	const { userProfile } = useOutletContext<OutletContextValues>();
+	const { user } = useOutletContext<OutletContextValues>();
 
 	return (
 		<DropdownMenu>
@@ -26,7 +26,7 @@ export const UserNav = () => {
 						<AvatarImage
 							src={
 								// TODO! fix this nonsense
-								null ?? `https://robohash.org/${userProfile.username}.png`
+								null ?? `https://robohash.org/${user.username}.png`
 							}
 							alt="User Avatar"
 						/>
@@ -37,11 +37,9 @@ export const UserNav = () => {
 			<DropdownMenuContent className="w-56" align="end" forceMount>
 				<DropdownMenuLabel className="font-normal">
 					<div className="flex flex-col space-y-1">
-						<p className="text-sm font-medium leading-none">
-							{userProfile.username}
-						</p>
+						<p className="text-sm font-medium leading-none">{user.username}</p>
 						<p className="text-xs leading-none text-muted-foreground">
-							{userProfile.email}
+							{user.email}
 						</p>
 					</div>
 				</DropdownMenuLabel>
