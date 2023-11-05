@@ -5,7 +5,7 @@ import { type Toast } from '~/core/server/index.ts';
 export function CustomToaster({ toast }: { toast?: Toast | null }) {
 	return (
 		<>
-			<Toaster closeButton position="top-center" />
+			<Toaster closeButton position="bottom-right" />
 			{toast ? <ShowToast toast={toast} /> : null}
 		</>
 	);
