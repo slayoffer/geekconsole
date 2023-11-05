@@ -5,14 +5,13 @@ import {
 	json,
 	type DataFunctionArgs,
 	type MetaFunction,
-	redirect,
 } from '@remix-run/node';
 import { Link, useLoaderData } from '@remix-run/react';
 
 import { BookCard } from '~/core/components/booksIndexComponents/index.ts';
 import {
 	prisma,
-	toastSessionStorage,
+	redirectWithToast,
 	validateCSRF,
 } from '~/core/server/index.ts';
 import { invariantResponse } from '~/shared/lib/utils/index.ts';
@@ -85,21 +84,11 @@ export const action = async ({ request }: DataFunctionArgs) => {
 
 	await prisma.book.delete({ where: { id: book.id } });
 
-	const toastCookieSession = await toastSessionStorage.getSession(
-		request.headers.get('cookie'),
-	);
-
-	toastCookieSession.flash('toast', {
+	return redirectWithToast('/books', {
 		id: createId(),
 		type: 'success',
 		title: 'Book deleted',
 		description: 'Your book has been deleted',
-	});
-
-	return redirect('/books', {
-		headers: {
-			'set-cookie': await toastSessionStorage.commitSession(toastCookieSession),
-		},
 	});
 };
 
