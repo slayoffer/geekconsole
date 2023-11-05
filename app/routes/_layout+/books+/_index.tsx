@@ -1,24 +1,28 @@
+import { parse } from '@conform-to/zod';
+import { createId } from '@paralleldrive/cuid2';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import {
 	json,
 	type DataFunctionArgs,
 	type MetaFunction,
+	redirect,
 } from '@remix-run/node';
-import { Link, useActionData, useLoaderData } from '@remix-run/react';
-import { useEffect } from 'react';
+import { Link, useLoaderData } from '@remix-run/react';
 
 import { BookCard } from '~/core/components/booksIndexComponents/index.ts';
-import { getSession } from '~/core/server/index.ts';
-import { type action } from '~/routes/books.$bookId.destroy.tsx';
-import { SUCCESS_DELETE_COOKIE_NAME } from '~/shared/consts/index.ts';
+import {
+	prisma,
+	toastSessionStorage,
+	validateCSRF,
+} from '~/core/server/index.ts';
 import { invariantResponse } from '~/shared/lib/utils/index.ts';
+import { DeleteBookFormSchema } from '~/shared/schemas/DeleteBookSchema/DeleteBookSchema.ts';
 import {
 	Alert,
 	AlertDescription,
 	AlertTitle,
 	Button,
 	GeneralErrorBoundary,
-	useToast,
 } from '~/shared/ui/index.ts';
 
 export const meta: MetaFunction = () => {
@@ -29,31 +33,13 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Books() {
-	const { mappedBooks, success } = useLoaderData<typeof loader>();
-	const response = useActionData<typeof action>();
-	const { toast } = useToast();
-
-	useEffect(() => {
-		if (response && response.error) {
-			toast({
-				title: response.error,
-				variant: 'destructive',
-			});
-		}
-
-		if (success) {
-			toast({
-				title: 'Book has been successfully deleted',
-				variant: 'default',
-			});
-		}
-	}, [response, success, toast]);
+	const { allBooks } = useLoaderData<typeof loader>();
 
 	return (
 		<>
-			{mappedBooks && mappedBooks.length > 0 ? (
+			{allBooks && allBooks.length > 0 ? (
 				<div className="grid grid-cols-5 gap-4">
-					{mappedBooks.map((book) => (
+					{allBooks.map((book) => (
 						<BookCard key={book.id} book={book} />
 					))}
 				</div>
@@ -71,52 +57,63 @@ export default function Books() {
 	);
 }
 
-export const loader = async ({ request }: DataFunctionArgs) => {
-	const headers = new Headers(request.headers);
-	const cookies = headers.get('cookie');
-	const isDeleted = cookies?.includes('deleteSuccess=true');
+export const action = async ({ request }: DataFunctionArgs) => {
+	const formData = await request.formData();
 
-	const response = new Response();
+	await validateCSRF(formData, request.headers);
 
-	const { supabaseClient, session } = await getSession(request);
+	const submission = parse(formData, {
+		schema: DeleteBookFormSchema,
+	});
 
-	invariantResponse(session, 'Unauthorized', { status: 401 });
-
-	const { data: books, error: getBooksError } = await supabaseClient
-		.from('books')
-		.select(
-			`
-        id,
-        status,
-        title,
-        books_images (id, alt_text, url)
-      `,
-		)
-		.eq('user_id', session.user.id);
-
-	invariantResponse(!getBooksError, getBooksError?.message, { status: 500 });
-
-	const mappedBooks = [];
-
-	if (books && books.length > 0) {
-		for (const book of books) {
-			const bookImg = Array.isArray(book.books_images)
-				? book.books_images[0]
-				: book.books_images;
-
-			mappedBooks.push({
-				...book,
-				books_images: bookImg,
-			});
-		}
+	if (submission.intent !== 'submit') {
+		return json({ status: 'idle', submission } as const);
 	}
 
+	if (!submission.value) {
+		return json({ status: 'error', submission } as const, { status: 400 });
+	}
+
+	const { bookId } = submission.value;
+
+	const book = await prisma.book.findFirst({
+		select: { id: true },
+		where: { id: bookId },
+	});
+
+	invariantResponse(book, 'Not found', { status: 404 });
+
+	await prisma.book.delete({ where: { id: book.id } });
+
+	const toastCookieSession = await toastSessionStorage.getSession(
+		request.headers.get('cookie'),
+	);
+
+	toastCookieSession.flash('toast', {
+		id: createId(),
+		type: 'success',
+		title: 'Book deleted',
+		description: 'Your book has been deleted',
+	});
+
+	return redirect('/books', {
+		headers: {
+			'set-cookie': await toastSessionStorage.commitSession(toastCookieSession),
+		},
+	});
+};
+
+export const loader = async (args: DataFunctionArgs) => {
+	const response = new Response();
+
+	// TODO fix this later for particular user
+	const allBooks = await prisma.book.findMany();
+
 	return json(
-		{ mappedBooks, success: isDeleted },
+		{ allBooks },
 		{
 			headers: {
 				...response.headers,
-				'Set-Cookie': `${SUCCESS_DELETE_COOKIE_NAME}; expires=Thu, 01 Jan 1970 00:00:00 GMT`,
 			},
 		},
 	);

@@ -26,10 +26,12 @@ import {
 	honeypot,
 	setTheme,
 	getTheme,
+	toastSessionStorage,
+	prisma,
 } from './core/server/index.ts';
 import fonts from './core/styles/fonts.css';
 import twStyles from './core/styles/twStyles.css';
-import { invariantResponse, prisma } from './shared/lib/utils/index.ts';
+import { combineHeaders, invariantResponse } from './shared/lib/utils/index.ts';
 import { ThemeFormSchema } from './shared/schemas/index.ts';
 import { GeneralErrorBoundary } from './shared/ui/index.ts';
 
@@ -62,12 +64,12 @@ export default function AppWithProviders() {
 }
 
 function App() {
-	const { ENV, userProfile } = useLoaderData<typeof loader>();
+	const { ENV, userProfile, toast } = useLoaderData<typeof loader>();
 	const theme = useTheme();
 
 	return (
 		<Document title="Geek Console" theme={theme}>
-			<Outlet context={{ userProfile, theme }} />
+			<Outlet context={{ userProfile, theme, toast }} />
 
 			<script
 				dangerouslySetInnerHTML={{
@@ -145,6 +147,10 @@ export const loader = async ({ request }: DataFunctionArgs) => {
 		SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
 	};
 
+	const toastCookieSession = await toastSessionStorage.getSession(
+		request.headers.get('cookie'),
+	);
+
 	const volodya = await prisma.user.findUnique({
 		select: {
 			name: true,
@@ -163,21 +169,24 @@ export const loader = async ({ request }: DataFunctionArgs) => {
 			ENV: getEnv(),
 			honeyProps,
 			csrfToken,
-			supabaseEnv,
 			theme: getTheme(request),
+			toast: toastCookieSession.get('toast'),
 			userProfile: volodya,
+			supabaseEnv,
 		},
 		{
-			headers: csrfCookieHeader
-				? {
-						'set-cookie': csrfCookieHeader,
-				  }
-				: {},
+			headers: combineHeaders(
+				csrfCookieHeader ? { 'set-cookie': csrfCookieHeader } : null,
+				{
+					'set-cookie':
+						await toastSessionStorage.commitSession(toastCookieSession),
+				},
+			),
 		},
 	);
 };
 
-export function useTheme() {
+function useTheme() {
 	const data = useLoaderData<typeof loader>();
 
 	const fetchers = useFetchers();

@@ -1,11 +1,13 @@
+import { useForm } from '@conform-to/react';
+import { getFieldsetConstraint, parse } from '@conform-to/zod';
 import { Pencil2Icon } from '@radix-ui/react-icons';
-import { Form, Link } from '@remix-run/react';
+import { Form, Link, useActionData } from '@remix-run/react';
 import { Loader2 } from 'lucide-react';
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
-import { useSpinDelay } from 'spin-delay';
-import { useSubmitting } from '~/shared/lib/hooks/index.ts';
+import { type action } from '~/routes/_layout+/books+/_index.tsx';
+import { useDelayedIsPending } from '~/shared/lib/hooks/useDelayedIsPending/useDelayedIsPending.tsx';
+import { DeleteBookFormSchema } from '~/shared/schemas/DeleteBookSchema/DeleteBookSchema.ts';
 
-import { type ReadingStatus } from '~/shared/types/index.ts';
 import {
 	Badge,
 	Button,
@@ -13,33 +15,41 @@ import {
 	CardContent,
 	CardFooter,
 	CardHeader,
+	ErrorList,
 } from '~/shared/ui/index.ts';
 
 type BookCardProps = {
 	book: {
 		id: string;
-		status: ReadingStatus;
 		title: string;
-		books_images: {
-			id: string;
-			alt_text: string;
-			url: string;
-		} | null;
+		author: string;
+		year: number;
+		readingStatus: string;
+		description: string;
+		comment: string | null;
+		ownerId: string;
 	};
 };
 
-const getFormAction = (id: string) => `/books/${id}/destroy`;
+const getFormAction = (id: string) => `/books/${id}/destroy` as const;
 
 export const BookCard = ({ book }: BookCardProps) => {
-	const { id, title, status, books_images } = book;
+	const { id, title, readingStatus } = book;
 
-	const isSubmitting = useSubmitting({ formAction: getFormAction(id) });
-	const showSpinner = useSpinDelay(isSubmitting);
+	const actionData = useActionData<typeof action>();
 
-	const onSubmit = (event: any) => {
-		const response = confirm('Please confirm you want to delete this book.');
-		if (!response) event.preventDefault();
-	};
+	const isPending = useDelayedIsPending({
+		formAction: getFormAction(id),
+	});
+
+	const [form] = useForm({
+		id: 'delete-note',
+		lastSubmission: actionData?.submission,
+		constraint: getFieldsetConstraint(DeleteBookFormSchema),
+		onValidate({ formData }) {
+			return parse(formData, { schema: DeleteBookFormSchema });
+		},
+	});
 
 	return (
 		<Card className="flex flex-col items-center">
@@ -54,10 +64,10 @@ export const BookCard = ({ book }: BookCardProps) => {
 			<CardContent className="flex flex-col items-center gap-2">
 				<img
 					className="h-40 w-40 max-w-full rounded-xl align-middle"
-					src={books_images ? books_images.url : 'images/noCover.gif'}
-					alt={books_images ? books_images.alt_text : book.title}
+					src={'images/noCover.gif'}
+					alt={book.title}
 				/>
-				<Badge variant="outline">{status}</Badge>
+				<Badge variant="outline">{readingStatus}</Badge>
 			</CardContent>
 			<CardFooter>
 				<Button asChild variant="link">
@@ -65,10 +75,17 @@ export const BookCard = ({ book }: BookCardProps) => {
 						See more
 					</Link>
 				</Button>
-				<Form action={getFormAction(id)} method="post" onSubmit={onSubmit}>
+				<Form method="post" {...form.props}>
 					<AuthenticityTokenInput />
-					<Button type="submit" variant="destructive" disabled={showSpinner}>
-						{showSpinner ? (
+					<input type="hidden" name="bookId" value={id} />
+					<Button
+						name="intent"
+						value="delete-book"
+						type="submit"
+						variant="destructive"
+						disabled={isPending}
+					>
+						{isPending ? (
 							<>
 								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
 								Deleting...
@@ -77,6 +94,7 @@ export const BookCard = ({ book }: BookCardProps) => {
 							'Delete'
 						)}
 					</Button>
+					<ErrorList errors={form.errors} id={form.errorId} />
 				</Form>
 			</CardFooter>
 		</Card>
