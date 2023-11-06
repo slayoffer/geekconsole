@@ -2,7 +2,7 @@ import { type CookieOptions } from '@remix-run/node';
 import { createServerClient } from '@supabase/auth-helpers-remix';
 import { type SupabaseClient } from '@supabase/supabase-js';
 
-import { type Database } from '~/shared/types/index.ts';
+import { type Database } from '~/app/shared/types/index.ts';
 
 export const createSupabaseServerClient = (options: {
 	request: Request;

@@ -15,11 +15,11 @@ import { useState } from 'react';
 import { useSpinDelay } from 'spin-delay';
 import { z } from 'zod';
 
-import { getSession } from '~/core/server/index.ts';
-import { BUCKET_BOOKS_URL } from '~/shared/consts/index.ts';
-import { useSubmitting } from '~/shared/lib/hooks/index.ts';
-import { cn, invariantResponse } from '~/shared/lib/utils/index.ts';
-import { type ReadingStatus } from '~/shared/types/index.ts';
+import { getSession } from '~/app/core/server/index.ts';
+import { BUCKET_BOOKS_URL } from '~/app/shared/consts/index.ts';
+import { useSubmitting } from '~/app/shared/lib/hooks/index.ts';
+import { cn, invariantResponse } from '~/app/shared/lib/utils/index.ts';
+import { type ReadingStatus } from '~/app/shared/types/index.ts';
 import {
 	Alert,
 	AlertDescription,
@@ -34,7 +34,7 @@ import {
 	RadioGroup,
 	RadioGroupItem,
 	Textarea,
-} from '~/shared/ui/index.ts';
+} from '~/app/shared/ui/index.ts';
 
 export const meta: MetaFunction = () => {
 	return [

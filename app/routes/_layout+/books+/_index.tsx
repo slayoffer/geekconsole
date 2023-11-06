@@ -8,21 +8,21 @@ import {
 } from '@remix-run/node';
 import { Link, useLoaderData } from '@remix-run/react';
 
-import { BookCard } from '~/core/components/booksIndexComponents/index.ts';
+import { BookCard } from '~/app/core/components/booksIndexComponents/index.ts';
 import {
 	prisma,
 	redirectWithToast,
 	validateCSRF,
-} from '~/core/server/index.ts';
-import { invariantResponse } from '~/shared/lib/utils/index.ts';
-import { DeleteBookFormSchema } from '~/shared/schemas/DeleteBookSchema/DeleteBookSchema.ts';
+} from '~/app/core/server/index.ts';
+import { invariantResponse } from '~/app/shared/lib/utils/index.ts';
+import { DeleteBookFormSchema } from '~/app/shared/schemas/DeleteBookSchema/DeleteBookSchema.ts';
 import {
 	Alert,
 	AlertDescription,
 	AlertTitle,
 	Button,
 	GeneralErrorBoundary,
-} from '~/shared/ui/index.ts';
+} from '~/app/shared/ui/index.ts';
 
 export const meta: MetaFunction = () => {
 	return [

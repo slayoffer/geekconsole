@@ -4,9 +4,9 @@ import {
 	Footer,
 	GlobalLoading,
 	Header,
-} from '~/core/components/layoutComponents/index.ts';
-import { type OutletContextValues } from '~/shared/models/index.ts';
-import { CustomToaster } from '~/shared/ui/index.ts';
+} from '~/app/core/components/layoutComponents/index.ts';
+import { type OutletContextValues } from '~/app/shared/models/index.ts';
+import { CustomToaster } from '~/app/shared/ui/index.ts';
 
 export default function Layout() {
 	const { user, toast } = useOutletContext<OutletContextValues>();

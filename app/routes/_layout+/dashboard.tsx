@@ -10,7 +10,7 @@ import {
 	TabsContent,
 	TabsList,
 	TabsTrigger,
-} from '~/shared/ui/index.ts';
+} from '~/app/shared/ui/index.ts';
 
 export const meta: MetaFunction = () => {
 	return [

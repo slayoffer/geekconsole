@@ -1,7 +1,7 @@
 import { Link, useOutletContext } from '@remix-run/react';
 
-import { type OutletContextValues } from '~/shared/models/common.ts';
-import { Button } from '~/shared/ui/index.ts';
+import { type OutletContextValues } from '~/app/shared/models/common.ts';
+import { Button } from '~/app/shared/ui/index.ts';
 import { ThemeSwitcher, UserNav } from './components/index.ts';
 
 export const Header = () => {

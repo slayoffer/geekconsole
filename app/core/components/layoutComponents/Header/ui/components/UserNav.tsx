@@ -1,6 +1,6 @@
 import { Link, useOutletContext } from '@remix-run/react';
 
-import { type OutletContextValues } from '~/shared/models/index.ts';
+import { type OutletContextValues } from '~/app/shared/models/index.ts';
 import {
 	Avatar,
 	AvatarFallback,
@@ -13,7 +13,7 @@ import {
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from '~/shared/ui/index.ts';
+} from '~/app/shared/ui/index.ts';
 
 export const UserNav = () => {
 	const { user } = useOutletContext<OutletContextValues>();

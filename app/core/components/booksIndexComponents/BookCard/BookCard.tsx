@@ -4,9 +4,9 @@ import { Pencil2Icon } from '@radix-ui/react-icons';
 import { Form, Link, useActionData } from '@remix-run/react';
 import { Loader2 } from 'lucide-react';
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
-import { type action } from '~/routes/_layout+/books+/_index.tsx';
-import { useDelayedIsPending } from '~/shared/lib/hooks/useDelayedIsPending/useDelayedIsPending.tsx';
-import { DeleteBookFormSchema } from '~/shared/schemas/DeleteBookSchema/DeleteBookSchema.ts';
+import { type action } from '~/app/routes/_layout+/books+/_index.tsx';
+import { useDelayedIsPending } from '~/app/shared/lib/hooks/useDelayedIsPending/useDelayedIsPending.tsx';
+import { DeleteBookFormSchema } from '~/app/shared/schemas/DeleteBookSchema/DeleteBookSchema.ts';
 
 import {
 	Badge,
@@ -16,7 +16,7 @@ import {
 	CardFooter,
 	CardHeader,
 	ErrorList,
-} from '~/shared/ui/index.ts';
+} from '~/app/shared/ui/index.ts';
 
 type BookCardProps = {
 	book: {

@@ -10,16 +10,16 @@ import {
 	checkHoneypot,
 	prisma,
 	validateCSRF,
-} from '~/core/server/index.ts';
-import { useIsPending } from '~/shared/lib/hooks/index.ts';
-import { PasswordSchema, UsernameSchema } from '~/shared/schemas/index.ts';
+} from '~/app/core/server/index.ts';
+import { useIsPending } from '~/app/shared/lib/hooks/index.ts';
+import { PasswordSchema, UsernameSchema } from '~/app/shared/schemas/index.ts';
 import {
 	ErrorList,
 	Field,
 	GeneralErrorBoundary,
 	Spacer,
 	StatusButton,
-} from '~/shared/ui/index.ts';
+} from '~/app/shared/ui/index.ts';
 
 export const meta: MetaFunction = () => {
 	return [{ title: 'Login to Geek Console' }];

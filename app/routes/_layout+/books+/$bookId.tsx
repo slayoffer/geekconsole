@@ -3,15 +3,15 @@ import { json, type DataFunctionArgs } from '@remix-run/node';
 import { type MetaFunction, Link, useLoaderData } from '@remix-run/react';
 import invariant from 'tiny-invariant';
 
-import { getSession } from '~/core/server/index.ts';
-import { invariantResponse } from '~/shared/lib/utils/index.ts';
+import { getSession } from '~/app/core/server/index.ts';
+import { invariantResponse } from '~/app/shared/lib/utils/index.ts';
 import {
 	Alert,
 	AlertDescription,
 	AlertTitle,
 	Button,
 	GeneralErrorBoundary,
-} from '~/shared/ui/index.ts';
+} from '~/app/shared/ui/index.ts';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	const bookName = data?.book.title ?? 'Book';

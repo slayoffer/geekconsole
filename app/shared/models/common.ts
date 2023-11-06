@@ -1,5 +1,5 @@
-import { type Theme } from '~/core/server/index.ts';
-import { type User } from '../types/index.ts';
+import { type User } from '@prisma/client';
+import { type Theme } from '~/app/core/server/index.ts';
 
 export type OutletContextValues = {
 	user: User;

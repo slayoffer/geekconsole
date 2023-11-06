@@ -1,13 +1,13 @@
 import { useForm } from '@conform-to/react';
 import { parse } from '@conform-to/zod';
 import { useFetcher } from '@remix-run/react';
-import { type Theme } from '~/core/server/index.ts';
-import { type action } from '~/root.tsx';
-import { ThemeFormSchema } from '~/shared/schemas/index.ts';
-import { ErrorList, Icon } from '~/shared/ui/index.ts';
+import { type Theme } from '~/app/core/server/index.ts';
+import { type action as rootAction } from '~/app/root.tsx';
+import { ThemeFormSchema } from '~/app/shared/schemas/index.ts';
+import { ErrorList, Icon } from '~/app/shared/ui/index.ts';
 
 export function ThemeSwitcher({ userPreference }: { userPreference?: Theme }) {
-	const fetcher = useFetcher<typeof action>();
+	const fetcher = useFetcher<typeof rootAction>();
 
 	const [form] = useForm({
 		id: 'theme-switch',

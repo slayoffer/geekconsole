@@ -10,21 +10,25 @@ import { Form, useActionData } from '@remix-run/react';
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
 import { HoneypotInputs } from 'remix-utils/honeypot/react';
 import { z } from 'zod';
-import { checkHoneypot, prisma, validateCSRF } from '~/core/server/index.ts';
-import { useIsPending } from '~/shared/lib/hooks/index.ts';
+import {
+	checkHoneypot,
+	prisma,
+	validateCSRF,
+} from '~/app/core/server/index.ts';
+import { useIsPending } from '~/app/shared/lib/hooks/index.ts';
 import {
 	EmailSchema,
 	NameSchema,
 	PasswordSchema,
 	UsernameSchema,
-} from '~/shared/schemas/index.ts';
+} from '~/app/shared/schemas/index.ts';
 import {
 	CheckboxField,
 	ErrorList,
 	Field,
 	Spacer,
 	StatusButton,
-} from '~/shared/ui/index.ts';
+} from '~/app/shared/ui/index.ts';
 
 const SignupFormSchema = z
 	.object({

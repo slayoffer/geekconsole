@@ -4,7 +4,7 @@ import {
 	createReadableStreamFromReadable,
 	type DataFunctionArgs,
 } from '@remix-run/node';
-import { invariantResponse } from '~/shared/lib/utils/index.ts';
+import { invariantResponse } from '~/app/shared/lib/utils/index.ts';
 
 export async function loader({ params }: DataFunctionArgs) {
 	invariantResponse(params.imageId, 'Invalid image ID');
