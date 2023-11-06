@@ -1,5 +1,6 @@
 import { useForm } from '@conform-to/react';
 import { getFieldsetConstraint, parse } from '@conform-to/zod';
+import { type Book } from '@prisma/client';
 import { Pencil2Icon } from '@radix-ui/react-icons';
 import { Form, Link, useActionData } from '@remix-run/react';
 import { Loader2 } from 'lucide-react';
@@ -18,17 +19,9 @@ import {
 	ErrorList,
 } from '~/app/shared/ui/index.ts';
 
+type BookProps = Pick<Book, 'id' | 'title' | 'readingStatus'>;
 type BookCardProps = {
-	book: {
-		id: string;
-		title: string;
-		author: string;
-		year: number;
-		readingStatus: string;
-		description: string;
-		comment: string | null;
-		ownerId: string;
-	};
+	book: BookProps;
 };
 
 const getFormAction = (id: string) => `/books/${id}/destroy` as const;
@@ -77,6 +70,7 @@ export const BookCard = ({ book }: BookCardProps) => {
 				</Button>
 				<Form method="post" {...form.props}>
 					<AuthenticityTokenInput />
+
 					<input type="hidden" name="bookId" value={id} />
 					<Button
 						name="intent"

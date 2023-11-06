@@ -4,6 +4,7 @@ import {
 	type DataFunctionArgs,
 	json,
 	type LinksFunction,
+	redirect,
 } from '@remix-run/node';
 import {
 	Links,
@@ -65,13 +66,13 @@ export default function AppWithProviders() {
 }
 
 function App() {
-	const { ENV, toast } = useLoaderData<typeof loader>();
+	const { ENV } = useLoaderData<typeof loader>();
 
 	const theme = useTheme();
 
 	return (
 		<Document title="Geek Console" theme={theme}>
-			<Outlet context={{ toast }} />
+			<Outlet />
 
 			<script
 				dangerouslySetInnerHTML={{
@@ -156,6 +157,14 @@ export const loader = async ({ request }: DataFunctionArgs) => {
 				where: { id: userId },
 		  })
 		: null;
+
+	if (userId && !user) {
+		throw redirect('/', {
+			headers: {
+				'set-cookie': await authSessionStorage.destroySession(cookieSession),
+			},
+		});
+	}
 
 	const supabaseEnv = {
 		SUPABASE_URL: process.env.SUPABASE_API_URL,

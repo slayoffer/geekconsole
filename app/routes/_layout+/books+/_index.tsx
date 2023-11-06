@@ -12,6 +12,7 @@ import { BookCard } from '~/app/core/components/booksIndexComponents/index.ts';
 import {
 	prisma,
 	redirectWithToast,
+	requireUserId,
 	validateCSRF,
 } from '~/app/core/server/index.ts';
 import { invariantResponse } from '~/app/shared/lib/utils/index.ts';
@@ -32,13 +33,13 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Books() {
-	const { allBooks } = useLoaderData<typeof loader>();
+	const { usersBooks } = useLoaderData<typeof loader>();
 
 	return (
 		<>
-			{allBooks && allBooks.length > 0 ? (
+			{usersBooks && usersBooks.length > 0 ? (
 				<div className="grid grid-cols-5 gap-4">
-					{allBooks.map((book) => (
+					{usersBooks.map((book) => (
 						<BookCard key={book.id} book={book} />
 					))}
 				</div>
@@ -56,7 +57,20 @@ export default function Books() {
 	);
 }
 
+export const loader = async ({ request }: DataFunctionArgs) => {
+	const userId = await requireUserId(request);
+
+	const usersBooks = await prisma.book.findMany({
+		select: { id: true, title: true, readingStatus: true },
+		where: { ownerId: userId },
+	});
+
+	return json({ usersBooks });
+};
+
 export const action = async ({ request }: DataFunctionArgs) => {
+	await requireUserId(request);
+
 	const formData = await request.formData();
 
 	await validateCSRF(formData, request.headers);
@@ -90,13 +104,6 @@ export const action = async ({ request }: DataFunctionArgs) => {
 		title: 'Book deleted',
 		description: 'Your book has been deleted',
 	});
-};
-
-export const loader = async (args: DataFunctionArgs) => {
-	// TODO fix this later for particular user
-	const allBooks = await prisma.book.findMany();
-
-	return json({ allBooks });
 };
 
 export const ErrorBoundary = () => {

@@ -6,15 +6,17 @@ import {
 	type DataFunctionArgs,
 	redirect,
 } from '@remix-run/node';
-import { Form, useActionData } from '@remix-run/react';
+import { Form, useActionData, useSearchParams } from '@remix-run/react';
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
 import { HoneypotInputs } from 'remix-utils/honeypot/react';
+import { safeRedirect } from 'remix-utils/safe-redirect';
 import { z } from 'zod';
 import {
 	authSessionStorage,
-	bcrypt,
 	checkHoneypot,
 	prisma,
+	requireAnonymous,
+	signup,
 	validateCSRF,
 } from '~/app/core/server/index.ts';
 import { useIsPending } from '~/app/shared/lib/hooks/index.ts';
@@ -39,6 +41,8 @@ const SignupFormSchema = z
 		email: EmailSchema,
 		password: PasswordSchema,
 		confirmPassword: PasswordSchema,
+		remember: z.boolean().optional(),
+		redirectTo: z.string().optional(),
 		agreeToTermsOfServiceAndPrivacyPolicy: z.boolean({
 			required_error:
 				'You must agree to the terms of service and privacy policy',
@@ -61,10 +65,14 @@ export const meta: MetaFunction = () => {
 export default function SignupRoute() {
 	const actionData = useActionData<typeof action>();
 	const isPending = useIsPending();
+	const [searchParams] = useSearchParams();
+
+	const redirectTo = searchParams.get('redirectTo');
 
 	const [form, fields] = useForm({
 		id: 'signup-form',
 		constraint: getFieldsetConstraint(SignupFormSchema),
+		defaultValue: { redirectTo },
 		lastSubmission: actionData?.submission,
 		onValidate({ formData }) {
 			return parse(formData, { schema: SignupFormSchema });
@@ -156,6 +164,17 @@ export default function SignupRoute() {
 						errors={fields.agreeToTermsOfServiceAndPrivacyPolicy.errors}
 					/>
 
+					<CheckboxField
+						labelProps={{
+							htmlFor: fields.remember.id,
+							children: 'Remember me',
+						}}
+						buttonProps={conform.input(fields.remember, { type: 'checkbox' })}
+						errors={fields.remember.errors}
+					/>
+
+					<input {...conform.input(fields.redirectTo, { type: 'hidden' })} />
+
 					<ErrorList errors={form.errors} id={form.errorId} />
 
 					<div className="flex items-center justify-between gap-6">
@@ -174,7 +193,14 @@ export default function SignupRoute() {
 	);
 }
 
+export async function loader({ request }: DataFunctionArgs) {
+	await requireAnonymous(request);
+	return json({});
+}
+
 export async function action({ request }: DataFunctionArgs) {
+	await requireAnonymous(request);
+
 	const formData = await request.formData();
 
 	await validateCSRF(formData, request.headers);
@@ -197,21 +223,7 @@ export async function action({ request }: DataFunctionArgs) {
 				return;
 			}
 		}).transform(async (data) => {
-			const { username, email, name, password } = data;
-
-			const user = await prisma.user.create({
-				select: { id: true },
-				data: {
-					email: email.toLowerCase(),
-					username: username.toLowerCase(),
-					name,
-					password: {
-						create: {
-							hash: await bcrypt.hash(password, 10),
-						},
-					},
-				},
-			});
+			const user = await signup(data);
 
 			return { ...data, user };
 		}),
@@ -227,14 +239,14 @@ export async function action({ request }: DataFunctionArgs) {
 		return json({ status: 'error', submission } as const, { status: 400 });
 	}
 
-	const { user } = submission.value;
+	const { user, redirectTo } = submission.value;
 
 	const cookieSession = await authSessionStorage.getSession(
 		request.headers.get('cookie'),
 	);
 	cookieSession.set('userId', user.id);
 
-	return redirect('/', {
+	return redirect(safeRedirect(redirectTo), {
 		headers: {
 			'set-cookie': await authSessionStorage.commitSession(cookieSession),
 		},

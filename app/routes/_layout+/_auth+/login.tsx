@@ -1,20 +1,29 @@
 import { conform, useForm } from '@conform-to/react';
 import { getFieldsetConstraint, parse } from '@conform-to/zod';
 import { json, type DataFunctionArgs, redirect } from '@remix-run/node';
-import { type MetaFunction, Form, Link, useActionData } from '@remix-run/react';
+import {
+	type MetaFunction,
+	Form,
+	Link,
+	useActionData,
+	useSearchParams,
+} from '@remix-run/react';
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
 import { HoneypotInputs } from 'remix-utils/honeypot/react';
+import { safeRedirect } from 'remix-utils/safe-redirect';
 import { z } from 'zod';
 import {
 	authSessionStorage,
-	bcrypt,
 	checkHoneypot,
-	prisma,
+	getSessionExpirationDate,
+	login,
+	requireAnonymous,
 	validateCSRF,
 } from '~/app/core/server/index.ts';
 import { useIsPending } from '~/app/shared/lib/hooks/index.ts';
 import { PasswordSchema, UsernameSchema } from '~/app/shared/schemas/index.ts';
 import {
+	CheckboxField,
 	ErrorList,
 	Field,
 	GeneralErrorBoundary,
@@ -29,15 +38,21 @@ export const meta: MetaFunction = () => {
 const LoginFormSchema = z.object({
 	username: UsernameSchema,
 	password: PasswordSchema,
+	remember: z.boolean().optional(),
+	redirectTo: z.string().optional(),
 });
 
 export default function LoginRoute() {
 	const actionData = useActionData<typeof action>();
 	const isPending = useIsPending();
+	const [searchParams] = useSearchParams();
+
+	const redirectTo = searchParams.get('redirectTo');
 
 	const [form, fields] = useForm({
 		id: 'login-form',
 		constraint: getFieldsetConstraint(LoginFormSchema),
+		defaultValue: { redirectTo },
 		lastSubmission: actionData?.submission,
 		onValidate({ formData }) {
 			return parse(formData, { schema: LoginFormSchema });
@@ -81,6 +96,31 @@ export default function LoginRoute() {
 								errors={fields.password.errors}
 							/>
 
+							<div className="flex justify-between">
+								<CheckboxField
+									labelProps={{
+										htmlFor: fields.remember.id,
+										children: 'Remember me',
+									}}
+									buttonProps={conform.input(fields.remember, {
+										type: 'checkbox',
+									})}
+									errors={fields.remember.errors}
+								/>
+								<div>
+									<Link
+										to="/forgot-password"
+										className="text-body-xs font-semibold"
+									>
+										Forgot password?
+									</Link>
+								</div>
+							</div>
+
+							<input
+								{...conform.input(fields.redirectTo, { type: 'hidden' })}
+							/>
+
 							<ErrorList errors={form.errors} id={form.errorId} />
 
 							<div className="mt-2 flex flex-col space-y-3">
@@ -106,7 +146,14 @@ export default function LoginRoute() {
 	);
 }
 
+export async function loader({ request }: DataFunctionArgs) {
+	await requireAnonymous(request);
+	return json({});
+}
+
 export async function action({ request }: DataFunctionArgs) {
+	await requireAnonymous(request);
+
 	const formData = await request.formData();
 
 	await validateCSRF(formData, request.headers);
@@ -115,14 +162,11 @@ export async function action({ request }: DataFunctionArgs) {
 	const submission = await parse(formData, {
 		schema: (intent) =>
 			LoginFormSchema.transform(async (data, ctx) => {
-				if (intent !== 'submit') return { ...data, user: null };
+				if (intent !== 'submit') return { ...data, userId: null };
 
-				const userWithPassword = await prisma.user.findUnique({
-					select: { id: true, password: { select: { hash: true } } },
-					where: { username: data.username },
-				});
+				const userId = await login(data);
 
-				if (!userWithPassword || !userWithPassword.password) {
+				if (!userId) {
 					ctx.addIssue({
 						code: 'custom',
 						message: 'Invalid username or password',
@@ -131,21 +175,7 @@ export async function action({ request }: DataFunctionArgs) {
 					return z.NEVER;
 				}
 
-				const isValid = await bcrypt.compare(
-					data.password,
-					userWithPassword.password.hash,
-				);
-
-				if (!isValid) {
-					ctx.addIssue({
-						code: 'custom',
-						message: 'Invalid username or password',
-					});
-
-					return z.NEVER;
-				}
-
-				return { ...data, user: userWithPassword?.id };
+				return { ...data, userId };
 			}),
 
 		async: true,
@@ -160,20 +190,22 @@ export async function action({ request }: DataFunctionArgs) {
 		return json({ status: 'idle', submission } as const);
 	}
 
-	if (!submission.value?.user) {
+	if (!submission.value?.userId) {
 		return json({ status: 'error', submission } as const, { status: 400 });
 	}
 
-	const { user } = submission.value;
+	const { userId, remember, redirectTo } = submission.value;
 
 	const cookieSession = await authSessionStorage.getSession(
 		request.headers.get('cookie'),
 	);
-	cookieSession.set('userId', user);
+	cookieSession.set('userId', userId.id);
 
-	return redirect('/', {
+	return redirect(safeRedirect(redirectTo), {
 		headers: {
-			'set-cookie': await authSessionStorage.commitSession(cookieSession),
+			'set-cookie': await authSessionStorage.commitSession(cookieSession, {
+				expires: remember ? getSessionExpirationDate() : undefined,
+			}),
 		},
 	});
 }

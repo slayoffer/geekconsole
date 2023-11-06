@@ -1,3 +1,4 @@
+export * from './AlertDialog/AlertDialog.tsx';
 export * from './Button/Button.tsx';
 export * from './Tabs/Tabs.tsx';
 export * from './StatusButton/StatusButton.tsx';
