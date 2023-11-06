@@ -12,7 +12,6 @@ import {
 	Outlet,
 	Scripts,
 	ScrollRestoration,
-	useFetchers,
 	useLoaderData,
 } from '@remix-run/react';
 import { type PropsWithChildren } from 'react';
@@ -32,6 +31,7 @@ import {
 } from './core/server/index.ts';
 import fonts from './core/styles/fonts.css';
 import twStyles from './core/styles/twStyles.css';
+import { useTheme } from './shared/lib/hooks/index.ts';
 import { combineHeaders, invariantResponse } from './shared/lib/utils/index.ts';
 import { ThemeFormSchema } from './shared/schemas/index.ts';
 import { GeneralErrorBoundary } from './shared/ui/index.ts';
@@ -65,12 +65,13 @@ export default function AppWithProviders() {
 }
 
 function App() {
-	const { ENV, user, toast } = useLoaderData<typeof loader>();
+	const { ENV, toast } = useLoaderData<typeof loader>();
+
 	const theme = useTheme();
 
 	return (
 		<Document title="Geek Console" theme={theme}>
-			<Outlet context={{ user, theme, toast }} />
+			<Outlet context={{ toast }} />
 
 			<script
 				dangerouslySetInnerHTML={{
@@ -179,23 +180,6 @@ export const loader = async ({ request }: DataFunctionArgs) => {
 		},
 	);
 };
-
-function useTheme() {
-	const data = useLoaderData<typeof loader>();
-
-	const fetchers = useFetchers();
-	const themeFetcher = fetchers.find(
-		(fetcher) => fetcher.formData?.get('intent') === 'update-theme',
-	);
-
-	const optimisticTheme = themeFetcher?.formData?.get('theme');
-
-	if (optimisticTheme === 'light' || optimisticTheme === 'dark') {
-		return optimisticTheme;
-	}
-
-	return data.theme;
-}
 
 export function ErrorBoundary() {
 	return (

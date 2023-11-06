@@ -1,6 +1,7 @@
-import { Link, useOutletContext } from '@remix-run/react';
+import { Form, Link } from '@remix-run/react';
+import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
+import { useUser } from '~/app/shared/lib/hooks/index.ts';
 
-import { type OutletContextValues } from '~/app/shared/models/index.ts';
 import {
 	Avatar,
 	AvatarFallback,
@@ -13,10 +14,11 @@ import {
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
+	Icon,
 } from '~/app/shared/ui/index.ts';
 
 export const UserNav = () => {
-	const { user } = useOutletContext<OutletContextValues>();
+	const user = useUser();
 
 	return (
 		<DropdownMenu>
@@ -62,8 +64,15 @@ export const UserNav = () => {
 					</DropdownMenuItem>
 				</DropdownMenuGroup>
 				<DropdownMenuSeparator />
-				<DropdownMenuItem onClick={() => console.log('TODO LOG OUT')}>
-					Log out
+				<DropdownMenuItem asChild>
+					<Form action="/logout" method="post" className="mt-3">
+						<AuthenticityTokenInput />
+						<Button type="submit" variant="link" size="sm">
+							<Icon name="exit" className="scale-125 max-md:scale-150">
+								Logout
+							</Icon>
+						</Button>
+					</Form>
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>

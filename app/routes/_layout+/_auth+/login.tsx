@@ -7,6 +7,7 @@ import { HoneypotInputs } from 'remix-utils/honeypot/react';
 import { z } from 'zod';
 import {
 	authSessionStorage,
+	bcrypt,
 	checkHoneypot,
 	prisma,
 	validateCSRF,
@@ -116,12 +117,12 @@ export async function action({ request }: DataFunctionArgs) {
 			LoginFormSchema.transform(async (data, ctx) => {
 				if (intent !== 'submit') return { ...data, user: null };
 
-				const user = await prisma.user.findUnique({
-					select: { id: true },
+				const userWithPassword = await prisma.user.findUnique({
+					select: { id: true, password: { select: { hash: true } } },
 					where: { username: data.username },
 				});
 
-				if (!user) {
+				if (!userWithPassword || !userWithPassword.password) {
 					ctx.addIssue({
 						code: 'custom',
 						message: 'Invalid username or password',
@@ -130,8 +131,21 @@ export async function action({ request }: DataFunctionArgs) {
 					return z.NEVER;
 				}
 
-				// verify the password (we'll do this later)
-				return { ...data, user };
+				const isValid = await bcrypt.compare(
+					data.password,
+					userWithPassword.password.hash,
+				);
+
+				if (!isValid) {
+					ctx.addIssue({
+						code: 'custom',
+						message: 'Invalid username or password',
+					});
+
+					return z.NEVER;
+				}
+
+				return { ...data, user: userWithPassword?.id };
 			}),
 
 		async: true,
@@ -155,7 +169,7 @@ export async function action({ request }: DataFunctionArgs) {
 	const cookieSession = await authSessionStorage.getSession(
 		request.headers.get('cookie'),
 	);
-	cookieSession.set('userId', user.id);
+	cookieSession.set('userId', user);
 
 	return redirect('/', {
 		headers: {

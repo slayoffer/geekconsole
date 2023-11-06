@@ -1,11 +1,12 @@
-import { Link, useOutletContext } from '@remix-run/react';
+import { Link } from '@remix-run/react';
 
-import { type OutletContextValues } from '~/app/shared/models/common.ts';
+import { useOptionalUser, useTheme } from '~/app/shared/lib/hooks/index.ts';
 import { Button } from '~/app/shared/ui/index.ts';
 import { ThemeSwitcher, UserNav } from './components/index.ts';
 
 export const Header = () => {
-	const { user, theme } = useOutletContext<OutletContextValues>();
+	const maybeUser = useOptionalUser();
+	const theme = useTheme();
 
 	return (
 		<header className="bg-zinc-900">
@@ -21,7 +22,7 @@ export const Header = () => {
 						</Link>
 					</div>
 					<div className="flex items-center justify-center gap-4">
-						{user !== null ? (
+						{maybeUser !== null ? (
 							<div className="ml-10 hidden space-x-4 lg:block">
 								<UserNav />
 							</div>
