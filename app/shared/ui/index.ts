@@ -17,4 +17,4 @@ export * from './StatusButton/StatusButton.tsx';
 export * from './Spacer/Spacer.tsx';
 export * from './Checkbox/Checkbox.tsx';
 export * from './Forms/Forms.tsx';
-export * from './Toast/Toast.tsx';
+export { CustomToaster } from './Toast/Toast.tsx';
