@@ -10,6 +10,10 @@ FROM base AS build
 WORKDIR /app
 COPY ./ .
 COPY --from=dependencies /app/node_modules ./node_modules
+
+ADD prisma .
+RUN npx prisma generate
+
 RUN pnpm typecheck && \
     npm run build
 EXPOSE 3000
