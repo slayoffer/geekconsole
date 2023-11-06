@@ -14,3 +14,4 @@ export {
 	getToast,
 } from './toast/toast.server.ts';
 export { authSessionStorage } from './session/session.server.ts';
+export { bcrypt } from './auth/auth.server.ts';

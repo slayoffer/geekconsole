@@ -11,6 +11,8 @@ import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
 import { HoneypotInputs } from 'remix-utils/honeypot/react';
 import { z } from 'zod';
 import {
+	authSessionStorage,
+	bcrypt,
 	checkHoneypot,
 	prisma,
 	validateCSRF,
@@ -194,6 +196,24 @@ export async function action({ request }: DataFunctionArgs) {
 
 				return;
 			}
+		}).transform(async (data) => {
+			const { username, email, name, password } = data;
+
+			const user = await prisma.user.create({
+				select: { id: true },
+				data: {
+					email: email.toLowerCase(),
+					username: username.toLowerCase(),
+					name,
+					password: {
+						create: {
+							hash: await bcrypt.hash(password, 10),
+						},
+					},
+				},
+			});
+
+			return { ...data, user };
 		}),
 
 		async: true,
@@ -203,9 +223,20 @@ export async function action({ request }: DataFunctionArgs) {
 		return json({ status: 'idle', submission } as const);
 	}
 
-	if (!submission.value) {
+	if (!submission.value?.user) {
 		return json({ status: 'error', submission } as const, { status: 400 });
 	}
 
-	return redirect('/');
+	const { user } = submission.value;
+
+	const cookieSession = await authSessionStorage.getSession(
+		request.headers.get('cookie'),
+	);
+	cookieSession.set('userId', user.id);
+
+	return redirect('/', {
+		headers: {
+			'set-cookie': await authSessionStorage.commitSession(cookieSession),
+		},
+	});
 }

@@ -28,10 +28,10 @@ export const Header = () => {
 						) : (
 							<div className="ml-10 hidden space-x-4 lg:block">
 								<Button asChild variant="link">
-									<Link to="/auth?type=signin">Sign in</Link>
+									<Link to="/login">Log in</Link>
 								</Button>
 								<Button asChild variant="link">
-									<Link to="/auth?type=register">Get started today</Link>
+									<Link to="/signup">Get started today</Link>
 								</Button>
 							</div>
 						)}
