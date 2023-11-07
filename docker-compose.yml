@@ -11,6 +11,9 @@ services:
       # - SESSION_SECRET=${SESSION_SECRET}
       # - HONEYPOT_SECRET=${HONEYPOT_SECRET}
       # - DATABASE_URL=${DATABASE_URL}
+      - SESSION_SECRET=sSecret
+      - HONEYPOT_SECRET=sSecret
+      - DATABASE_URL=${DATABASE_URL}
     networks:
       - proxy
 
