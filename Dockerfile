@@ -1,4 +1,9 @@
 FROM node:18-alpine AS base
+
+# Update the package index and install the required packages
+RUN apk update && \
+    apk add fuse3 openssl sqlite-libs sqlite-dev ca-certificates
+
 RUN npm i -g pnpm
 
 FROM base AS dependencies
