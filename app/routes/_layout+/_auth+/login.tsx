@@ -13,9 +13,9 @@ import { HoneypotInputs } from 'remix-utils/honeypot/react';
 import { safeRedirect } from 'remix-utils/safe-redirect';
 import { z } from 'zod';
 import {
+	SESSION_KEY,
 	authSessionStorage,
 	checkHoneypot,
-	getSessionExpirationDate,
 	login,
 	requireAnonymous,
 	validateCSRF,
@@ -162,11 +162,11 @@ export async function action({ request }: DataFunctionArgs) {
 	const submission = await parse(formData, {
 		schema: (intent) =>
 			LoginFormSchema.transform(async (data, ctx) => {
-				if (intent !== 'submit') return { ...data, userId: null };
+				if (intent !== 'submit') return { ...data, session: null };
 
-				const userId = await login(data);
+				const session = await login(data);
 
-				if (!userId) {
+				if (!session) {
 					ctx.addIssue({
 						code: 'custom',
 						message: 'Invalid username or password',
@@ -175,7 +175,7 @@ export async function action({ request }: DataFunctionArgs) {
 					return z.NEVER;
 				}
 
-				return { ...data, userId };
+				return { ...data, session };
 			}),
 
 		async: true,
@@ -190,21 +190,21 @@ export async function action({ request }: DataFunctionArgs) {
 		return json({ status: 'idle', submission } as const);
 	}
 
-	if (!submission.value?.userId) {
+	if (!submission.value?.session) {
 		return json({ status: 'error', submission } as const, { status: 400 });
 	}
 
-	const { userId, remember, redirectTo } = submission.value;
+	const { session, remember, redirectTo } = submission.value;
 
 	const cookieSession = await authSessionStorage.getSession(
 		request.headers.get('cookie'),
 	);
-	cookieSession.set('userId', userId.id);
+	cookieSession.set(SESSION_KEY, session.id);
 
 	return redirect(safeRedirect(redirectTo), {
 		headers: {
 			'set-cookie': await authSessionStorage.commitSession(cookieSession, {
-				expires: remember ? getSessionExpirationDate() : undefined,
+				expires: remember ? session.expirationDate : undefined,
 			}),
 		},
 	});

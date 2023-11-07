@@ -223,9 +223,9 @@ export async function action({ request }: DataFunctionArgs) {
 				return;
 			}
 		}).transform(async (data) => {
-			const user = await signup(data);
+			const session = await signup(data);
 
-			return { ...data, user };
+			return { ...data, session };
 		}),
 
 		async: true,
@@ -235,20 +235,22 @@ export async function action({ request }: DataFunctionArgs) {
 		return json({ status: 'idle', submission } as const);
 	}
 
-	if (!submission.value?.user) {
+	if (!submission.value?.session) {
 		return json({ status: 'error', submission } as const, { status: 400 });
 	}
 
-	const { user, redirectTo } = submission.value;
+	const { session, remember, redirectTo } = submission.value;
 
 	const cookieSession = await authSessionStorage.getSession(
 		request.headers.get('cookie'),
 	);
-	cookieSession.set('userId', user.id);
+	cookieSession.set('userId', session.id);
 
 	return redirect(safeRedirect(redirectTo), {
 		headers: {
-			'set-cookie': await authSessionStorage.commitSession(cookieSession),
+			'set-cookie': await authSessionStorage.commitSession(cookieSession, {
+				expires: remember ? session.expirationDate : undefined,
+			}),
 		},
 	});
 }

@@ -24,6 +24,7 @@ export {
 	getUserId,
 	verifyUserPassword,
 	getPasswordHash,
+	SESSION_KEY,
 } from './auth/auth.server.ts';
 export {
 	userHasRole,

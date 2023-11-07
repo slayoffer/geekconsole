@@ -19,6 +19,7 @@ model User {
   image UserImage?
   books Book[]
   roles Role[]
+  sessions Session[]
 }
 
 model Password {
@@ -99,4 +100,17 @@ model Role {
 
   permissions Permission[]
   users User[]
+}
+
+model Session {
+  id String @id @default(cuid())
+  expirationDate DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId String
+
+  @@index([userId])
 }

@@ -5,6 +5,8 @@ import { Link, useFetcher, useLoaderData } from '@remix-run/react';
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
 import { z } from 'zod';
 import {
+	SESSION_KEY,
+	authSessionStorage,
 	prisma,
 	requireUserId,
 	validateCSRF,
@@ -42,6 +44,13 @@ export async function loader({ request }: DataFunctionArgs) {
 			image: {
 				select: { id: true },
 			},
+			_count: {
+				select: {
+					sessions: {
+						where: { expirationDate: { gt: new Date() } },
+					},
+				},
+			},
 		},
 	});
 
@@ -55,8 +64,9 @@ type ProfileActionArgs = {
 	userId: string;
 	formData: FormData;
 };
-const profileUpdateActionIntent = 'update-profile';
-const deleteDataActionIntent = 'delete-data';
+const PROFILE_UPDATE_ACTION_INTENT = 'update-profile';
+const DELETE_DATA_ACTION_INTENT = 'delete-data';
+const SIGN_OUT_OF_SESSIONS_ACTION_INTENT = 'sign-out-of-sessions';
 
 export async function action({ request }: DataFunctionArgs) {
 	const userId = await requireUserId(request);
@@ -68,11 +78,15 @@ export async function action({ request }: DataFunctionArgs) {
 	const intent = formData.get('intent');
 
 	switch (intent) {
-		case profileUpdateActionIntent: {
+		case PROFILE_UPDATE_ACTION_INTENT: {
 			return profileUpdateAction({ request, userId, formData });
 		}
 
-		case deleteDataActionIntent: {
+		case SIGN_OUT_OF_SESSIONS_ACTION_INTENT: {
+			return signOutOfSessionsAction({ request, userId, formData });
+		}
+
+		case DELETE_DATA_ACTION_INTENT: {
 			return deleteDataAction({ request, userId, formData });
 		}
 
@@ -124,12 +138,13 @@ export default function EditUserProfile() {
 				</div>
 				<div>
 					<a
-						download="my-epic-notes-data.json"
+						download="my-geek-console-data.json"
 						href="/resources/download-user-data"
 					>
 						<Icon name="download">Download your data</Icon>
 					</a>
 				</div>
+				<SignOutOfSessions />
 				<DeleteData />
 			</div>
 		</div>
@@ -144,6 +159,7 @@ async function profileUpdateAction({ userId, formData }: ProfileActionArgs) {
 				where: { username },
 				select: { id: true },
 			});
+
 			if (existingUsername && existingUsername.id !== userId) {
 				ctx.addIssue({
 					path: ['username'],
@@ -151,10 +167,12 @@ async function profileUpdateAction({ userId, formData }: ProfileActionArgs) {
 					message: 'A user already exists with this username',
 				});
 			}
+
 			const existingEmail = await prisma.user.findUnique({
 				where: { email },
 				select: { id: true },
 			});
+
 			if (existingEmail && existingEmail.id !== userId) {
 				ctx.addIssue({
 					path: ['email'],
@@ -164,9 +182,11 @@ async function profileUpdateAction({ userId, formData }: ProfileActionArgs) {
 			}
 		}),
 	});
+
 	if (submission.intent !== 'submit') {
 		return json({ status: 'idle', submission } as const);
 	}
+
 	if (!submission.value) {
 		return json({ status: 'error', submission } as const, { status: 400 });
 	}
@@ -208,6 +228,7 @@ function UpdateProfile() {
 	return (
 		<fetcher.Form method="POST" {...form.props}>
 			<AuthenticityTokenInput />
+
 			<div className="grid grid-cols-6 gap-x-10">
 				<Field
 					className="col-span-3"
@@ -239,7 +260,7 @@ function UpdateProfile() {
 					type="submit"
 					size="lg"
 					name="intent"
-					value={profileUpdateActionIntent}
+					value={PROFILE_UPDATE_ACTION_INTENT}
 					status={
 						fetcher.state !== 'idle'
 							? 'pending'
@@ -250,6 +271,67 @@ function UpdateProfile() {
 				</StatusButton>
 			</div>
 		</fetcher.Form>
+	);
+}
+
+async function signOutOfSessionsAction({ request, userId }: ProfileActionArgs) {
+	const cookieSession = await authSessionStorage.getSession(
+		request.headers.get('cookie'),
+	);
+
+	const sessionId = cookieSession.get(SESSION_KEY);
+
+	invariantResponse(
+		sessionId,
+		'You must be authenticated to sign out of other sessions',
+	);
+
+	await prisma.session.deleteMany({
+		where: {
+			userId,
+			id: { not: sessionId },
+		},
+	});
+
+	return json({ status: 'success' } as const);
+}
+
+function SignOutOfSessions() {
+	const data = useLoaderData<typeof loader>();
+	const dc = useDoubleCheck();
+
+	const fetcher = useFetcher<typeof signOutOfSessionsAction>();
+	const otherSessionsCount = data.user._count.sessions - 1;
+
+	return (
+		<div>
+			{otherSessionsCount ? (
+				<fetcher.Form method="POST">
+					<AuthenticityTokenInput />
+					<StatusButton
+						{...dc.getButtonProps({
+							type: 'submit',
+							name: 'intent',
+							value: SIGN_OUT_OF_SESSIONS_ACTION_INTENT,
+						})}
+						variant={dc.doubleCheck ? 'destructive' : 'default'}
+						status={
+							fetcher.state !== 'idle'
+								? 'pending'
+								: fetcher.data?.status ?? 'idle'
+						}
+					>
+						<Icon name="avatar">
+							{dc.doubleCheck
+								? `Are you sure?`
+								: `Sign out of ${otherSessionsCount} other sessions`}
+						</Icon>
+					</StatusButton>
+				</fetcher.Form>
+			) : (
+				<Icon name="avatar">This is your only session</Icon>
+			)}
+		</div>
 	);
 }
 
@@ -272,7 +354,7 @@ function DeleteData() {
 					{...dc.getButtonProps({
 						type: 'submit',
 						name: 'intent',
-						value: deleteDataActionIntent,
+						value: DELETE_DATA_ACTION_INTENT,
 					})}
 					variant={dc.doubleCheck ? 'destructive' : 'default'}
 					status={fetcher.state !== 'idle' ? 'pending' : 'idle'}
