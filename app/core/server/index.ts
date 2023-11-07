@@ -21,4 +21,13 @@ export {
 	requireUserId,
 	login,
 	signup,
+	getUserId,
+	verifyUserPassword,
+	getPasswordHash,
 } from './auth/auth.server.ts';
+export {
+	userHasRole,
+	userHasPermission,
+	requireUserWithPermission,
+	requireUserWithRole,
+} from './permissions/permissions.ts';

@@ -13,6 +13,7 @@ import {
 	prisma,
 	redirectWithToast,
 	requireUserId,
+	requireUserWithPermission,
 	validateCSRF,
 } from '~/app/core/server/index.ts';
 import { invariantResponse } from '~/app/shared/lib/utils/index.ts';
@@ -69,7 +70,7 @@ export const loader = async ({ request }: DataFunctionArgs) => {
 };
 
 export const action = async ({ request }: DataFunctionArgs) => {
-	await requireUserId(request);
+	const userId = await requireUserId(request);
 
 	const formData = await request.formData();
 
@@ -90,11 +91,17 @@ export const action = async ({ request }: DataFunctionArgs) => {
 	const { bookId } = submission.value;
 
 	const book = await prisma.book.findFirst({
-		select: { id: true },
+		select: { id: true, ownerId: true },
 		where: { id: bookId },
 	});
 
 	invariantResponse(book, 'Not found', { status: 404 });
+
+	const isOwner = userId === book.ownerId;
+	await requireUserWithPermission(
+		request,
+		isOwner ? 'delete:book:own' : 'delete:book:any',
+	);
 
 	await prisma.book.delete({ where: { id: book.id } });
 
@@ -122,6 +129,7 @@ export const ErrorBoundary = () => {
 						</AlertDescription>
 					</Alert>
 				),
+				403: () => <p>You are not allowed to do that</p>,
 				500: () => (
 					<Alert variant="destructive" className="w-2/4">
 						<ExclamationTriangleIcon className="h-4 w-4" />

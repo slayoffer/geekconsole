@@ -48,7 +48,7 @@ export const UserNav = () => {
 				<DropdownMenuSeparator />
 				<DropdownMenuGroup>
 					<DropdownMenuItem asChild>
-						<Link to="/profile" prefetch="intent">
+						<Link to={`/profile/${user.username}`} prefetch="intent">
 							Profile
 						</Link>
 					</DropdownMenuItem>
@@ -58,7 +58,7 @@ export const UserNav = () => {
 						</Link>
 					</DropdownMenuItem>
 					<DropdownMenuItem asChild>
-						<Link to="/settings" prefetch="intent">
+						<Link to="/settings/profile" prefetch="intent">
 							Settings
 						</Link>
 					</DropdownMenuItem>

@@ -4,7 +4,6 @@ import {
 	type DataFunctionArgs,
 	json,
 	type LinksFunction,
-	redirect,
 } from '@remix-run/node';
 import {
 	Links,
@@ -28,7 +27,7 @@ import {
 	getTheme,
 	prisma,
 	getToast,
-	authSessionStorage,
+	getUserId,
 } from './core/server/index.ts';
 import fonts from './core/styles/fonts.css';
 import twStyles from './core/styles/twStyles.css';
@@ -147,24 +146,28 @@ export const loader = async ({ request }: DataFunctionArgs) => {
 
 	const { toast, headers: toastHeaders } = await getToast(request);
 
-	const cookieSession = await authSessionStorage.getSession(
-		request.headers.get('cookie'),
-	);
-	const userId = cookieSession.get('userId');
+	const userId = await getUserId(request);
+
 	const user = userId
-		? await prisma.user.findUnique({
-				select: { id: true, name: true, username: true, email: true },
+		? await prisma.user.findUniqueOrThrow({
+				select: {
+					id: true,
+					name: true,
+					username: true,
+					email: true,
+					image: { select: { id: true } },
+					roles: {
+						select: {
+							name: true,
+							permissions: {
+								select: { entity: true, action: true, access: true },
+							},
+						},
+					},
+				},
 				where: { id: userId },
 		  })
 		: null;
-
-	if (userId && !user) {
-		throw redirect('/', {
-			headers: {
-				'set-cookie': await authSessionStorage.destroySession(cookieSession),
-			},
-		});
-	}
 
 	const supabaseEnv = {
 		SUPABASE_URL: process.env.SUPABASE_API_URL,

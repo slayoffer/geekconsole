@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 import { safeRedirect } from 'remix-utils/safe-redirect';
 import { combineResponseInits } from '~/app/shared/lib/utils/index.ts';
 import { prisma } from '../db/db.server.ts';
-import { authSessionStorage } from '../index.ts';
+import { authSessionStorage } from '../session/session.server.ts';
 
 const SESSION_EXPIRATION_TIME = 1000 * 60 * 60 * 24 * 30;
 export const USER_ID_KEY = 'userId';
@@ -126,7 +126,7 @@ export async function logout(
 	},
 	responseInit?: ResponseInit,
 ) {
-	const cookieSession = await sessionStorage.getSession(
+	const cookieSession = await authSessionStorage.getSession(
 		request.headers.get('cookie'),
 	);
 
@@ -134,13 +134,13 @@ export async function logout(
 		safeRedirect(redirectTo),
 		combineResponseInits(responseInit, {
 			headers: {
-				'set-cookie': await sessionStorage.destroySession(cookieSession),
+				'set-cookie': await authSessionStorage.destroySession(cookieSession),
 			},
 		}),
 	);
 }
 
-async function getPasswordHash(password: string) {
+export async function getPasswordHash(password: string) {
 	const hash = await bcrypt.hash(password, 10);
 	return hash;
 }
