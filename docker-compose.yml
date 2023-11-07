@@ -8,6 +8,9 @@ services:
     environment:
       - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
       - SUPABASE_API_URL=${SUPABASE_API_URL}
+      - SESSION_SECRET=${SESSION_SECRET}
+      - HONEYPOT_SECRET=${HONEYPOT_SECRET}
+      - DATABASE_URL=${DATABASE_URL}
     networks:
       - proxy
 
