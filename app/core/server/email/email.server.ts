@@ -1,10 +1,12 @@
+import { getErrorMessage } from '~/app/shared/lib/utils/index.ts';
+
 export async function sendEmail(options: {
 	to: string;
 	subject: string;
 	html?: string;
 	text: string;
 }) {
-	const email = { ...options };
+	const email = { from: 'skinner.vova@gmail.com', ...options };
 
 	const response = await fetch('https://api.resend.com/emails', {
 		method: 'POST',
@@ -16,5 +18,12 @@ export async function sendEmail(options: {
 	});
 
 	const data = await response.json();
-	console.log(data);
+
+	if (response.ok) return { status: 'success' } as const;
+	else {
+		return {
+			status: 'error',
+			error: getErrorMessage(data),
+		} as const;
+	}
 }

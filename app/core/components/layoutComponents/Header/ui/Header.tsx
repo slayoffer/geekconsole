@@ -6,8 +6,6 @@ import { ThemeSwitcher, UserNav } from './components/index.ts';
 
 export const Header = () => {
 	const maybeUser = useOptionalUser();
-	console.log(maybeUser);
-
 	const theme = useTheme();
 
 	return (
