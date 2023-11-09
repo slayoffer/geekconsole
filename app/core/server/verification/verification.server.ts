@@ -1,7 +1,5 @@
 import { createCookieSessionStorage } from '@remix-run/node';
 
-export const ONBOARDING_EMAIL_SESSION_KEY = 'onboardingEmail';
-
 export const verifySessionStorage = createCookieSessionStorage({
 	cookie: {
 		name: 'gk_verification',

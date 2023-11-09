@@ -33,7 +33,4 @@ export {
 	requireUserWithRole,
 } from './permissions/permissions.ts';
 export { sendEmail } from './email/email.server.ts';
-export {
-	verifySessionStorage,
-	ONBOARDING_EMAIL_SESSION_KEY,
-} from './verification/verification.server.ts';
+export { verifySessionStorage } from './verification/verification.server.ts';

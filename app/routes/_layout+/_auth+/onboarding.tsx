@@ -17,7 +17,6 @@ import { HoneypotInputs } from 'remix-utils/honeypot/react';
 import { safeRedirect } from 'remix-utils/safe-redirect';
 import { z } from 'zod';
 import {
-	ONBOARDING_EMAIL_SESSION_KEY,
 	SESSION_KEY,
 	authSessionStorage,
 	checkHoneypot,
@@ -28,6 +27,7 @@ import {
 	verifySessionStorage,
 } from '~/app/core/server/index.ts';
 import { useIsPending } from '~/app/shared/lib/hooks/index.ts';
+import { invariant } from '~/app/shared/lib/utils/index.ts';
 import {
 	NameSchema,
 	PasswordSchema,
@@ -40,6 +40,9 @@ import {
 	Spacer,
 	StatusButton,
 } from '~/app/shared/ui/index.ts';
+import { type VerifyFunctionArgs } from './verify.tsx';
+
+const ONBOARDING_EMAIL_SESSION_KEY = 'onboardingEmail';
 
 const SignupFormSchema = z
 	.object({
@@ -151,11 +154,30 @@ export async function action({ request }: DataFunctionArgs) {
 	return redirect(safeRedirect(redirectTo), { headers });
 }
 
+export async function handleVerification({
+	request,
+	submission,
+}: VerifyFunctionArgs) {
+	invariant(submission.value, 'submission.value should be defined by now');
+
+	const verifySession = await verifySessionStorage.getSession(
+		request.headers.get('cookie'),
+	);
+
+	verifySession.set(ONBOARDING_EMAIL_SESSION_KEY, submission.value.target);
+
+	return redirect('/onboarding', {
+		headers: {
+			'set-cookie': await verifySessionStorage.commitSession(verifySession),
+		},
+	});
+}
+
 export const meta: MetaFunction = () => {
-	return [{ title: 'Setup Epic Notes Account' }];
+	return [{ title: 'Setup Geek Console Account' }];
 };
 
-export default function SignupRoute() {
+export default function OnboardingRoute() {
 	const data = useLoaderData<typeof loader>();
 	const actionData = useActionData<typeof action>();
 	const isPending = useIsPending();

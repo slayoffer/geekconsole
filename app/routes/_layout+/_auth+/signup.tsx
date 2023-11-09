@@ -1,6 +1,6 @@
 import { conform, useForm } from '@conform-to/react';
 import { getFieldsetConstraint, parse } from '@conform-to/zod';
-import { generateTOTP } from '@epic-web/totp';
+import * as E from '@react-email/components';
 import {
 	type MetaFunction,
 	json,
@@ -19,7 +19,6 @@ import {
 	validateCSRF,
 } from '~/app/core/server/index.ts';
 import { useIsPending } from '~/app/shared/lib/hooks/index.ts';
-import { getDomainUrl } from '~/app/shared/lib/utils/index.ts';
 import { EmailSchema } from '~/app/shared/schemas/index.ts';
 import {
 	ErrorList,
@@ -27,7 +26,7 @@ import {
 	GeneralErrorBoundary,
 	StatusButton,
 } from '~/app/shared/ui/index.ts';
-import { codeQueryParam, targetQueryParam, typeQueryParam } from './verify.tsx';
+import { prepareVerification } from './verify.tsx';
 
 const SignupSchema = z.object({
 	email: EmailSchema,
@@ -69,50 +68,57 @@ export async function action({ request }: DataFunctionArgs) {
 		return json({ status: 'idle', submission } as const);
 	}
 
-	if (!submission.value?.email) {
+	if (!submission.value) {
 		return json({ status: 'error', submission } as const, { status: 400 });
 	}
 
-	const { email } = submission.value;
-
-	const { otp, ...verificationConfig } = generateTOTP({
-		algorithm: 'SHA256',
-		period: 10 * 60, // valid for 10 minutes
-	});
-
-	const type = 'onboarding';
-
-	const redirectToUrl = new URL(`${getDomainUrl(request)}/verify`);
-	redirectToUrl.searchParams.set(typeQueryParam, type);
-	redirectToUrl.searchParams.set(targetQueryParam, email);
-
-	const verifyUrl = new URL(redirectToUrl);
-	verifyUrl.searchParams.set(codeQueryParam, otp);
-
-	const verificationData = {
-		type,
+	const { email, redirectTo: postVerificationRedirectTo } = submission.value;
+	const { verifyUrl, redirectTo, otp } = await prepareVerification({
+		period: 10 * 60,
+		request,
+		type: 'onboarding',
 		target: email,
-		...verificationConfig,
-		expiresAt: new Date(Date.now() + verificationConfig.period * 1000),
-	};
-
-	await prisma.verification.upsert({
-		where: { target_type: { target: email, type } },
-		create: verificationData,
-		update: verificationData,
+		redirectTo: postVerificationRedirectTo,
 	});
 
 	const response = await sendEmail({
 		to: email,
 		subject: `Welcome to Geek Console!`,
-		text: `Here is your code ${otp}! Or open this: ${verifyUrl}`,
+		react: <SignupEmail onboardingUrl={verifyUrl.toString()} otp={otp} />,
 	});
 
-	if (response.status === 'success') return redirect(redirectToUrl.toString());
+	if (response.status === 'success') return redirect(redirectTo.toString());
 	else {
-		submission.error[''] = [response.error];
+		submission.error[''] = [response.error.message];
 		return json({ status: 'error', submission } as const, { status: 500 });
 	}
+}
+
+export function SignupEmail({
+	onboardingUrl,
+	otp,
+}: {
+	onboardingUrl: string;
+	otp: string;
+}) {
+	return (
+		<E.Html lang="en" dir="ltr">
+			<E.Container>
+				<h1>
+					<E.Text>Welcome to Geek Console!</E.Text>
+				</h1>
+				<p>
+					<E.Text>
+						Here's your verification code: <strong>{otp}</strong>
+					</E.Text>
+				</p>
+				<p>
+					<E.Text>Or click the link to get started:</E.Text>
+				</p>
+				<E.Link href={onboardingUrl}>{onboardingUrl}</E.Link>
+			</E.Container>
+		</E.Html>
+	);
 }
 
 export const meta: MetaFunction = () => {
