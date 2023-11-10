@@ -99,7 +99,7 @@ function Document({
 
 				<title>{title}</title>
 			</head>
-			<body className="flex h-full flex-col justify-between">
+			<body className="flex h-full flex-col justify-between bg-background text-foreground">
 				{children}
 
 				<ScrollRestoration />

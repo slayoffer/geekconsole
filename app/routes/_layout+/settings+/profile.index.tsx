@@ -64,6 +64,7 @@ type ProfileActionArgs = {
 	userId: string;
 	formData: FormData;
 };
+
 const PROFILE_UPDATE_ACTION_INTENT = 'update-profile';
 const DELETE_DATA_ACTION_INTENT = 'delete-data';
 const SIGN_OUT_OF_SESSIONS_ACTION_INTENT = 'sign-out-of-sessions';

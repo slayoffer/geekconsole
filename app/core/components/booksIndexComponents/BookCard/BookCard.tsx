@@ -3,11 +3,14 @@ import { getFieldsetConstraint, parse } from '@conform-to/zod';
 import { type Book } from '@prisma/client';
 import { Pencil2Icon } from '@radix-ui/react-icons';
 import { Form, Link, useActionData } from '@remix-run/react';
-import { Loader2 } from 'lucide-react';
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
 import { type action } from '~/app/routes/_layout+/books+/_index.tsx';
+import { useDoubleCheck } from '~/app/shared/lib/hooks/index.ts';
 import { useDelayedIsPending } from '~/app/shared/lib/hooks/useDelayedIsPending/useDelayedIsPending.tsx';
-import { DeleteBookFormSchema } from '~/app/shared/schemas/DeleteBookSchema/DeleteBookSchema.ts';
+import {
+	DELETE_BOOK_INTENT,
+	DeleteBookFormSchema,
+} from '~/app/shared/schemas/DeleteBookSchema/DeleteBookSchema.ts';
 
 import {
 	Badge,
@@ -17,6 +20,8 @@ import {
 	CardFooter,
 	CardHeader,
 	ErrorList,
+	Icon,
+	StatusButton,
 } from '~/app/shared/ui/index.ts';
 
 type BookProps = Pick<Book, 'id' | 'title' | 'readingStatus'>;
@@ -24,19 +29,15 @@ type BookCardProps = {
 	book: BookProps;
 };
 
-const getFormAction = (id: string) => `/books/${id}/destroy` as const;
-
 export const BookCard = ({ book }: BookCardProps) => {
 	const { id, title, readingStatus } = book;
 
 	const actionData = useActionData<typeof action>();
-
-	const isPending = useDelayedIsPending({
-		formAction: getFormAction(id),
-	});
+	const isPending = useDelayedIsPending();
+	const dc = useDoubleCheck();
 
 	const [form] = useForm({
-		id: 'delete-note',
+		id: 'delete-book',
 		lastSubmission: actionData?.submission,
 		constraint: getFieldsetConstraint(DeleteBookFormSchema),
 		onValidate({ formData }) {
@@ -62,7 +63,7 @@ export const BookCard = ({ book }: BookCardProps) => {
 				/>
 				<Badge variant="outline">{readingStatus}</Badge>
 			</CardContent>
-			<CardFooter>
+			<CardFooter className="flex flex-col gap-2">
 				<Button asChild variant="link">
 					<Link to={`${id}`} prefetch="intent">
 						See more
@@ -72,22 +73,21 @@ export const BookCard = ({ book }: BookCardProps) => {
 					<AuthenticityTokenInput />
 
 					<input type="hidden" name="bookId" value={id} />
-					<Button
-						name="intent"
-						value="delete-book"
-						type="submit"
-						variant="destructive"
-						disabled={isPending}
+
+					<StatusButton
+						{...dc.getButtonProps({
+							type: 'submit',
+							name: 'intent',
+							value: DELETE_BOOK_INTENT,
+						})}
+						variant={dc.doubleCheck ? 'destructive' : 'default'}
+						status={isPending ? 'pending' : actionData?.status ?? 'idle'}
 					>
-						{isPending ? (
-							<>
-								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-								Deleting...
-							</>
-						) : (
-							'Delete'
-						)}
-					</Button>
+						<Icon name="trash">
+							{dc.doubleCheck ? 'Are you sure?' : 'Delete'}
+						</Icon>
+					</StatusButton>
+
 					<ErrorList errors={form.errors} id={form.errorId} />
 				</Form>
 			</CardFooter>

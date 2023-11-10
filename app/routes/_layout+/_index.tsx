@@ -20,12 +20,12 @@ export default function Index() {
 					src="images/giphy.gif"
 					alt="GeekConsole Logo"
 				/>
-				<h1 className="mb-3 text-xl text-yellow-400">Welcome to GeekConsole</h1>
-				<p className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
+				<h1 className="mb-3 text-xl text-primary">Welcome to GeekConsole</h1>
+				<p className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
 					Take full control of your material and digital stuff
 				</p>
-				<p className="mx-auto mt-5 max-w-xl text-xl text-gray-400">
-					Start tracking what you are reading and what you have read.
+				<p className="mx-auto mt-5 max-w-xl text-xl">
+					Start saving your essentials with zero effort.
 				</p>
 				{userIsAdmin ? (
 					<Button asChild variant="secondary" className="mt-4">

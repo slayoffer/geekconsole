@@ -1,6 +1,9 @@
+import { Link } from '@remix-run/react';
+import { Button } from '~/app/shared/ui/index.ts';
+
 export const Footer = () => {
 	return (
-		<footer className="mt-auto bg-zinc-900 p-4 py-16">
+		<footer className="mt-auto bg-background p-4 py-16">
 			<div className="mx-auto max-w-screen-xl">
 				<div className="flex items-center justify-between">
 					<div>
@@ -13,41 +16,38 @@ export const Footer = () => {
 								/>
 							</a>
 						</div>
-						<p className="text-sm text-white">
-							© 2022 GeekConsole™. All Rights Reserved
+						<p className="text-sm">
+							© {new Date().getFullYear()} GeekConsole™. All Rights Reserved
 						</p>
 					</div>
 
-					<ul className="mb-4 flex flex-wrap items-center text-xl text-gray-400 lg:mb-0">
+					<ul className="mb-4 flex flex-wrap items-center text-[body-lg] text-primary lg:mb-0">
 						<li>
-							<a
-								href="/"
-								className="mr-4 transition duration-300 hover:text-white hover:underline md:mr-6"
-								target="_blank"
-								rel="noopener noreferrer"
-							>
-								Home
-							</a>
+							<Button asChild variant="link">
+								<Link to="/">Home</Link>
+							</Button>
 						</li>
 						<li>
-							<a
-								href="https://roadmap.geekconsole.app"
-								className="mr-4 transition duration-300 hover:text-white hover:underline md:mr-6"
-								target="_blank"
-								rel="noopener noreferrer"
-							>
-								Roadmap
-							</a>
+							<Button asChild variant="link">
+								<a
+									href="https://roadmap.geekconsole.app"
+									target="_blank"
+									rel="noopener noreferrer"
+								>
+									Roadmap
+								</a>
+							</Button>
 						</li>
 						<li>
-							<a
-								href="https://github.com/vVolodya"
-								className="mr-4 transition duration-300 hover:text-white hover:underline md:mr-6"
-								target="_blank"
-								rel="noopener noreferrer"
-							>
-								Github
-							</a>
+							<Button asChild variant="link">
+								<a
+									href="https://github.com/vVolodya"
+									target="_blank"
+									rel="noopener noreferrer"
+								>
+									Github
+								</a>
+							</Button>
 						</li>
 					</ul>
 				</div>

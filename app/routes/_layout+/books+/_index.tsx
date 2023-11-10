@@ -17,7 +17,7 @@ import {
 	validateCSRF,
 } from '~/app/core/server/index.ts';
 import { invariantResponse } from '~/app/shared/lib/utils/index.ts';
-import { DeleteBookFormSchema } from '~/app/shared/schemas/DeleteBookSchema/DeleteBookSchema.ts';
+import { DeleteBookFormSchema } from '~/app/shared/schemas/index.ts';
 import {
 	Alert,
 	AlertDescription,

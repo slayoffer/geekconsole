@@ -37,7 +37,7 @@ export const StatusButton = React.forwardRef<
 		),
 		error: (
 			<div className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-destructive">
-				<Icon name="cross-1" className="text-destructive-foreground" />
+				<Icon name="cross-1" className="text-foreground" />
 			</div>
 		),
 		idle: null,
