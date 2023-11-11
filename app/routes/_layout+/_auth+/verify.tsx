@@ -20,6 +20,7 @@ import {
 	StatusButton,
 } from '~/app/shared/ui/index.ts';
 import { handleVerification as handleOnboardingVerification } from './onboarding.tsx';
+import { handleVerification as handleResetPasswordVerification } from './reset-password.tsx';
 
 export const codeQueryParam = 'code';
 export const targetQueryParam = 'target';
@@ -108,6 +109,7 @@ export async function prepareVerification({
 		target,
 		redirectTo: postVerificationRedirectTo,
 	});
+
 	const redirectTo = new URL(verifyUrl.toString());
 
 	const { otp, ...verificationConfig } = generateTOTP({
@@ -150,6 +152,7 @@ export async function isCodeValid({
 		},
 		select: { algorithm: true, secret: true, period: true, charSet: true },
 	});
+
 	if (!verification) return false;
 
 	const result = verifyTOTP({
@@ -211,9 +214,10 @@ async function validateRequest(
 	});
 
 	switch (submissionValue[typeQueryParam]) {
-		// case 'reset-password': {
-		// 	return handleResetPasswordVerification({ request, body, submission });
-		// }
+		case 'reset-password': {
+			return handleResetPasswordVerification({ request, body, submission });
+		}
+
 		case 'onboarding': {
 			return handleOnboardingVerification({ request, body, submission });
 		}

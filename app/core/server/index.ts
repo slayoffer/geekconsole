@@ -24,6 +24,7 @@ export {
 	getUserId,
 	verifyUserPassword,
 	getPasswordHash,
+	resetUserPassword,
 	SESSION_KEY,
 } from './auth/auth.server.ts';
 export {
