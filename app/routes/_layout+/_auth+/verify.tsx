@@ -10,8 +10,13 @@ import {
 } from '@remix-run/react';
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
 import { z } from 'zod';
-import { prisma, validateCSRF } from '~/app/core/server/index.ts';
+import {
+	prisma,
+	redirectWithToast,
+	validateCSRF,
+} from '~/app/core/server/index.ts';
 import { handleVerification as handleChangeEmailVerification } from '~/app/routes/_layout+/settings+/profile.change-email.tsx';
+import { twoFAVerificationType } from '~/app/routes/_layout+/settings+/profile.two-factor.tsx';
 import { type twoFAVerifyVerificationType } from '~/app/routes/_layout+/settings+/profile.two-factor.verify.tsx';
 import { useIsPending } from '~/app/shared/lib/hooks/index.ts';
 import { getDomainUrl } from '~/app/shared/lib/utils/index.ts';
@@ -21,7 +26,10 @@ import {
 	Spacer,
 	StatusButton,
 } from '~/app/shared/ui/index.ts';
-import { handleVerification as handleLoginTwoFactorVerification } from './login.tsx';
+import {
+	handleVerification as handleLoginTwoFactorVerification,
+	shouldRequestTwoFA,
+} from './login.tsx';
 import { handleVerification as handleOnboardingVerification } from './onboarding.tsx';
 import { handleVerification as handleResetPasswordVerification } from './reset-password.tsx';
 
@@ -70,6 +78,30 @@ export async function action({ request }: DataFunctionArgs) {
 	const formData = await request.formData();
 	await validateCSRF(formData, request.headers);
 	return validateRequest(request, formData);
+}
+
+export async function requireRecentVerification({
+	request,
+	userId,
+}: {
+	request: Request;
+	userId: string;
+}) {
+	if (await shouldRequestTwoFA({ request, userId })) {
+		const reqUrl = new URL(request.url);
+
+		const redirectUrl = getRedirectToUrl({
+			request,
+			target: userId,
+			type: twoFAVerificationType,
+			redirectTo: reqUrl.pathname + reqUrl.search,
+		});
+
+		throw await redirectWithToast(redirectUrl.toString(), {
+			title: 'Please Reverify',
+			description: 'Please reverify your account before proceeding',
+		});
+	}
 }
 
 export function getRedirectToUrl({

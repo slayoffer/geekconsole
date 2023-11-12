@@ -45,8 +45,16 @@ export const meta: MetaFunction = () => {
 	return [{ title: 'Login to Geek Console' }];
 };
 
+const LoginFormSchema = z.object({
+	username: UsernameSchema,
+	password: PasswordSchema,
+	redirectTo: z.string().optional(),
+	remember: z.boolean().optional(),
+});
+
 const UNVERIFIED_SESSION_KEY = 'unverified-session-id';
 const REMEMBER_ME_KEY = 'remember-me';
+const VERIFIED_TIME_KEY = 'verified-time';
 
 export async function handleVerification({
 	request,
@@ -62,32 +70,44 @@ export async function handleVerification({
 		request.headers.get('cookie'),
 	);
 
-	const session = await prisma.session.findUnique({
-		select: { expirationDate: true },
-		where: { id: verifySession.get(UNVERIFIED_SESSION_KEY) },
-	});
-
-	if (!session) {
-		throw await redirectWithToast('/login', {
-			type: 'error',
-			title: 'Invalid session',
-			description: 'Could not find session to verify. Please try again.',
-		});
-	}
-
-	cookieSession.set(SESSION_KEY, verifySession.get(UNVERIFIED_SESSION_KEY));
-
 	const remember = verifySession.get(REMEMBER_ME_KEY);
+
 	const { redirectTo } = submission.value;
 
 	const headers = new Headers();
 
-	headers.append(
-		'set-cookie',
-		await authSessionStorage.commitSession(cookieSession, {
-			expires: remember ? session.expirationDate : undefined,
-		}),
-	);
+	cookieSession.set(VERIFIED_TIME_KEY, Date.now());
+
+	const unverifiedSessionId = verifySession.get(UNVERIFIED_SESSION_KEY);
+
+	if (unverifiedSessionId) {
+		const session = await prisma.session.findUnique({
+			select: { expirationDate: true },
+			where: { id: unverifiedSessionId },
+		});
+
+		if (!session) {
+			throw await redirectWithToast('/login', {
+				type: 'error',
+				title: 'Invalid session',
+				description: 'Could not find session to verify. Please try again.',
+			});
+		}
+
+		cookieSession.set(SESSION_KEY, unverifiedSessionId);
+
+		headers.append(
+			'set-cookie',
+			await authSessionStorage.commitSession(cookieSession, {
+				expires: remember ? session.expirationDate : undefined,
+			}),
+		);
+	} else {
+		headers.append(
+			'set-cookie',
+			await authSessionStorage.commitSession(cookieSession),
+		);
+	}
 
 	headers.append(
 		'set-cookie',
@@ -97,12 +117,37 @@ export async function handleVerification({
 	return redirect(safeRedirect(redirectTo), { headers });
 }
 
-const LoginFormSchema = z.object({
-	username: UsernameSchema,
-	password: PasswordSchema,
-	redirectTo: z.string().optional(),
-	remember: z.boolean().optional(),
-});
+export async function shouldRequestTwoFA({
+	request,
+	userId,
+}: {
+	request: Request;
+	userId: string;
+}) {
+	const verifySession = await verifySessionStorage.getSession(
+		request.headers.get('cookie'),
+	);
+
+	if (verifySession.has(UNVERIFIED_SESSION_KEY)) return true;
+
+	// if it's over two hours since they last verified, we should request 2FA again
+	const userHasTwoFA = await prisma.verification.findUnique({
+		select: { id: true },
+		where: { target_type: { target: userId, type: twoFAVerificationType } },
+	});
+
+	if (!userHasTwoFA) return false;
+
+	const cookieSession = await authSessionStorage.getSession(
+		request.headers.get('cookie'),
+	);
+
+	const verifiedTime = cookieSession.get(VERIFIED_TIME_KEY) ?? new Date(0);
+
+	const TWO_HOURS = 1000 * 60 * 60 * 2;
+
+	return Date.now() - verifiedTime > TWO_HOURS;
+}
 
 export async function loader({ request }: DataFunctionArgs) {
 	await requireAnonymous(request);
@@ -153,16 +198,7 @@ export async function action({ request }: DataFunctionArgs) {
 
 	const { session, remember, redirectTo } = submission.value;
 
-	const verification = await prisma.verification.findUnique({
-		select: { id: true },
-		where: {
-			target_type: { target: session.userId, type: twoFAVerificationType },
-		},
-	});
-
-	const userHasTwoFactor = Boolean(verification);
-
-	if (userHasTwoFactor) {
+	if (await shouldRequestTwoFA({ request, userId: session.userId })) {
 		const verifySession = await verifySessionStorage.getSession();
 
 		verifySession.set(UNVERIFIED_SESSION_KEY, session.id);

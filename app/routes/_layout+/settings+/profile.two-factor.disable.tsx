@@ -2,32 +2,48 @@ import { json, type DataFunctionArgs } from '@remix-run/node';
 import { Form } from '@remix-run/react';
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
 import {
+	prisma,
 	redirectWithToast,
 	requireUserId,
 	validateCSRF,
 } from '~/app/core/server/index.ts';
+import { requireRecentVerification } from '~/app/routes/_layout+/_auth+/verify.tsx';
 import { useDoubleCheck, useIsPending } from '~/app/shared/lib/hooks/index.ts';
 import { Icon, StatusButton } from '~/app/shared/ui/index.ts';
+import { twoFAVerificationType } from './profile.two-factor.tsx';
 
 export const handle = {
 	breadcrumb: <Icon name="lock-open-1">Disable</Icon>,
 };
 
 export async function loader({ request }: DataFunctionArgs) {
-	await requireUserId(request);
+	await requireRecentVerification({
+		request,
+		userId: await requireUserId(request),
+	});
+
 	return json({});
 }
 
 export async function action({ request }: DataFunctionArgs) {
-	await requireUserId(request);
+	const userId = await requireUserId(request);
+
+	await requireRecentVerification({
+		request,
+		userId: userId,
+	});
 
 	const formData = await request.formData();
 
 	await validateCSRF(formData, request.headers);
 
+	await prisma.verification.delete({
+		where: { target_type: { target: userId, type: twoFAVerificationType } },
+	});
+
 	throw await redirectWithToast('/settings/profile/two-factor', {
-		title: '2FA Disabled (jk)',
-		description: 'This has not yet been implemented',
+		title: '2FA Disabled',
+		description: 'Two factor authentication has been disabled.',
 	});
 }
 
