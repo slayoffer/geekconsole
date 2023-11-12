@@ -21,6 +21,7 @@ import {
 	Spacer,
 	StatusButton,
 } from '~/app/shared/ui/index.ts';
+import { handleVerification as handleLoginTwoFactorVerification } from './login.tsx';
 import { handleVerification as handleOnboardingVerification } from './onboarding.tsx';
 import { handleVerification as handleResetPasswordVerification } from './reset-password.tsx';
 
@@ -28,6 +29,7 @@ export const codeQueryParam = 'code';
 export const targetQueryParam = 'target';
 export const typeQueryParam = 'type';
 export const redirectToQueryParam = 'redirectTo';
+
 const types = ['onboarding', 'reset-password', 'change-email', '2fa'] as const;
 const VerificationTypeSchema = z.enum(types);
 export type VerificationTypes = z.infer<typeof VerificationTypeSchema>;
@@ -47,8 +49,9 @@ export type VerifyFunctionArgs = {
 
 export async function loader({ request }: DataFunctionArgs) {
 	const params = new URL(request.url).searchParams;
+
 	if (!params.has(codeQueryParam)) {
-		// we don't want to show an error message on page load if the otp hasn't be
+		// we don't want to show an error message on page load if the otp hasn't been
 		// prefilled in yet, so we'll send a response with an empty submission.
 		return json({
 			status: 'idle',
@@ -189,6 +192,7 @@ async function validateRequest(
 						code: z.ZodIssueCode.custom,
 						message: `Invalid code`,
 					});
+
 					return z.NEVER;
 				}
 			}),
@@ -206,30 +210,35 @@ async function validateRequest(
 
 	const { value: submissionValue } = submission;
 
-	await prisma.verification.delete({
-		where: {
-			target_type: {
-				target: submissionValue[targetQueryParam],
-				type: submissionValue[typeQueryParam],
+	const deleteVerification = async () => {
+		await prisma.verification.delete({
+			where: {
+				target_type: {
+					target: submissionValue[targetQueryParam],
+					type: submissionValue[typeQueryParam],
+				},
 			},
-		},
-	});
+		});
+	};
 
 	switch (submissionValue[typeQueryParam]) {
 		case 'reset-password': {
+			await deleteVerification();
 			return handleResetPasswordVerification({ request, body, submission });
 		}
 
 		case 'onboarding': {
+			await deleteVerification();
 			return handleOnboardingVerification({ request, body, submission });
 		}
 
 		case 'change-email': {
+			await deleteVerification();
 			return handleChangeEmailVerification({ request, body, submission });
 		}
 
 		case '2fa': {
-			throw new Error('Not yet implemented');
+			return handleLoginTwoFactorVerification({ request, body, submission });
 		}
 	}
 }
@@ -239,6 +248,30 @@ export default function VerifyRoute() {
 	const [searchParams] = useSearchParams();
 	const isPending = useIsPending();
 	const actionData = useActionData<typeof action>();
+	const type = VerificationTypeSchema.parse(searchParams.get(typeQueryParam));
+
+	const checkEmail = (
+		<>
+			<h1 className="text-h1">Check your email</h1>
+			<p className="mt-3 text-body-md text-muted-foreground">
+				We've sent you a code to verify your email address.
+			</p>
+		</>
+	);
+
+	const headings: Record<VerificationTypes, React.ReactNode> = {
+		onboarding: checkEmail,
+		'reset-password': checkEmail,
+		'change-email': checkEmail,
+		'2fa': (
+			<>
+				<h1 className="text-h1">Check your 2FA app</h1>
+				<p className="mt-3 text-body-md text-muted-foreground">
+					Please enter your 2FA code to verify your identity.
+				</p>
+			</>
+		),
+	};
 
 	const [form, fields] = useForm({
 		id: 'verify-form',
@@ -249,7 +282,7 @@ export default function VerifyRoute() {
 		},
 		defaultValue: {
 			code: searchParams.get(codeQueryParam) ?? '',
-			type: searchParams.get(typeQueryParam) ?? '',
+			type,
 			target: searchParams.get(targetQueryParam) ?? '',
 			redirectTo: searchParams.get(redirectToQueryParam) ?? '',
 		},
@@ -257,12 +290,7 @@ export default function VerifyRoute() {
 
 	return (
 		<div className="container flex flex-col justify-center pb-32 pt-20">
-			<div className="text-center">
-				<h1 className="text-h1">Check your email</h1>
-				<p className="mt-3 text-body-md text-muted-foreground">
-					We've sent you a code to verify your email address.
-				</p>
-			</div>
+			<div className="text-center">{headings[type]}</div>
 
 			<Spacer size="xs" />
 
@@ -282,6 +310,7 @@ export default function VerifyRoute() {
 							inputProps={conform.input(fields[codeQueryParam])}
 							errors={fields[codeQueryParam].errors}
 						/>
+
 						<input
 							{...conform.input(fields[typeQueryParam], { type: 'hidden' })}
 						/>
@@ -293,6 +322,7 @@ export default function VerifyRoute() {
 								type: 'hidden',
 							})}
 						/>
+
 						<StatusButton
 							className="w-full"
 							status={isPending ? 'pending' : actionData?.status ?? 'idle'}
