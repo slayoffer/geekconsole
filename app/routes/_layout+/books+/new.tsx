@@ -259,7 +259,7 @@ export const action = async ({ request }: DataFunctionArgs) => {
 
 	const coverImg = submission.value.coverImg;
 
-	// TODO ADDING NEW BOOK
+	// TODO: ADDING NEW BOOK
 	console.log({
 		title,
 		author,

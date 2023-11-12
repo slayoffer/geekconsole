@@ -105,7 +105,7 @@ export default function EditUserProfile() {
 				<div className="relative h-52 w-52">
 					<img
 						src={
-							// TODO! fix this nonsense
+							// FIX: fix this nonsense
 							null ?? `https://robohash.org/${data.user.username}.png`
 						}
 						alt={data.user.username}

@@ -84,7 +84,6 @@ export async function login({
 	password: string;
 }) {
 	const user = await verifyUserPassword({ username }, password);
-
 	if (!user) return null;
 
 	const session = await prisma.session.create({

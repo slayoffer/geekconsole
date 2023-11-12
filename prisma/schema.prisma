@@ -16,16 +16,16 @@ model User {
   updatedAt DateTime @updatedAt
 
   password Password?
-  image UserImage?
-  books Book[]
-  roles Role[]
+  image    UserImage?
+  books    Book[]
+  roles    Role[]
   sessions Session[]
 }
 
 model Password {
   hash String
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId String @unique
 }
 
@@ -37,8 +37,8 @@ model UserImage {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId      String   @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId String @unique
 }
 
 model Book {
@@ -77,39 +77,40 @@ model BookImage {
 }
 
 model Permission {
-  id String @id @default(cuid())
-  action String // create, read, update, delete
-  entity String // user, book
-  access String // own, any
+  id          String  @id @default(cuid())
+  action      String // create, read, update, delete
+  entity      String // user, book
+  access      String // own, any
   description String? @default("")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   roles Role[]
+
   @@unique([action, entity, access])
 }
 
 model Role {
-  id String @id @default(cuid())
-  name String @unique
+  id          String  @id @default(cuid())
+  name        String  @unique
   description String? @default("")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   permissions Permission[]
-  users User[]
+  users       User[]
 }
 
 model Session {
-  id String @id @default(cuid())
+  id             String   @id @default(cuid())
   expirationDate DateTime
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId String
 
   @@index([userId])

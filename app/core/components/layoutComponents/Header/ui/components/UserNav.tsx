@@ -27,7 +27,7 @@ export const UserNav = () => {
 					<Avatar className="h-12 w-12">
 						<AvatarImage
 							src={
-								// TODO! fix this nonsense
+								// FIX: fix this nonsense
 								null ?? `https://robohash.org/${user.username}.png`
 							}
 							alt="User Avatar"

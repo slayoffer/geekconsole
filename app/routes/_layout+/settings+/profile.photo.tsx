@@ -144,7 +144,7 @@ export default function PhotoRoute() {
 
 				<img
 					src={
-						// TODO! fix this nonsense
+						// FIX: fix this nonsense
 						null ?? `https://robohash.org/${data.user.username}.png`
 					}
 					className="h-52 w-52 rounded-full object-cover"
