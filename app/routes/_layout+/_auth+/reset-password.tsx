@@ -25,7 +25,7 @@ import {
 } from '~/app/shared/ui/index.ts';
 import { type VerifyFunctionArgs } from './verify.tsx';
 
-const resetPasswordUsernameSessionKey = 'resetPasswordUsername';
+const RESET_PASSWORD_USERNAME_SESSION_KEY = 'resetPasswordUsername';
 
 export async function handleVerification({
 	request,
@@ -51,7 +51,7 @@ export async function handleVerification({
 		request.headers.get('cookie'),
 	);
 
-	verifySession.set(resetPasswordUsernameSessionKey, user.username);
+	verifySession.set(RESET_PASSWORD_USERNAME_SESSION_KEY, user.username);
 
 	return redirect('/reset-password', {
 		headers: {
@@ -78,7 +78,7 @@ async function requireResetPasswordUsername(request: Request) {
 	);
 
 	const resetPasswordUsername = verifySession.get(
-		resetPasswordUsernameSessionKey,
+		RESET_PASSWORD_USERNAME_SESSION_KEY,
 	);
 
 	if (typeof resetPasswordUsername !== 'string' || !resetPasswordUsername) {

@@ -11,6 +11,7 @@ import {
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
 import { z } from 'zod';
 import { prisma, validateCSRF } from '~/app/core/server/index.ts';
+import { handleVerification as handleChangeEmailVerification } from '~/app/routes/_layout+/settings+/profile.change-email.tsx';
 import { useIsPending } from '~/app/shared/lib/hooks/index.ts';
 import { getDomainUrl } from '~/app/shared/lib/utils/index.ts';
 import {
@@ -26,7 +27,7 @@ export const codeQueryParam = 'code';
 export const targetQueryParam = 'target';
 export const typeQueryParam = 'type';
 export const redirectToQueryParam = 'redirectTo';
-const types = ['onboarding', 'reset-password'] as const;
+const types = ['onboarding', 'reset-password', 'change-email'] as const;
 const VerificationTypeSchema = z.enum(types);
 export type VerificationTypes = z.infer<typeof VerificationTypeSchema>;
 
@@ -220,6 +221,10 @@ async function validateRequest(
 
 		case 'onboarding': {
 			return handleOnboardingVerification({ request, body, submission });
+		}
+
+		case 'change-email': {
+			return handleChangeEmailVerification({ request, body, submission });
 		}
 	}
 }
