@@ -3,8 +3,6 @@ import { json, type DataFunctionArgs } from '@remix-run/node';
 import { type MetaFunction, Link, useLoaderData } from '@remix-run/react';
 import invariant from 'tiny-invariant';
 
-import { getSession } from '~/app/core/server/index.ts';
-import { invariantResponse } from '~/app/shared/lib/utils/index.ts';
 import {
 	Alert,
 	AlertDescription,
@@ -38,8 +36,8 @@ export default function BookOverview() {
 				<div className="w-1/4">
 					<img
 						className="h-full w-full rounded-lg"
-						src={book.books_images?.url ?? 'images/noCover.gif'}
-						alt={book.books_images?.alt_text ?? book.title}
+						src={'images/noCover.gif'}
+						alt={book.title}
 					/>
 				</div>
 				<div className="w-3/4">
@@ -76,36 +74,24 @@ export default function BookOverview() {
 	);
 }
 
-export const loader = async ({ request, params }: DataFunctionArgs) => {
+export const loader = async ({ params }: DataFunctionArgs) => {
 	const response = new Response();
 	const { bookId } = params;
 	invariant(bookId, 'Missing bookId param');
 
-	const { supabaseClient, session } = await getSession(request);
-
-	invariantResponse(session, 'Unauthorized', { status: 401 });
-
-	const { data: book } = await supabaseClient
-		.from('books')
-		.select(
-			`
-        *,
-        books_images (id, alt_text, url)
-      `,
-		)
-		.eq('id', bookId)
-		.single();
-
-	invariantResponse(book, 'Book is not found', { status: 404 });
-
-	const mappedBook = {
-		...book,
-		books_images: Array.isArray(book.books_images)
-			? book.books_images[0]
-			: book.books_images,
-	};
-
-	return json({ book: mappedBook }, { headers: response.headers });
+	return json(
+		{
+			book: {
+				id: '123',
+				title: 'Book',
+				description: 'mock',
+				author: 'me',
+				year: 2023,
+				comments: 'mock',
+			},
+		},
+		{ headers: response.headers },
+	);
 };
 
 export function ErrorBoundary() {

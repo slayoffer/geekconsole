@@ -1,4 +1,3 @@
-import { randomUUID } from 'crypto';
 import { conform, useForm } from '@conform-to/react';
 import { getFieldsetConstraint, parse } from '@conform-to/zod';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
@@ -15,10 +14,8 @@ import { useState } from 'react';
 import { useSpinDelay } from 'spin-delay';
 import { z } from 'zod';
 
-import { getSession } from '~/app/core/server/index.ts';
-import { BUCKET_BOOKS_URL } from '~/app/shared/consts/index.ts';
 import { useSubmitting } from '~/app/shared/lib/hooks/index.ts';
-import { cn, invariantResponse } from '~/app/shared/lib/utils/index.ts';
+import { cn } from '~/app/shared/lib/utils/index.ts';
 import { type ReadingStatus } from '~/app/shared/types/index.ts';
 import {
 	Alert,
@@ -245,7 +242,7 @@ export default function NewBook() {
 
 export const action = async ({ request }: DataFunctionArgs) => {
 	const response = new Response();
-	const { supabaseClient, session } = await getSession(request);
+
 	const uploadHandler = createMemoryUploadHandler({
 		maxPartSize: MAX_UPLOAD_SIZE,
 	});
@@ -260,53 +257,19 @@ export const action = async ({ request }: DataFunctionArgs) => {
 	const { title, author, year, readingStatus, description, comments, altText } =
 		submission.value;
 
-	const { data: bookData, error: booksInsertError } = await supabaseClient
-		.from('books')
-		.insert([
-			{
-				user_id: session?.user.id ?? '',
-				status: readingStatus as ReadingStatus,
-				title,
-				description,
-				comments,
-				author,
-				year,
-			},
-		])
-		.select('id')
-		.single();
-
-	invariantResponse(!booksInsertError, booksInsertError?.message, {
-		status: 500,
-	});
-
 	const coverImg = submission.value.coverImg;
 
-	if (coverImg) {
-		const fileExt = coverImg.name.split('.').at(-1);
-
-		const { data, error: storageInstertError } = await supabaseClient.storage
-			.from('books')
-			.upload(`${session?.user.id}/${randomUUID()}.${fileExt}`, coverImg);
-
-		invariantResponse(!storageInstertError, storageInstertError?.message, {
-			status: 500,
-		});
-
-		const { error: bookImageInsertError } = await supabaseClient
-			.from('books_images')
-			.insert([
-				{
-					book_id: bookData.id,
-					alt_text: altText ?? title,
-					url: `${BUCKET_BOOKS_URL}/${data.path}`,
-				},
-			]);
-
-		invariantResponse(!bookImageInsertError, bookImageInsertError?.message, {
-			status: 500,
-		});
-	}
+	// TODO ADDING NEW BOOK
+	console.log({
+		title,
+		author,
+		year,
+		readingStatus,
+		description,
+		comments,
+		altText,
+		coverImg,
+	});
 
 	return redirect('/books', { headers: response.headers });
 };

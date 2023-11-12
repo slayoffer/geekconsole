@@ -169,11 +169,6 @@ export const loader = async ({ request }: DataFunctionArgs) => {
 		  })
 		: null;
 
-	const supabaseEnv = {
-		SUPABASE_URL: process.env.SUPABASE_API_URL,
-		SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
-	};
-
 	return json(
 		{
 			ENV: getEnv(),
@@ -182,7 +177,6 @@ export const loader = async ({ request }: DataFunctionArgs) => {
 			theme: getTheme(request),
 			toast,
 			user,
-			supabaseEnv,
 		},
 		{
 			headers: combineHeaders(

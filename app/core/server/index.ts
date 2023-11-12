@@ -1,5 +1,3 @@
-export { createSupabaseServerClient } from './supaClient/supaClient.server.ts';
-export { getSession } from './supaClient/supaClient.server.ts';
 export { init, getEnv } from './env/env.server.ts';
 export { honeypot, checkHoneypot } from './honeypot/honeypot.server.ts';
 export { csrf, validateCSRF } from './csrf/csrf.server.ts';
