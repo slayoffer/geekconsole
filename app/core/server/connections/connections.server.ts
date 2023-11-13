@@ -11,3 +11,18 @@ export const connectionSessionStorage = createCookieSessionStorage({
 		secure: process.env.NODE_ENV === 'production',
 	},
 });
+
+export const providers: Record<ProviderName, AuthProvider> = {
+	github: new GitHubProvider(),
+};
+
+export function handleMockAction(providerName: ProviderName, request: Request) {
+	return providers[providerName].handleMockAction(request);
+}
+
+export function resolveConnectionData(
+	providerName: ProviderName,
+	providerId: string,
+) {
+	return providers[providerName].resolveConnectionData(providerId);
+}

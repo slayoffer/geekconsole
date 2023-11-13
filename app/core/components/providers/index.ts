@@ -1,1 +1,5 @@
-export { ProviderConnectionForm } from './connections.tsx';
+export {
+	ProviderConnectionForm,
+	ProviderNameSchema,
+	providerLabels,
+} from './connections.tsx';

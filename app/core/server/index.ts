@@ -34,4 +34,9 @@ export {
 } from './permissions/permissions.ts';
 export { sendEmail } from './email/email.server.ts';
 export { verifySessionStorage } from './verification/verification.server.ts';
-export { connectionSessionStorage } from './connections/connections.server.ts';
+export {
+	connectionSessionStorage,
+	providers,
+	handleMockAction,
+	resolveConnectionData,
+} from './connections/connections.server.ts';
