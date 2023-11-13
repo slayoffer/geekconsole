@@ -1,10 +1,14 @@
 import { type Password, type User } from '@prisma/client';
 import { redirect } from '@remix-run/node';
 import bcrypt from 'bcryptjs';
+import { Authenticator } from 'remix-auth';
+import { GitHubStrategy } from 'remix-auth-github';
 import { safeRedirect } from 'remix-utils/safe-redirect';
 import { combineResponseInits } from '~/app/shared/lib/utils/index.ts';
+import { connectionSessionStorage } from '../connections/connections.server.ts';
 import { prisma } from '../db/db.server.ts';
 import { authSessionStorage } from '../session/session.server.ts';
+import { redirectWithToast } from '../toast/toast.server.ts';
 
 export { bcrypt };
 
@@ -13,6 +17,50 @@ export const getSessionExpirationDate = () =>
 	new Date(Date.now() + SESSION_EXPIRATION_TIME);
 
 export const SESSION_KEY = 'sessionId';
+
+type ProviderUser = {
+	id: string;
+	email: string;
+	username?: string;
+	name?: string;
+	imageUrl?: string;
+};
+
+export const authenticator = new Authenticator<ProviderUser>(
+	connectionSessionStorage,
+);
+
+authenticator.use(
+	new GitHubStrategy(
+		{
+			clientID: process.env.GITHUB_CLIENT_ID,
+			clientSecret: process.env.GITHUB_CLIENT_SECRET,
+			callbackURL: '/auth/github/callback',
+		},
+		async ({ profile }) => {
+			const email = profile.emails[0].value.trim().toLowerCase();
+
+			if (!email) {
+				throw await redirectWithToast('/login', {
+					title: 'No email found',
+					description: 'Please add a verified email to your GitHub account.',
+				});
+			}
+
+			const username = profile.displayName;
+			const imageUrl = profile.photos[0].value;
+
+			return {
+				email,
+				id: profile.id,
+				username,
+				name: profile.name.givenName,
+				imageUrl,
+			};
+		},
+	),
+	'github',
+);
 
 export async function getUserId(request: Request) {
 	const cookieSession = await authSessionStorage.getSession(

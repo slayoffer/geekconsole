@@ -23,6 +23,7 @@ export {
 	verifyUserPassword,
 	getPasswordHash,
 	resetUserPassword,
+	authenticator,
 	SESSION_KEY,
 } from './auth/auth.server.ts';
 export {
@@ -33,3 +34,4 @@ export {
 } from './permissions/permissions.ts';
 export { sendEmail } from './email/email.server.ts';
 export { verifySessionStorage } from './verification/verification.server.ts';
+export { connectionSessionStorage } from './connections/connections.server.ts';

@@ -12,6 +12,7 @@ import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
 import { HoneypotInputs } from 'remix-utils/honeypot/react';
 import { safeRedirect } from 'remix-utils/safe-redirect';
 import { z } from 'zod';
+import { ProviderConnectionForm } from '~/app/core/components/providers/index.ts';
 import {
 	SESSION_KEY,
 	authSessionStorage,
@@ -322,6 +323,9 @@ export default function LoginRoute() {
 								</StatusButton>
 							</div>
 						</Form>
+						<div className="mt-5 flex flex-col gap-5 border-y-2 border-border py-3">
+							<ProviderConnectionForm type="Login" providerName="github" />
+						</div>
 						<div className="flex items-center justify-center gap-2 pt-6">
 							<span className="text-muted-foreground">New here?</span>
 							<Link
