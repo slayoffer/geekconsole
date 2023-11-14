@@ -19,6 +19,7 @@ export {
 	requireUserId,
 	login,
 	signup,
+	signupWithConnection,
 	getUserId,
 	verifyUserPassword,
 	getPasswordHash,
@@ -40,3 +41,4 @@ export {
 	handleMockAction,
 	resolveConnectionData,
 } from './connections/connections.server.ts';
+export { GitHubProvider } from './github/github.server.ts';

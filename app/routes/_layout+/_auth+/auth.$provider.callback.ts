@@ -1,14 +1,22 @@
-import { type DataFunctionArgs } from '@remix-run/node';
+import { redirect, type DataFunctionArgs } from '@remix-run/node';
 import {
 	ProviderNameSchema,
 	providerLabels,
 } from '~/app/core/components/providers/index.ts';
 import {
 	authenticator,
+	getSessionExpirationDate,
 	getUserId,
 	prisma,
 	redirectWithToast,
+	verifySessionStorage,
 } from '~/app/core/server/index.ts';
+import { handleNewSession } from './login.tsx';
+import {
+	ONBOARDING_EMAIL_SESSION_KEY,
+	PROVIDER_ID_KEY,
+	PREFILLED_PROFILE_KEY,
+} from './onboarding_.$provider.tsx';
 
 export async function loader({ request, params }: DataFunctionArgs) {
 	const providerName = ProviderNameSchema.parse(params.provider);
@@ -46,9 +54,35 @@ export async function loader({ request, params }: DataFunctionArgs) {
 		});
 	}
 
-	throw await redirectWithToast('/login', {
-		title: 'Auth Success (jk)',
-		description: `You have successfully authenticated with ${label} (not really though...).`,
-		type: 'success',
+	if (existingConnection) {
+		const session = await prisma.session.create({
+			select: { id: true, expirationDate: true, userId: true },
+			data: {
+				expirationDate: getSessionExpirationDate(),
+				userId: existingConnection.userId,
+			},
+		});
+
+		return handleNewSession({ request, session, remember: true });
+	}
+
+	const verifySession = await verifySessionStorage.getSession(
+		request.headers.get('cookie'),
+	);
+	verifySession.set(ONBOARDING_EMAIL_SESSION_KEY, profile.email);
+	verifySession.set(PREFILLED_PROFILE_KEY, {
+		...profile,
+		username: profile.username
+			?.replace(/[^a-zA-Z0-9_]/g, '_')
+			.toLowerCase()
+			.slice(0, 20)
+			.padEnd(3, '_'),
+	});
+	verifySession.set(PROVIDER_ID_KEY, profile.id);
+
+	return redirect(`/onboarding/${providerName}`, {
+		headers: {
+			'set-cookie': await verifySessionStorage.commitSession(verifySession),
+		},
 	});
 }

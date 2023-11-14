@@ -135,7 +135,7 @@ const passthroughGitHub =
 
 export const handlers: Array<HttpHandler> = [
 	// test this github stuff out without going through github's oauth flow by
-	// going to http://localhost:3000/auth/github/callback?code=MOCK_GITHUB_CODE_KODY&state=MOCK_STATE
+	// going to http://localhost:3000/auth/github/callback?code=MOCK_GITHUB_CODE_VOLODYA&state=MOCK_STATE
 	http.post(
 		'https://github.com/login/oauth/access_token',
 		async ({ request }) => {

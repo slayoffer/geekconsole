@@ -1,13 +1,12 @@
 import { conform, useForm } from '@conform-to/react';
 import { getFieldsetConstraint, parse } from '@conform-to/zod';
-import { json, type DataFunctionArgs, redirect } from '@remix-run/node';
 import {
+	json,
+	redirect,
+	type DataFunctionArgs,
 	type MetaFunction,
-	Form,
-	Link,
-	useActionData,
-	useSearchParams,
-} from '@remix-run/react';
+} from '@remix-run/node';
+import { Form, Link, useActionData, useSearchParams } from '@remix-run/react';
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
 import { HoneypotInputs } from 'remix-utils/honeypot/react';
 import { safeRedirect } from 'remix-utils/safe-redirect';
@@ -24,12 +23,6 @@ import {
 	validateCSRF,
 	verifySessionStorage,
 } from '~/app/core/server/index.ts';
-import {
-	getRedirectToUrl,
-	type VerifyFunctionArgs,
-} from '~/app/routes/_layout+/_auth+/verify.tsx';
-import { twoFAVerificationType } from '~/app/routes/_layout+/settings+/profile.two-factor.tsx';
-
 import { useIsPending } from '~/app/shared/lib/hooks/index.ts';
 import { invariant } from '~/app/shared/lib/utils/index.ts';
 import { PasswordSchema, UsernameSchema } from '~/app/shared/schemas/index.ts';
@@ -41,21 +34,55 @@ import {
 	Spacer,
 	StatusButton,
 } from '~/app/shared/ui/index.ts';
+import { twoFAVerificationType } from '../settings+/profile.two-factor.tsx';
+import { getRedirectToUrl, type VerifyFunctionArgs } from './verify.tsx';
 
-export const meta: MetaFunction = () => {
-	return [{ title: 'Login to Geek Console' }];
-};
-
-const LoginFormSchema = z.object({
-	username: UsernameSchema,
-	password: PasswordSchema,
-	redirectTo: z.string().optional(),
-	remember: z.boolean().optional(),
-});
-
-const UNVERIFIED_SESSION_KEY = 'unverified-session-id';
-const REMEMBER_ME_KEY = 'remember-me';
 const VERIFIED_TIME_KEY = 'verified-time';
+const UNVERIFIED_SESSION_KEY = 'unverified-session-id';
+const REMEMBER_KEY = 'remember-me';
+
+export async function handleNewSession({
+	request,
+	session,
+	redirectTo,
+	remember = false,
+}: {
+	request: Request;
+	session: { userId: string; id: string; expirationDate: Date };
+	redirectTo?: string;
+	remember?: boolean;
+}) {
+	if (await shouldRequestTwoFA({ request, userId: session.userId })) {
+		const verifySession = await verifySessionStorage.getSession();
+		verifySession.set(UNVERIFIED_SESSION_KEY, session.id);
+		verifySession.set(REMEMBER_KEY, remember);
+
+		const redirectUrl = getRedirectToUrl({
+			request,
+			type: twoFAVerificationType,
+			target: session.userId,
+		});
+
+		return redirect(redirectUrl.toString(), {
+			headers: {
+				'set-cookie': await verifySessionStorage.commitSession(verifySession),
+			},
+		});
+	} else {
+		const cookieSession = await authSessionStorage.getSession(
+			request.headers.get('cookie'),
+		);
+		cookieSession.set(SESSION_KEY, session.id);
+
+		return redirect(safeRedirect(redirectTo), {
+			headers: {
+				'set-cookie': await authSessionStorage.commitSession(cookieSession, {
+					expires: remember ? session.expirationDate : undefined,
+				}),
+			},
+		});
+	}
+}
 
 export async function handleVerification({
 	request,
@@ -66,18 +93,16 @@ export async function handleVerification({
 	const cookieSession = await authSessionStorage.getSession(
 		request.headers.get('cookie'),
 	);
+	cookieSession.set(VERIFIED_TIME_KEY, Date.now());
 
 	const verifySession = await verifySessionStorage.getSession(
 		request.headers.get('cookie'),
 	);
-
-	const remember = verifySession.get(REMEMBER_ME_KEY);
+	const remember = verifySession.get(REMEMBER_KEY);
 
 	const { redirectTo } = submission.value;
 
 	const headers = new Headers();
-
-	cookieSession.set(VERIFIED_TIME_KEY, Date.now());
 
 	const unverifiedSessionId = verifySession.get(UNVERIFIED_SESSION_KEY);
 
@@ -142,13 +167,18 @@ export async function shouldRequestTwoFA({
 	const cookieSession = await authSessionStorage.getSession(
 		request.headers.get('cookie'),
 	);
-
 	const verifiedTime = cookieSession.get(VERIFIED_TIME_KEY) ?? new Date(0);
+	const twoHours = 1000 * 60 * 60 * 2;
 
-	const TWO_HOURS = 1000 * 60 * 60 * 2;
-
-	return Date.now() - verifiedTime > TWO_HOURS;
+	return Date.now() - verifiedTime > twoHours;
 }
+
+const LoginFormSchema = z.object({
+	username: UsernameSchema,
+	password: PasswordSchema,
+	redirectTo: z.string().optional(),
+	remember: z.boolean().optional(),
+});
 
 export async function loader({ request }: DataFunctionArgs) {
 	await requireAnonymous(request);
@@ -199,41 +229,10 @@ export async function action({ request }: DataFunctionArgs) {
 
 	const { session, remember, redirectTo } = submission.value;
 
-	if (await shouldRequestTwoFA({ request, userId: session.userId })) {
-		const verifySession = await verifySessionStorage.getSession();
-
-		verifySession.set(UNVERIFIED_SESSION_KEY, session.id);
-		verifySession.set(REMEMBER_ME_KEY, remember);
-
-		const redirectUrl = getRedirectToUrl({
-			request,
-			type: twoFAVerificationType,
-			target: session.userId,
-		});
-
-		return redirect(redirectUrl.toString(), {
-			headers: {
-				'set-cookie': await verifySessionStorage.commitSession(verifySession),
-			},
-		});
-	} else {
-		const cookieSession = await authSessionStorage.getSession(
-			request.headers.get('cookie'),
-		);
-
-		cookieSession.set(SESSION_KEY, session.id);
-
-		return redirect(safeRedirect(redirectTo), {
-			headers: {
-				'set-cookie': await authSessionStorage.commitSession(cookieSession, {
-					expires: remember ? session.expirationDate : undefined,
-				}),
-			},
-		});
-	}
+	return handleNewSession({ request, session, remember, redirectTo });
 }
 
-export default function LoginRoute() {
+export default function LoginPage() {
 	const actionData = useActionData<typeof action>();
 	const isPending = useIsPending();
 	const [searchParams] = useSearchParams();
@@ -344,6 +343,10 @@ export default function LoginRoute() {
 		</div>
 	);
 }
+
+export const meta: MetaFunction = () => {
+	return [{ title: 'Login to Geek Console' }];
+};
 
 export function ErrorBoundary() {
 	return <GeneralErrorBoundary />;

@@ -1,14 +1,19 @@
-import { type Password, type User } from '@prisma/client';
+import { type Connection, type Password, type User } from '@prisma/client';
 import { redirect } from '@remix-run/node';
 import bcrypt from 'bcryptjs';
 import { Authenticator } from 'remix-auth';
-import { GitHubStrategy } from 'remix-auth-github';
 import { safeRedirect } from 'remix-utils/safe-redirect';
-import { combineResponseInits } from '~/app/shared/lib/utils/index.ts';
-import { connectionSessionStorage } from '../connections/connections.server.ts';
+import { type ProviderName } from '~/app/core/components/providers/index.ts';
+import {
+	combineResponseInits,
+	downloadFile,
+} from '~/app/shared/lib/utils/index.ts';
+import {
+	connectionSessionStorage,
+	providers,
+} from '../connections/connections.server.ts';
 import { prisma } from '../db/db.server.ts';
 import { authSessionStorage } from '../session/session.server.ts';
-import { redirectWithToast } from '../toast/toast.server.ts';
 
 export { bcrypt };
 
@@ -30,37 +35,9 @@ export const authenticator = new Authenticator<ProviderUser>(
 	connectionSessionStorage,
 );
 
-authenticator.use(
-	new GitHubStrategy(
-		{
-			clientID: process.env.GITHUB_CLIENT_ID,
-			clientSecret: process.env.GITHUB_CLIENT_SECRET,
-			callbackURL: '/auth/github/callback',
-		},
-		async ({ profile }) => {
-			const email = profile.emails[0].value.trim().toLowerCase();
-
-			if (!email) {
-				throw await redirectWithToast('/login', {
-					title: 'No email found',
-					description: 'Please add a verified email to your GitHub account.',
-				});
-			}
-
-			const username = profile.displayName;
-			const imageUrl = profile.photos[0].value;
-
-			return {
-				email,
-				id: profile.id,
-				username,
-				name: profile.name.givenName,
-				imageUrl,
-			};
-		},
-	),
-	'github',
-);
+for (const [providerName, provider] of Object.entries(providers)) {
+	authenticator.use(provider.getAuthStrategy(), providerName);
+}
 
 export async function getUserId(request: Request) {
 	const cookieSession = await authSessionStorage.getSession(
@@ -172,6 +149,43 @@ export async function signup({
 							hash: hashedPassword,
 						},
 					},
+				},
+			},
+		},
+		select: { id: true, expirationDate: true },
+	});
+
+	return session;
+}
+
+export async function signupWithConnection({
+	email,
+	username,
+	name,
+	providerId,
+	providerName,
+	imageUrl,
+}: {
+	email: User['email'];
+	username: User['username'];
+	name: User['name'];
+	providerId: Connection['providerId'];
+	providerName: ProviderName;
+	imageUrl?: string;
+}) {
+	const session = await prisma.session.create({
+		data: {
+			expirationDate: getSessionExpirationDate(),
+			user: {
+				create: {
+					email: email.toLowerCase(),
+					username: username.toLowerCase(),
+					name,
+					roles: { connect: { name: 'user' } },
+					connections: { create: { providerId, providerName } },
+					image: imageUrl
+						? { create: await downloadFile(imageUrl) }
+						: undefined,
 				},
 			},
 		},
