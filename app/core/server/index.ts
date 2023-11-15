@@ -19,6 +19,7 @@ export {
 	requireUserId,
 	login,
 	signup,
+	logout,
 	signupWithConnection,
 	getUserId,
 	verifyUserPassword,
@@ -42,3 +43,15 @@ export {
 	resolveConnectionData,
 } from './connections/connections.server.ts';
 export { GitHubProvider } from './github/github.server.ts';
+export {
+	getRedirectCookieHeader,
+	getRedirectCookieValue,
+	destroyRedirectToHeader,
+} from './redirect/redirectCookie.server.ts';
+export {
+	redirectWithConfetti,
+	getConfetti,
+} from './confetti/confetti.server.ts';
+export { makeTimings, time } from './timing/timing.server.ts';
+export * from './litefs/litefs.server.ts';
+export * from './totp/totp.server.ts';

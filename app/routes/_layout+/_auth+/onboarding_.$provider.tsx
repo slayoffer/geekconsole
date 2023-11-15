@@ -21,6 +21,7 @@ import {
 	authSessionStorage,
 	authenticator,
 	prisma,
+	redirectWithConfetti,
 	requireAnonymous,
 	signupWithConnection,
 	verifySessionStorage,
@@ -86,7 +87,7 @@ async function requireData({
 export async function loader({ request, params }: DataFunctionArgs) {
 	const { email } = await requireData({ request, params });
 
-	const cookieSession = await authSessionStorage.getSession(
+	const authSession = await authSessionStorage.getSession(
 		request.headers.get('cookie'),
 	);
 
@@ -96,7 +97,7 @@ export async function loader({ request, params }: DataFunctionArgs) {
 
 	const prefilledProfile = verifySession.get(PREFILLED_PROFILE_KEY);
 
-	const formError = cookieSession.get(authenticator.sessionErrorKey);
+	const formError = authSession.get(authenticator.sessionErrorKey);
 
 	return json({
 		email,
@@ -162,17 +163,16 @@ export async function action({ request, params }: DataFunctionArgs) {
 
 	const { session, remember, redirectTo } = submission.value;
 
-	const cookieSession = await authSessionStorage.getSession(
+	const authSession = await authSessionStorage.getSession(
 		request.headers.get('cookie'),
 	);
-
-	cookieSession.set(SESSION_KEY, session.id);
+	authSession.set(SESSION_KEY, session.id);
 
 	const headers = new Headers();
 
 	headers.append(
 		'set-cookie',
-		await authSessionStorage.commitSession(cookieSession, {
+		await authSessionStorage.commitSession(authSession, {
 			expires: remember ? session.expirationDate : undefined,
 		}),
 	);
@@ -182,18 +182,13 @@ export async function action({ request, params }: DataFunctionArgs) {
 		await verifySessionStorage.destroySession(verifySession),
 	);
 
-	return redirect(safeRedirect(redirectTo), { headers });
+	return redirectWithConfetti(safeRedirect(redirectTo), { headers });
 }
 
-export async function handleVerification({
-	request,
-	submission,
-}: VerifyFunctionArgs) {
+export async function handleVerification({ submission }: VerifyFunctionArgs) {
 	invariant(submission.value, 'submission.value should be defined by now');
 
-	const verifySession = await verifySessionStorage.getSession(
-		request.headers.get('cookie'),
-	);
+	const verifySession = await verifySessionStorage.getSession();
 	verifySession.set(ONBOARDING_EMAIL_SESSION_KEY, submission.value.target);
 
 	return redirect('/onboarding', {
@@ -203,10 +198,6 @@ export async function handleVerification({
 	});
 }
 
-export const meta: MetaFunction = () => {
-	return [{ title: 'Setup Epic Notes Account' }];
-};
-
 export default function SignupRoute() {
 	const data = useLoaderData<typeof loader>();
 	const actionData = useActionData<typeof action>();
@@ -215,7 +206,7 @@ export default function SignupRoute() {
 	const redirectTo = searchParams.get('redirectTo');
 
 	const [form, fields] = useForm({
-		id: 'signup-form',
+		id: 'onboarding-provider-form',
 		constraint: getFieldsetConstraint(SignupFormSchema),
 		lastSubmission: actionData?.submission ?? data.submission,
 		onValidate({ formData }) {
@@ -317,3 +308,7 @@ export default function SignupRoute() {
 		</div>
 	);
 }
+
+export const meta: MetaFunction = () => {
+	return [{ title: 'Setup Geek Console Account' }];
+};

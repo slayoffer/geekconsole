@@ -16,6 +16,7 @@ import {
 	SESSION_KEY,
 	authSessionStorage,
 	checkHoneypot,
+	getUserId,
 	login,
 	prisma,
 	redirectWithToast,
@@ -24,7 +25,10 @@ import {
 	verifySessionStorage,
 } from '~/app/core/server/index.ts';
 import { useIsPending } from '~/app/shared/lib/hooks/index.ts';
-import { invariant } from '~/app/shared/lib/utils/index.ts';
+import {
+	combineResponseInits,
+	invariant,
+} from '~/app/shared/lib/utils/index.ts';
 import { PasswordSchema, UsernameSchema } from '~/app/shared/schemas/index.ts';
 import {
 	CheckboxField,
@@ -41,18 +45,30 @@ const VERIFIED_TIME_KEY = 'verified-time';
 const UNVERIFIED_SESSION_KEY = 'unverified-session-id';
 const REMEMBER_KEY = 'remember-me';
 
-export async function handleNewSession({
-	request,
-	session,
-	redirectTo,
-	remember = false,
-}: {
-	request: Request;
-	session: { userId: string; id: string; expirationDate: Date };
-	redirectTo?: string;
-	remember?: boolean;
-}) {
-	if (await shouldRequestTwoFA({ request, userId: session.userId })) {
+export async function handleNewSession(
+	{
+		request,
+		session,
+		redirectTo,
+		remember,
+	}: {
+		request: Request;
+		session: { userId: string; id: string; expirationDate: Date };
+		redirectTo?: string;
+		remember: boolean;
+	},
+	responseInit?: ResponseInit,
+) {
+	const verification = await prisma.verification.findUnique({
+		select: { id: true },
+		where: {
+			target_type: { target: session.userId, type: twoFAVerificationType },
+		},
+	});
+
+	const userHasTwoFactor = Boolean(verification);
+
+	if (userHasTwoFactor) {
 		const verifySession = await verifySessionStorage.getSession();
 		verifySession.set(UNVERIFIED_SESSION_KEY, session.id);
 		verifySession.set(REMEMBER_KEY, remember);
@@ -61,26 +77,40 @@ export async function handleNewSession({
 			request,
 			type: twoFAVerificationType,
 			target: session.userId,
+			redirectTo,
 		});
 
-		return redirect(redirectUrl.toString(), {
-			headers: {
-				'set-cookie': await verifySessionStorage.commitSession(verifySession),
-			},
-		});
+		return redirect(
+			`${redirectUrl.pathname}?${redirectUrl.searchParams}`,
+			combineResponseInits(
+				{
+					headers: {
+						'set-cookie':
+							await verifySessionStorage.commitSession(verifySession),
+					},
+				},
+				responseInit,
+			),
+		);
 	} else {
-		const cookieSession = await authSessionStorage.getSession(
+		const authSession = await authSessionStorage.getSession(
 			request.headers.get('cookie'),
 		);
-		cookieSession.set(SESSION_KEY, session.id);
+		authSession.set(SESSION_KEY, session.id);
 
-		return redirect(safeRedirect(redirectTo), {
-			headers: {
-				'set-cookie': await authSessionStorage.commitSession(cookieSession, {
-					expires: remember ? session.expirationDate : undefined,
-				}),
-			},
-		});
+		return redirect(
+			safeRedirect(redirectTo),
+			combineResponseInits(
+				{
+					headers: {
+						'set-cookie': await authSessionStorage.commitSession(authSession, {
+							expires: remember ? session.expirationDate : undefined,
+						}),
+					},
+				},
+				responseInit,
+			),
+		);
 	}
 }
 
@@ -143,18 +173,18 @@ export async function handleVerification({
 	return redirect(safeRedirect(redirectTo), { headers });
 }
 
-export async function shouldRequestTwoFA({
-	request,
-	userId,
-}: {
-	request: Request;
-	userId: string;
-}) {
+export async function shouldRequestTwoFA(request: Request) {
+	const authSession = await authSessionStorage.getSession(
+		request.headers.get('cookie'),
+	);
 	const verifySession = await verifySessionStorage.getSession(
 		request.headers.get('cookie'),
 	);
 
 	if (verifySession.has(UNVERIFIED_SESSION_KEY)) return true;
+
+	const userId = await getUserId(request);
+	if (!userId) return false;
 
 	// if it's over two hours since they last verified, we should request 2FA again
 	const userHasTwoFA = await prisma.verification.findUnique({
@@ -164,11 +194,8 @@ export async function shouldRequestTwoFA({
 
 	if (!userHasTwoFA) return false;
 
-	const cookieSession = await authSessionStorage.getSession(
-		request.headers.get('cookie'),
-	);
-	const verifiedTime = cookieSession.get(VERIFIED_TIME_KEY) ?? new Date(0);
-	const twoHours = 1000 * 60 * 60 * 2;
+	const verifiedTime = authSession.get(VERIFIED_TIME_KEY) ?? new Date(0);
+	const twoHours = 1000 * 60 * 2;
 
 	return Date.now() - verifiedTime > twoHours;
 }
@@ -229,7 +256,12 @@ export async function action({ request }: DataFunctionArgs) {
 
 	const { session, remember, redirectTo } = submission.value;
 
-	return handleNewSession({ request, session, remember, redirectTo });
+	return handleNewSession({
+		request,
+		session,
+		remember: remember ?? false,
+		redirectTo,
+	});
 }
 
 export default function LoginPage() {
@@ -323,7 +355,11 @@ export default function LoginPage() {
 							</div>
 						</Form>
 						<div className="mt-5 flex flex-col gap-5 border-y-2 border-border py-3">
-							<ProviderConnectionForm type="Login" providerName="github" />
+							<ProviderConnectionForm
+								type="Login"
+								providerName="github"
+								redirectTo={redirectTo}
+							/>
 						</div>
 						<div className="flex items-center justify-center gap-2 pt-6">
 							<span className="text-muted-foreground">New here?</span>

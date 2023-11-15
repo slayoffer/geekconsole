@@ -10,3 +10,4 @@ export { getDomainUrl } from './getDomainUrl/getDomainUrl.ts';
 export { getReferrerRoute } from './getReferrerRoute/getReferrerRoute.ts';
 export { invariant } from './invariant/invariant.ts';
 export { mergeHeaders } from './mergeHeaders/mergeHeaders.ts';
+export { getUserImgSrc, getBookImgSrc } from './getImgSrc/getImgSrc.ts';

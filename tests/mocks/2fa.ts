@@ -1,4 +1,4 @@
-import { generateTOTP } from '@epic-web/totp';
+import { generateTOTP } from '~/app/core/server/index.ts';
 
 // Paste your string here. It should start with "otpauth://totp/" and include a secret and other params
 const otpString = ``;

@@ -21,6 +21,7 @@ import {
 	authSessionStorage,
 	checkHoneypot,
 	prisma,
+	redirectWithConfetti,
 	requireAnonymous,
 	signup,
 	validateCSRF,
@@ -151,7 +152,7 @@ export async function action({ request }: DataFunctionArgs) {
 		await verifySessionStorage.destroySession(verifySession),
 	);
 
-	return redirect(safeRedirect(redirectTo), { headers });
+	return redirectWithConfetti(safeRedirect(redirectTo), { headers });
 }
 
 export async function handleVerification({
@@ -172,10 +173,6 @@ export async function handleVerification({
 		},
 	});
 }
-
-export const meta: MetaFunction = () => {
-	return [{ title: 'Setup Geek Console Account' }];
-};
 
 export default function OnboardingRoute() {
 	const data = useLoaderData<typeof loader>();
@@ -293,3 +290,7 @@ export default function OnboardingRoute() {
 		</div>
 	);
 }
+
+export const meta: MetaFunction = () => {
+	return [{ title: 'Setup Geek Console Account' }];
+};

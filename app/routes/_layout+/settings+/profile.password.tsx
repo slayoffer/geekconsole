@@ -1,5 +1,6 @@
 import { conform, useForm } from '@conform-to/react';
 import { getFieldsetConstraint, parse } from '@conform-to/zod';
+import { type SEOHandle } from '@nasa-gcn/remix-seo';
 import { json, redirect, type DataFunctionArgs } from '@remix-run/node';
 import { Form, Link, useActionData } from '@remix-run/react';
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
@@ -7,6 +8,7 @@ import { z } from 'zod';
 import {
 	getPasswordHash,
 	prisma,
+	redirectWithToast,
 	requireUserId,
 	validateCSRF,
 	verifyUserPassword,
@@ -20,9 +22,11 @@ import {
 	Icon,
 	StatusButton,
 } from '~/app/shared/ui/index.ts';
+import { type BreadcrumbHandle } from './profile.tsx';
 
-export const handle = {
+export const handle: BreadcrumbHandle & SEOHandle = {
 	breadcrumb: <Icon name="dots-horizontal">Password</Icon>,
+	getSitemapEntries: () => null,
 };
 
 const ChangePasswordForm = z
@@ -41,8 +45,28 @@ const ChangePasswordForm = z
 		}
 	});
 
+async function requirePassword(userId: string) {
+	const password = await prisma.password.findUnique({
+		select: { userId: true },
+		where: { userId },
+	});
+
+	if (!password) {
+		throw redirect('/settings/profile/password/create');
+	}
+}
+
+export async function loader({ request }: DataFunctionArgs) {
+	const userId = await requireUserId(request);
+	await requirePassword(userId);
+
+	return json({});
+}
+
 export async function action({ request }: DataFunctionArgs) {
 	const userId = await requireUserId(request);
+
+	await requirePassword(userId);
 
 	const formData = await request.formData();
 
@@ -57,10 +81,11 @@ export async function action({ request }: DataFunctionArgs) {
 						{ id: userId },
 						currentPassword,
 					);
+
 					if (!user) {
 						ctx.addIssue({
 							path: ['currentPassword'],
-							code: 'custom',
+							code: z.ZodIssueCode.custom,
 							message: 'Incorrect password.',
 						});
 					}
@@ -95,7 +120,15 @@ export async function action({ request }: DataFunctionArgs) {
 		},
 	});
 
-	return redirect(`/settings/profile`);
+	return redirectWithToast(
+		`/settings/profile`,
+		{
+			type: 'success',
+			title: 'Password Changed',
+			description: 'Your password has been changed.',
+		},
+		{ status: 302 },
+	);
 }
 
 export default function ChangePasswordRoute() {
@@ -103,7 +136,7 @@ export default function ChangePasswordRoute() {
 	const isPending = useIsPending();
 
 	const [form, fields] = useForm({
-		id: 'signup-form',
+		id: 'password-change-form',
 		constraint: getFieldsetConstraint(ChangePasswordForm),
 		lastSubmission: actionData?.submission,
 		onValidate({ formData }) {
@@ -115,6 +148,7 @@ export default function ChangePasswordRoute() {
 	return (
 		<Form method="POST" {...form.props} className="mx-auto max-w-md">
 			<AuthenticityTokenInput />
+
 			<Field
 				labelProps={{ children: 'Current Password' }}
 				inputProps={conform.input(fields.currentPassword, { type: 'password' })}
@@ -132,7 +166,9 @@ export default function ChangePasswordRoute() {
 				})}
 				errors={fields.confirmNewPassword.errors}
 			/>
+
 			<ErrorList id={form.errorId} errors={form.errors} />
+
 			<div className="grid w-full grid-cols-2 gap-6">
 				<Button variant="secondary" asChild>
 					<Link to="..">Cancel</Link>

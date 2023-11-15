@@ -1,5 +1,5 @@
 import { z } from 'zod';
 
 export const ThemeFormSchema = z.object({
-	theme: z.enum(['light', 'dark']),
+	theme: z.enum(['light', 'dark', 'system']),
 });

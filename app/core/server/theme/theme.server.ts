@@ -1,7 +1,7 @@
 import * as cookie from 'cookie';
 
 const COOKIE_NAME = 'theme';
-export type Theme = 'light' | 'dark';
+export type Theme = 'light' | 'dark' | 'system';
 
 export function getTheme(request: Request): Theme {
 	const cookieHeader = request.headers.get('cookie');

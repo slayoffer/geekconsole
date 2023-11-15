@@ -6,9 +6,9 @@ import {
 	Header,
 	LogoutTimer,
 } from '~/app/core/components/layoutComponents/index.ts';
-import { CustomToaster } from '~/app/shared/ui/index.ts';
-import { type loader as rootLoader } from '../root.tsx';
-import { useOptionalUser } from '../shared/lib/hooks/index.ts';
+import { type loader as rootLoader } from '~/app/root.tsx';
+import { useOptionalUser } from '~/app/shared/lib/hooks/index.ts';
+import { Confetti, CustomToaster } from '~/app/shared/ui/index.ts';
 
 export default function Layout() {
 	const data = useRouteLoaderData<typeof rootLoader>('root');
@@ -24,6 +24,8 @@ export default function Layout() {
 
 			<GlobalLoading />
 			<CustomToaster toast={data?.toast ?? null} />
+			<Confetti id={data?.confettiId} />
+
 			{maybeUser ? <LogoutTimer /> : null}
 		</>
 	);

@@ -1,8 +1,8 @@
-import { generateTOTP } from '@epic-web/totp';
 import { json, redirect, type DataFunctionArgs } from '@remix-run/node';
 import { Link, Form, useLoaderData } from '@remix-run/react';
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
 import {
+	generateTOTP,
 	prisma,
 	requireUserId,
 	validateCSRF,

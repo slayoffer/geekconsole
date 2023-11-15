@@ -1,19 +1,18 @@
 import { type Submission, conform, useForm } from '@conform-to/react';
 import { getFieldsetConstraint, parse } from '@conform-to/zod';
-import { generateTOTP, verifyTOTP } from '@epic-web/totp';
 import { json, type DataFunctionArgs } from '@remix-run/node';
-import {
-	Form,
-	useActionData,
-	useLoaderData,
-	useSearchParams,
-} from '@remix-run/react';
+import { Form, useActionData, useSearchParams } from '@remix-run/react';
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
+import { HoneypotInputs } from 'remix-utils/honeypot/react';
 import { z } from 'zod';
 import {
+	ensurePrimary,
+	generateTOTP,
 	prisma,
 	redirectWithToast,
+	requireUserId,
 	validateCSRF,
+	verifyTOTP,
 } from '~/app/core/server/index.ts';
 import { handleVerification as handleChangeEmailVerification } from '~/app/routes/_layout+/settings+/profile.change-email.tsx';
 import { twoFAVerificationType } from '~/app/routes/_layout+/settings+/profile.two-factor.tsx';
@@ -80,16 +79,12 @@ export async function action({ request }: DataFunctionArgs) {
 	return validateRequest(request, formData);
 }
 
-export async function requireRecentVerification({
-	request,
-	userId,
-}: {
-	request: Request;
-	userId: string;
-}) {
-	if (await shouldRequestTwoFA({ request, userId })) {
-		const reqUrl = new URL(request.url);
+export async function requireRecentVerification(request: Request) {
+	const userId = await requireUserId(request);
+	const shouldReverify = await shouldRequestTwoFA(request);
 
+	if (shouldReverify) {
+		const reqUrl = new URL(request.url);
 		const redirectUrl = getRedirectToUrl({
 			request,
 			target: userId,
@@ -132,25 +127,19 @@ export async function prepareVerification({
 	request,
 	type,
 	target,
-	redirectTo: postVerificationRedirectTo,
 }: {
 	period: number;
 	request: Request;
 	type: VerificationTypes;
 	target: string;
-	redirectTo?: string;
 }) {
-	const verifyUrl = getRedirectToUrl({
-		request,
-		type,
-		target,
-		redirectTo: postVerificationRedirectTo,
-	});
-
+	const verifyUrl = getRedirectToUrl({ request, type, target });
 	const redirectTo = new URL(verifyUrl.toString());
 
 	const { otp, ...verificationConfig } = generateTOTP({
 		algorithm: 'SHA256',
+		// Leaving off 0 and O on purpose to avoid confusing users.
+		charSet: 'ABCDEFGHIJKLMNPQRSTUVWXYZ123456789',
 		period,
 	});
 
@@ -194,10 +183,7 @@ export async function isCodeValid({
 
 	const result = verifyTOTP({
 		otp: code,
-		secret: verification.secret,
-		algorithm: verification.algorithm,
-		period: verification.period,
-		charSet: verification.charSet,
+		...verification,
 	});
 
 	if (!result) return false;
@@ -210,25 +196,23 @@ async function validateRequest(
 	body: URLSearchParams | FormData,
 ) {
 	const submission = await parse(body, {
-		schema: () =>
-			VerifySchema.superRefine(async (data, ctx) => {
-				const codeIsValid = await isCodeValid({
-					code: data[codeQueryParam],
-					type: data[typeQueryParam],
-					target: data[targetQueryParam],
+		schema: VerifySchema.superRefine(async (data, ctx) => {
+			const codeIsValid = await isCodeValid({
+				code: data[codeQueryParam],
+				type: data[typeQueryParam],
+				target: data[targetQueryParam],
+			});
+
+			if (!codeIsValid) {
+				ctx.addIssue({
+					path: ['code'],
+					code: z.ZodIssueCode.custom,
+					message: `Invalid code`,
 				});
 
-				if (!codeIsValid) {
-					ctx.addIssue({
-						path: ['code'],
-						code: z.ZodIssueCode.custom,
-						message: `Invalid code`,
-					});
-
-					return z.NEVER;
-				}
-			}),
-
+				return;
+			}
+		}),
 		async: true,
 	});
 
@@ -240,18 +224,22 @@ async function validateRequest(
 		return json({ status: 'error', submission } as const, { status: 400 });
 	}
 
+	// this code path could be part of a loader (GET request), so we need to make
+	// sure we're running on primary because we're about to make writes.
+	await ensurePrimary();
+
 	const { value: submissionValue } = submission;
 
-	const deleteVerification = async () => {
+	async function deleteVerification() {
 		await prisma.verification.delete({
 			where: {
 				target_type: {
-					target: submissionValue[targetQueryParam],
 					type: submissionValue[typeQueryParam],
+					target: submissionValue[targetQueryParam],
 				},
 			},
 		});
-	};
+	}
 
 	switch (submissionValue[typeQueryParam]) {
 		case 'reset-password': {
@@ -276,11 +264,14 @@ async function validateRequest(
 }
 
 export default function VerifyRoute() {
-	const data = useLoaderData<typeof loader>();
 	const [searchParams] = useSearchParams();
 	const isPending = useIsPending();
 	const actionData = useActionData<typeof action>();
-	const type = VerificationTypeSchema.parse(searchParams.get(typeQueryParam));
+
+	const parsedType = VerificationTypeSchema.safeParse(
+		searchParams.get(typeQueryParam),
+	);
+	const type = parsedType.success ? parsedType.data : null;
 
 	const checkEmail = (
 		<>
@@ -308,7 +299,7 @@ export default function VerifyRoute() {
 	const [form, fields] = useForm({
 		id: 'verify-form',
 		constraint: getFieldsetConstraint(VerifySchema),
-		lastSubmission: actionData?.submission ?? data.submission,
+		lastSubmission: actionData?.submission,
 		onValidate({ formData }) {
 			return parse(formData, { schema: VerifySchema });
 		},
@@ -321,8 +312,10 @@ export default function VerifyRoute() {
 	});
 
 	return (
-		<div className="container flex flex-col justify-center pb-32 pt-20">
-			<div className="text-center">{headings[type]}</div>
+		<main className="container flex flex-col justify-center pb-32 pt-20">
+			<div className="text-center">
+				{type ? headings[type] : 'Invalid Verification Type'}
+			</div>
 
 			<Spacer size="xs" />
 
@@ -333,6 +326,7 @@ export default function VerifyRoute() {
 				<div className="flex w-full gap-2">
 					<Form method="POST" {...form.props} className="flex-1">
 						<AuthenticityTokenInput />
+						<HoneypotInputs />
 
 						<Field
 							labelProps={{
@@ -366,6 +360,6 @@ export default function VerifyRoute() {
 					</Form>
 				</div>
 			</div>
-		</div>
+		</main>
 	);
 }

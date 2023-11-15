@@ -11,11 +11,11 @@ import { Form, useActionData, useSearchParams } from '@remix-run/react';
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
 import { HoneypotInputs } from 'remix-utils/honeypot/react';
 import { z } from 'zod';
+import { providerNames } from '~/app/core/components/providers/connections.tsx';
 import { ProviderConnectionForm } from '~/app/core/components/providers/index.ts';
 import {
 	checkHoneypot,
 	prisma,
-	requireAnonymous,
 	sendEmail,
 	validateCSRF,
 } from '~/app/core/server/index.ts';
@@ -31,13 +31,7 @@ import { prepareVerification } from './verify.tsx';
 
 const SignupSchema = z.object({
 	email: EmailSchema,
-	redirectTo: z.string().optional(),
 });
-
-export async function loader({ request }: DataFunctionArgs) {
-	await requireAnonymous(request);
-	return json({});
-}
 
 export async function action({ request }: DataFunctionArgs) {
 	const formData = await request.formData();
@@ -58,10 +52,10 @@ export async function action({ request }: DataFunctionArgs) {
 					code: z.ZodIssueCode.custom,
 					message: 'A user already exists with this email',
 				});
+
 				return;
 			}
 		}),
-
 		async: true,
 	});
 
@@ -73,23 +67,24 @@ export async function action({ request }: DataFunctionArgs) {
 		return json({ status: 'error', submission } as const, { status: 400 });
 	}
 
-	const { email, redirectTo: postVerificationRedirectTo } = submission.value;
+	const { email } = submission.value;
+
 	const { verifyUrl, redirectTo, otp } = await prepareVerification({
 		period: 10 * 60,
 		request,
 		type: 'onboarding',
 		target: email,
-		redirectTo: postVerificationRedirectTo,
 	});
 
 	const response = await sendEmail({
 		to: email,
-		subject: `Welcome to Geek Console!`,
+		subject: 'Welcome to Geek Console!',
 		react: <SignupEmail onboardingUrl={verifyUrl.toString()} otp={otp} />,
 	});
 
-	if (response.status === 'success') return redirect(redirectTo.toString());
-	else {
+	if (response.status === 'success') {
+		return redirect(redirectTo.toString());
+	} else {
 		submission.error[''] = [response.error.message];
 		return json({ status: 'error', submission } as const, { status: 500 });
 	}
@@ -122,21 +117,15 @@ export function SignupEmail({
 	);
 }
 
-export const meta: MetaFunction = () => {
-	return [{ title: 'Sign Up | Geek Console' }];
-};
-
 export default function SignupRoute() {
 	const actionData = useActionData<typeof action>();
 	const isPending = useIsPending();
-
 	const [searchParams] = useSearchParams();
 	const redirectTo = searchParams.get('redirectTo');
 
 	const [form, fields] = useForm({
 		id: 'signup-form',
 		constraint: getFieldsetConstraint(SignupSchema),
-		defaultValue: { redirectTo },
 		lastSubmission: actionData?.submission,
 		onValidate({ formData }) {
 			const result = parse(formData, { schema: SignupSchema });
@@ -167,8 +156,8 @@ export default function SignupRoute() {
 						errors={fields.email.errors}
 					/>
 
-					<input {...conform.input(fields.redirectTo, { type: 'hidden' })} />
 					<ErrorList errors={form.errors} id={form.errorId} />
+
 					<StatusButton
 						className="w-full"
 						status={isPending ? 'pending' : actionData?.status ?? 'idle'}
@@ -178,14 +167,25 @@ export default function SignupRoute() {
 						Submit
 					</StatusButton>
 				</Form>
-
-				<div className="mt-5 flex flex-col gap-5 border-y-2 border-border py-3">
-					<ProviderConnectionForm type="Signup" providerName="github" />
-				</div>
+				<ul className="mt-5 flex flex-col gap-5 border-y-2 border-border py-3">
+					{providerNames.map((providerName) => (
+						<li key={providerName}>
+							<ProviderConnectionForm
+								type="Signup"
+								providerName={providerName}
+								redirectTo={redirectTo}
+							/>
+						</li>
+					))}
+				</ul>
 			</div>
 		</div>
 	);
 }
+
+export const meta: MetaFunction = () => {
+	return [{ title: 'Sign Up | Geek Console' }];
+};
 
 export function ErrorBoundary() {
 	return <GeneralErrorBoundary />;

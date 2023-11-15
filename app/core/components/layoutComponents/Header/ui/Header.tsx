@@ -1,12 +1,13 @@
-import { Link } from '@remix-run/react';
+import { Link, useRouteLoaderData } from '@remix-run/react';
 
-import { useOptionalUser, useTheme } from '~/app/shared/lib/hooks/index.ts';
+import { type loader as rootLoader } from '~/app/root.tsx';
+import { useOptionalUser } from '~/app/shared/lib/hooks/index.ts';
 import { Button } from '~/app/shared/ui/index.ts';
 import { ThemeSwitcher, UserNav } from './components/index.ts';
 
 export const Header = () => {
 	const maybeUser = useOptionalUser();
-	const theme = useTheme();
+	const data = useRouteLoaderData<typeof rootLoader>('root');
 
 	return (
 		<header className="bg-background">
@@ -36,7 +37,7 @@ export const Header = () => {
 								</Button>
 							</div>
 						)}
-						<ThemeSwitcher userPreference={theme} />
+						<ThemeSwitcher userPreference={data?.requestInfo.userPrefs.theme} />
 					</div>
 				</div>
 			</nav>

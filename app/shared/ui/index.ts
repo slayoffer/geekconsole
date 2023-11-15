@@ -19,3 +19,4 @@ export * from './Spacer/Spacer.tsx';
 export * from './Checkbox/Checkbox.tsx';
 export * from './Forms/Forms.tsx';
 export * from './Toaster/Toaster.tsx';
+export * from './Confetti/Confetti.tsx';

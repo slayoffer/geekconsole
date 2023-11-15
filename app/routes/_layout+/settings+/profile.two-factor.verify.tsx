@@ -1,6 +1,5 @@
 import { conform, useForm } from '@conform-to/react';
 import { getFieldsetConstraint, parse } from '@conform-to/zod';
-import { getTOTPAuthUri } from '@epic-web/totp';
 import { json, redirect, type DataFunctionArgs } from '@remix-run/node';
 import {
 	Form,
@@ -12,6 +11,7 @@ import * as QRCode from 'qrcode';
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
 import { z } from 'zod';
 import {
+	getTOTPAuthUri,
 	prisma,
 	redirectWithToast,
 	requireUserId,

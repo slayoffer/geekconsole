@@ -1,6 +1,7 @@
 import { conform, useForm } from '@conform-to/react';
 import { getFieldsetConstraint, parse } from '@conform-to/zod';
-import { json, redirect, type DataFunctionArgs } from '@remix-run/node';
+import { type SEOHandle } from '@nasa-gcn/remix-seo';
+import { json, type DataFunctionArgs } from '@remix-run/node';
 import { Link, useFetcher, useLoaderData } from '@remix-run/react';
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
 import { z } from 'zod';
@@ -8,11 +9,15 @@ import {
 	SESSION_KEY,
 	authSessionStorage,
 	prisma,
+	redirectWithToast,
 	requireUserId,
 	validateCSRF,
 } from '~/app/core/server/index.ts';
 import { useDoubleCheck } from '~/app/shared/lib/hooks/index.ts';
-import { invariantResponse } from '~/app/shared/lib/utils/index.ts';
+import {
+	getUserImgSrc,
+	invariantResponse,
+} from '~/app/shared/lib/utils/index.ts';
 import { NameSchema, UsernameSchema } from '~/app/shared/schemas/index.ts';
 import {
 	Button,
@@ -23,6 +28,20 @@ import {
 } from '~/app/shared/ui/index.ts';
 import { twoFAVerificationType } from './profile.two-factor.tsx';
 
+export const handle: SEOHandle = {
+	getSitemapEntries: () => null,
+};
+
+type ProfileActionArgs = {
+	request: Request;
+	userId: string;
+	formData: FormData;
+};
+
+const PROFILE_UPDATE_ACTION_INTENT = 'update-profile';
+const DELETE_DATA_ACTION_INTENT = 'delete-data';
+const SIGN_OUT_OF_SESSIONS_ACTION_INTENT = 'sign-out-of-sessions';
+
 const ProfileFormSchema = z.object({
 	name: NameSchema.optional(),
 	username: UsernameSchema,
@@ -30,6 +49,7 @@ const ProfileFormSchema = z.object({
 
 export async function loader({ request }: DataFunctionArgs) {
 	const userId = await requireUserId(request);
+
 	const user = await prisma.user.findUniqueOrThrow({
 		where: { id: userId },
 		select: {
@@ -43,7 +63,9 @@ export async function loader({ request }: DataFunctionArgs) {
 			_count: {
 				select: {
 					sessions: {
-						where: { expirationDate: { gt: new Date() } },
+						where: {
+							expirationDate: { gt: new Date() },
+						},
 					},
 				},
 			},
@@ -55,18 +77,17 @@ export async function loader({ request }: DataFunctionArgs) {
 		where: { target_type: { type: twoFAVerificationType, target: userId } },
 	});
 
-	return json({ user, isTwoFAEnabled: Boolean(twoFactorVerification) });
+	const password = await prisma.password.findUnique({
+		select: { userId: true },
+		where: { userId },
+	});
+
+	return json({
+		user,
+		hasPassword: Boolean(password),
+		isTwoFactorEnabled: Boolean(twoFactorVerification),
+	});
 }
-
-type ProfileActionArgs = {
-	request: Request;
-	userId: string;
-	formData: FormData;
-};
-
-const PROFILE_UPDATE_ACTION_INTENT = 'update-profile';
-const DELETE_DATA_ACTION_INTENT = 'delete-data';
-const SIGN_OUT_OF_SESSIONS_ACTION_INTENT = 'sign-out-of-sessions';
 
 export async function action({ request }: DataFunctionArgs) {
 	const userId = await requireUserId(request);
@@ -104,10 +125,7 @@ export default function EditUserProfile() {
 			<div className="flex justify-center">
 				<div className="relative h-52 w-52">
 					<img
-						src={
-							// FIX: fix this nonsense
-							null ?? `https://robohash.org/${data.user.username}.png`
-						}
+						src={getUserImgSrc(data.user.image?.id)}
 						alt={data.user.username}
 						className="h-full w-full rounded-full object-cover"
 					/>
@@ -127,9 +145,11 @@ export default function EditUserProfile() {
 					</Button>
 				</div>
 			</div>
+
 			<UpdateProfile />
 
 			<div className="col-span-6 my-6 h-1 border-b-[1.5px] border-foreground" />
+
 			<div className="col-span-full flex flex-col gap-6">
 				<div>
 					<Link to="change-email">
@@ -138,33 +158,41 @@ export default function EditUserProfile() {
 						</Icon>
 					</Link>
 				</div>
+
 				<div>
 					<Link to="two-factor">
-						{data.isTwoFAEnabled ? (
+						{data.isTwoFactorEnabled ? (
 							<Icon name="lock-closed">2FA is enabled</Icon>
 						) : (
 							<Icon name="lock-open-1">Enable 2FA</Icon>
 						)}
 					</Link>
 				</div>
+
 				<div>
-					<Link to="password">
-						<Icon name="dots-horizontal">Change Password</Icon>
+					<Link to={data.hasPassword ? 'password' : 'password/create'}>
+						<Icon name="dots-horizontal">
+							{data.hasPassword ? 'Change Password' : 'Create a Password'}
+						</Icon>
 					</Link>
 				</div>
+
 				<div>
 					<Link to="connections">
 						<Icon name="link-2">Manage connections</Icon>
 					</Link>
 				</div>
+
 				<div>
-					<a
-						download="my-geek-console-data.json"
-						href="/resources/download-user-data"
+					<Link
+						reloadDocument
+						download="my-epic-notes-data.json"
+						to="/resources/download-user-data"
 					>
 						<Icon name="download">Download your data</Icon>
-					</a>
+					</Link>
 				</div>
+
 				<SignOutOfSessions />
 				<DeleteData />
 			</div>
@@ -184,7 +212,7 @@ async function profileUpdateAction({ userId, formData }: ProfileActionArgs) {
 			if (existingUsername && existingUsername.id !== userId) {
 				ctx.addIssue({
 					path: ['username'],
-					code: 'custom',
+					code: z.ZodIssueCode.custom,
 					message: 'A user already exists with this username',
 				});
 			}
@@ -259,7 +287,7 @@ function UpdateProfile() {
 			<div className="mt-8 flex justify-center">
 				<StatusButton
 					type="submit"
-					size="lg"
+					size="wide"
 					name="intent"
 					value={PROFILE_UPDATE_ACTION_INTENT}
 					status={
@@ -276,11 +304,11 @@ function UpdateProfile() {
 }
 
 async function signOutOfSessionsAction({ request, userId }: ProfileActionArgs) {
-	const cookieSession = await authSessionStorage.getSession(
+	const authSession = await authSessionStorage.getSession(
 		request.headers.get('cookie'),
 	);
 
-	const sessionId = cookieSession.get(SESSION_KEY);
+	const sessionId = authSession.get(SESSION_KEY);
 
 	invariantResponse(
 		sessionId,
@@ -338,12 +366,16 @@ function SignOutOfSessions() {
 
 async function deleteDataAction({ userId }: ProfileActionArgs) {
 	await prisma.user.delete({ where: { id: userId } });
-	return redirect('/');
+
+	return redirectWithToast('/', {
+		type: 'success',
+		title: 'Data Deleted',
+		description: 'All of your data has been deleted',
+	});
 }
 
 function DeleteData() {
 	const dc = useDoubleCheck();
-
 	const fetcher = useFetcher<typeof deleteDataAction>();
 
 	return (

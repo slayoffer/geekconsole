@@ -1,5 +1,6 @@
+import { type SEOHandle } from '@nasa-gcn/remix-seo';
 import { json, type DataFunctionArgs } from '@remix-run/node';
-import { Form } from '@remix-run/react';
+import { useFetcher } from '@remix-run/react';
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
 import {
 	prisma,
@@ -7,53 +8,45 @@ import {
 	requireUserId,
 	validateCSRF,
 } from '~/app/core/server/index.ts';
-import { requireRecentVerification } from '~/app/routes/_layout+/_auth+/verify.tsx';
-import { useDoubleCheck, useIsPending } from '~/app/shared/lib/hooks/index.ts';
+import { useDoubleCheck } from '~/app/shared/lib/hooks/index.ts';
 import { Icon, StatusButton } from '~/app/shared/ui/index.ts';
+import { requireRecentVerification } from '../_auth+/verify.tsx';
+import { type BreadcrumbHandle } from './profile.tsx';
 import { twoFAVerificationType } from './profile.two-factor.tsx';
 
-export const handle = {
+export const handle: BreadcrumbHandle & SEOHandle = {
 	breadcrumb: <Icon name="lock-open-1">Disable</Icon>,
+	getSitemapEntries: () => null,
 };
 
 export async function loader({ request }: DataFunctionArgs) {
-	await requireRecentVerification({
-		request,
-		userId: await requireUserId(request),
-	});
-
+	await requireRecentVerification(request);
 	return json({});
 }
 
 export async function action({ request }: DataFunctionArgs) {
+	await requireRecentVerification(request);
+
+	await validateCSRF(await request.formData(), request.headers);
 	const userId = await requireUserId(request);
-
-	await requireRecentVerification({
-		request,
-		userId: userId,
-	});
-
-	const formData = await request.formData();
-
-	await validateCSRF(formData, request.headers);
 
 	await prisma.verification.delete({
 		where: { target_type: { target: userId, type: twoFAVerificationType } },
 	});
 
-	throw await redirectWithToast('/settings/profile/two-factor', {
+	return redirectWithToast('/settings/profile/two-factor', {
 		title: '2FA Disabled',
 		description: 'Two factor authentication has been disabled.',
 	});
 }
 
 export default function TwoFactorDisableRoute() {
-	const isPending = useIsPending();
+	const disable2FAFetcher = useFetcher<typeof action>();
 	const dc = useDoubleCheck();
 
 	return (
 		<div className="mx-auto max-w-sm">
-			<Form method="POST">
+			<disable2FAFetcher.Form method="POST">
 				<AuthenticityTokenInput />
 				<p>
 					Disabling two factor authentication is not recommended. However, if
@@ -61,8 +54,7 @@ export default function TwoFactorDisableRoute() {
 				</p>
 				<StatusButton
 					variant="destructive"
-					status={isPending ? 'pending' : 'idle'}
-					disabled={isPending}
+					status={disable2FAFetcher.state === 'loading' ? 'pending' : 'idle'}
 					{...dc.getButtonProps({
 						className: 'mx-auto',
 						name: 'intent',
@@ -72,7 +64,7 @@ export default function TwoFactorDisableRoute() {
 				>
 					{dc.doubleCheck ? 'Are you sure?' : 'Disable 2FA'}
 				</StatusButton>
-			</Form>
+			</disable2FAFetcher.Form>
 		</div>
 	);
 }

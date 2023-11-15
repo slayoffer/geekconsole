@@ -1,5 +1,6 @@
 import { conform, useForm } from '@conform-to/react';
 import { getFieldsetConstraint, parse } from '@conform-to/zod';
+import { type SEOHandle } from '@nasa-gcn/remix-seo';
 import * as E from '@react-email/components';
 import { json, redirect, type DataFunctionArgs } from '@remix-run/node';
 import { Form, useActionData, useLoaderData } from '@remix-run/react';
@@ -15,30 +16,35 @@ import {
 } from '~/app/core/server/index.ts';
 import {
 	prepareVerification,
+	requireRecentVerification,
 	type VerifyFunctionArgs,
 } from '~/app/routes/_layout+/_auth+/verify.tsx';
 import { useIsPending } from '~/app/shared/lib/hooks/index.ts';
 import { invariant } from '~/app/shared/lib/utils/index.ts';
 import { EmailSchema } from '~/app/shared/schemas/index.ts';
 import { ErrorList, Field, Icon, StatusButton } from '~/app/shared/ui/index.ts';
+import { type BreadcrumbHandle } from './profile.tsx';
 
-export const handle = {
+export const handle: BreadcrumbHandle & SEOHandle = {
 	breadcrumb: <Icon name="envelope-closed">Change Email</Icon>,
+	getSitemapEntries: () => null,
 };
 
-const NEW_EMAIL_ADDRESS_SESSION_KEY = 'new-email-address';
+const newEmailAddressSessionKey = 'new-email-address';
 
 export async function handleVerification({
 	request,
 	submission,
 }: VerifyFunctionArgs) {
+	await requireRecentVerification(request);
+
 	invariant(submission.value, 'submission.value should be defined by now');
 
 	const verifySession = await verifySessionStorage.getSession(
 		request.headers.get('cookie'),
 	);
 
-	const newEmail = verifySession.get(NEW_EMAIL_ADDRESS_SESSION_KEY);
+	const newEmail = verifySession.get(newEmailAddressSessionKey);
 
 	if (!newEmail) {
 		submission.error[''] = [
@@ -65,7 +71,7 @@ export async function handleVerification({
 		react: <EmailChangeNoticeEmail userId={user.id} />,
 	});
 
-	throw await redirectWithToast(
+	return redirectWithToast(
 		'/settings/profile',
 		{
 			title: 'Email Changed',
@@ -85,6 +91,7 @@ const ChangeEmailSchema = z.object({
 });
 
 export async function loader({ request }: DataFunctionArgs) {
+	await requireRecentVerification(request);
 	const userId = await requireUserId(request);
 
 	const user = await prisma.user.findUnique({
@@ -116,7 +123,7 @@ export async function action({ request }: DataFunctionArgs) {
 			if (existingUser) {
 				ctx.addIssue({
 					path: ['email'],
-					code: 'custom',
+					code: z.ZodIssueCode.custom,
 					message: 'This email is already in use.',
 				});
 			}
@@ -141,16 +148,13 @@ export async function action({ request }: DataFunctionArgs) {
 
 	const response = await sendEmail({
 		to: submission.value.email,
-		subject: `Geek Console Email Change Verification`,
+		subject: 'Geek Console Email Change Verification',
 		react: <EmailChangeEmail verifyUrl={verifyUrl.toString()} otp={otp} />,
 	});
 
 	if (response.status === 'success') {
-		const verifySession = await verifySessionStorage.getSession(
-			request.headers.get('cookie'),
-		);
-
-		verifySession.set(NEW_EMAIL_ADDRESS_SESSION_KEY, submission.value.email);
+		const verifySession = await verifySessionStorage.getSession();
+		verifySession.set(newEmailAddressSessionKey, submission.value.email);
 
 		return redirect(redirectTo.toString(), {
 			headers: {
@@ -250,6 +254,7 @@ export default function ChangeEmailIndex() {
 					/>
 
 					<ErrorList id={form.errorId} errors={form.errors} />
+
 					<div>
 						<StatusButton
 							status={isPending ? 'pending' : actionData?.status ?? 'idle'}

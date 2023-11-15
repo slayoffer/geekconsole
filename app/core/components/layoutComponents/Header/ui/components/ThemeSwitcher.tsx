@@ -1,9 +1,8 @@
 import { useForm } from '@conform-to/react';
-import { parse } from '@conform-to/zod';
 import { useFetcher } from '@remix-run/react';
 import { type Theme } from '~/app/core/server/index.ts';
 import { type action as rootAction } from '~/app/root.tsx';
-import { ThemeFormSchema } from '~/app/shared/schemas/index.ts';
+import { useOptimisticThemeMode } from '~/app/shared/lib/hooks/index.ts';
 import { ErrorList, Icon } from '~/app/shared/ui/index.ts';
 
 export function ThemeSwitcher({ userPreference }: { userPreference?: Theme }) {
@@ -12,13 +11,13 @@ export function ThemeSwitcher({ userPreference }: { userPreference?: Theme }) {
 	const [form] = useForm({
 		id: 'theme-switch',
 		lastSubmission: fetcher.data?.submission,
-		onValidate({ formData }) {
-			return parse(formData, { schema: ThemeFormSchema });
-		},
 	});
 
-	const mode = userPreference ?? 'light';
-	const nextMode = mode === 'light' ? 'dark' : 'light';
+	const optimisticMode = useOptimisticThemeMode();
+	const mode = optimisticMode ?? userPreference ?? 'system';
+	const nextMode =
+		mode === 'system' ? 'light' : mode === 'light' ? 'dark' : 'system';
+
 	const modeLabel = {
 		light: (
 			<Icon name="sun">
@@ -30,6 +29,11 @@ export function ThemeSwitcher({ userPreference }: { userPreference?: Theme }) {
 				<span className="sr-only">Dark</span>
 			</Icon>
 		),
+		system: (
+			<Icon name="laptop">
+				<span className="sr-only">System</span>
+			</Icon>
+		),
 	};
 
 	return (
@@ -37,8 +41,6 @@ export function ThemeSwitcher({ userPreference }: { userPreference?: Theme }) {
 			<input type="hidden" name="theme" value={nextMode} />
 			<div className="flex gap-2">
 				<button
-					name="intent"
-					value="update-theme"
 					type="submit"
 					className="flex h-8 w-8 cursor-pointer items-center justify-center"
 				>

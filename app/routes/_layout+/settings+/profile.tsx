@@ -1,3 +1,4 @@
+import { type SEOHandle } from '@nasa-gcn/remix-seo';
 import { json, type DataFunctionArgs } from '@remix-run/node';
 import { Link, Outlet, useMatches } from '@remix-run/react';
 import { z } from 'zod';
@@ -6,8 +7,12 @@ import { useUser } from '~/app/shared/lib/hooks/index.ts';
 import { cn, invariantResponse } from '~/app/shared/lib/utils/index.ts';
 import { Icon, Spacer } from '~/app/shared/ui/index.ts';
 
-export const handle = {
+export const BreadcrumbHandle = z.object({ breadcrumb: z.any() });
+export type BreadcrumbHandle = z.infer<typeof BreadcrumbHandle>;
+
+export const handle: BreadcrumbHandle & SEOHandle = {
 	breadcrumb: <Icon name="file-text">Edit Profile</Icon>,
+	getSitemapEntries: () => null,
 };
 
 export async function loader({ request }: DataFunctionArgs) {
@@ -22,8 +27,9 @@ export async function loader({ request }: DataFunctionArgs) {
 
 	return json({});
 }
+
 const BreadcrumbHandleMatch = z.object({
-	handle: z.object({ breadcrumb: z.any() }),
+	handle: BreadcrumbHandle,
 });
 
 export default function EditUserProfile() {
@@ -72,7 +78,7 @@ export default function EditUserProfile() {
 
 			<Spacer size="xs" />
 
-			<main className="mx-auto bg-secondary px-6 py-8 md:container md:rounded-3xl">
+			<main className="mx-auto bg-muted px-6 py-8 md:container md:rounded-3xl">
 				<Outlet />
 			</main>
 		</div>

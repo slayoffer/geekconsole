@@ -5,12 +5,16 @@ import {
 } from '~/app/core/components/providers/index.ts';
 import {
 	authenticator,
+	createToastHeaders,
+	destroyRedirectToHeader,
+	getRedirectCookieValue,
 	getSessionExpirationDate,
 	getUserId,
 	prisma,
 	redirectWithToast,
 	verifySessionStorage,
 } from '~/app/core/server/index.ts';
+import { combineHeaders } from '~/app/shared/lib/utils/index.ts';
 import { handleNewSession } from './login.tsx';
 import {
 	ONBOARDING_EMAIL_SESSION_KEY,
@@ -18,22 +22,35 @@ import {
 	PREFILLED_PROFILE_KEY,
 } from './onboarding_.$provider.tsx';
 
+const destroyRedirectTo = { 'set-cookie': destroyRedirectToHeader };
+
 export async function loader({ request, params }: DataFunctionArgs) {
 	const providerName = ProviderNameSchema.parse(params.provider);
-
+	const redirectTo = getRedirectCookieValue(request);
 	const label = providerLabels[providerName];
 
-	const profile = await authenticator
+	const authResult = await authenticator
 		.authenticate(providerName, request, { throwOnError: true })
-		.catch(async (error) => {
-			console.error(error);
+		.then(
+			(data) => ({ success: true, data }) as const,
+			(error) => ({ success: false, error }) as const,
+		);
 
-			throw await redirectWithToast('/login', {
-				type: 'error',
+	if (!authResult.success) {
+		console.error(authResult.error);
+
+		throw await redirectWithToast(
+			'/login',
+			{
 				title: 'Auth Failed',
 				description: `There was an error authenticating with ${label}.`,
-			});
-		});
+				type: 'error',
+			},
+			{ headers: destroyRedirectTo },
+		);
+	}
+
+	const { data: profile } = authResult;
 
 	const existingConnection = await prisma.connection.findUnique({
 		select: { userId: true },
@@ -45,44 +62,125 @@ export async function loader({ request, params }: DataFunctionArgs) {
 	const userId = await getUserId(request);
 
 	if (existingConnection && userId) {
-		throw await redirectWithToast('/settings/profile/connections', {
-			title: 'Already Connected',
-			description:
-				existingConnection.userId === userId
-					? `Your "${profile.username}" ${label} account is already connected.`
-					: `The "${profile.username}" ${label} account is already connected to another account.`,
-		});
+		if (existingConnection.userId === userId) {
+			return redirectWithToast(
+				'/settings/profile/connections',
+				{
+					title: 'Already Connected',
+					description: `Your "${profile.username}" ${label} account is already connected.`,
+				},
+				{ headers: destroyRedirectTo },
+			);
+		} else {
+			return redirectWithToast(
+				'/settings/profile/connections',
+				{
+					title: 'Already Connected',
+					description: `The "${profile.username}" ${label} account is already connected to another account.`,
+				},
+				{ headers: destroyRedirectTo },
+			);
+		}
 	}
 
-	if (existingConnection) {
-		const session = await prisma.session.create({
-			select: { id: true, expirationDate: true, userId: true },
+	// If we're already logged in, then link the account
+	if (userId) {
+		await prisma.connection.create({
 			data: {
-				expirationDate: getSessionExpirationDate(),
-				userId: existingConnection.userId,
+				providerName,
+				providerId: profile.id,
+				userId,
 			},
 		});
 
-		return handleNewSession({ request, session, remember: true });
+		return redirectWithToast(
+			'/settings/profile/connections',
+			{
+				title: 'Connected',
+				type: 'success',
+				description: `Your "${profile.username}" ${label} account has been connected.`,
+			},
+			{ headers: destroyRedirectTo },
+		);
 	}
 
-	const verifySession = await verifySessionStorage.getSession(
-		request.headers.get('cookie'),
-	);
+	// Connection exists already? Make a new session
+	if (existingConnection) {
+		return makeSession({ request, userId: existingConnection.userId });
+	}
+
+	// if the email matches a user in the db, then link the account and
+	// make a new session
+	const user = await prisma.user.findUnique({
+		select: { id: true },
+		where: { email: profile.email.toLowerCase() },
+	});
+
+	if (user) {
+		await prisma.connection.create({
+			data: {
+				providerName,
+				providerId: profile.id,
+				userId: user.id,
+			},
+		});
+
+		return makeSession(
+			{ request, userId: user.id },
+			{
+				headers: await createToastHeaders({
+					title: 'Connected',
+					description: `Your "${profile.username}" ${label} account has been connected.`,
+				}),
+			},
+		);
+	}
+
+	// this is a new user, so let's get them onboarded
+	const verifySession = await verifySessionStorage.getSession();
 	verifySession.set(ONBOARDING_EMAIL_SESSION_KEY, profile.email);
 	verifySession.set(PREFILLED_PROFILE_KEY, {
 		...profile,
-		username: profile.username
-			?.replace(/[^a-zA-Z0-9_]/g, '_')
-			.toLowerCase()
-			.slice(0, 20)
-			.padEnd(3, '_'),
+		email: profile.email.toLowerCase(),
+		username: profile.username?.replace(/[^a-zA-Z0-9_]/g, '_').toLowerCase(),
 	});
 	verifySession.set(PROVIDER_ID_KEY, profile.id);
 
-	return redirect(`/onboarding/${providerName}`, {
-		headers: {
-			'set-cookie': await verifySessionStorage.commitSession(verifySession),
+	const onboardingRedirect = [
+		`/onboarding/${providerName}`,
+		redirectTo ? new URLSearchParams({ redirectTo }) : null,
+	]
+		.filter(Boolean)
+		.join('?');
+
+	return redirect(onboardingRedirect, {
+		headers: combineHeaders(
+			{ 'set-cookie': await verifySessionStorage.commitSession(verifySession) },
+			destroyRedirectTo,
+		),
+	});
+}
+
+async function makeSession(
+	{
+		request,
+		userId,
+		redirectTo,
+	}: { request: Request; userId: string; redirectTo?: string | null },
+	responseInit?: ResponseInit,
+) {
+	redirectTo ??= '/';
+
+	const session = await prisma.session.create({
+		select: { id: true, expirationDate: true, userId: true },
+		data: {
+			expirationDate: getSessionExpirationDate(),
+			userId,
 		},
 	});
+
+	return handleNewSession(
+		{ request, session, redirectTo, remember: true },
+		{ headers: combineHeaders(responseInit?.headers, destroyRedirectTo) },
+	);
 }

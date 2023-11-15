@@ -26,6 +26,9 @@ importers:
       '@mswjs/data':
         specifier: ^0.15.0
         version: 0.15.0(typescript@5.2.2)
+      '@nasa-gcn/remix-seo':
+        specifier: ^2.0.0
+        version: 2.0.0(@remix-run/react@2.2.0)(@remix-run/server-runtime@1.19.3)
       '@paralleldrive/cuid2':
         specifier: ^2.2.2
         version: 2.2.2
@@ -95,6 +98,9 @@ importers:
       bcryptjs:
         specifier: ^2.4.3
         version: 2.4.3
+      cachified:
+        specifier: ^3.5.4
+        version: 3.5.4
       chalk:
         specifier: ^5.3.0
         version: 5.3.0
@@ -110,6 +116,9 @@ importers:
       compression:
         specifier: ^1.7.4
         version: 1.7.4
+      confetti-react:
+        specifier: ^2.5.0
+        version: 2.5.0(react@18.2.0)
       crypto-js:
         specifier: ^4.2.0
         version: 4.2.0
@@ -137,6 +146,9 @@ importers:
       isbot:
         specifier: ^3.7.0
         version: 3.7.0
+      litefs-js:
+        specifier: ^1.1.2
+        version: 1.1.2
       lucide-react:
         specifier: ^0.292.0
         version: 0.292.0(react@18.2.0)
@@ -176,6 +188,9 @@ importers:
       tailwindcss-animate:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.3.5)
+      tailwindcss-radix:
+        specifier: ^2.8.0
+        version: 2.8.0
       tiny-invariant:
         specifier: ^1.3.1
         version: 1.3.1
@@ -2968,6 +2983,17 @@ packages:
       is-node-process: 1.2.0
       outvariant: 1.4.0
       strict-event-emitter: 0.5.1
+    dev: false
+
+  /@nasa-gcn/remix-seo@2.0.0(@remix-run/react@2.2.0)(@remix-run/server-runtime@1.19.3):
+    resolution: {integrity: sha512-jawoxrjMMbFGgj20d61KblrQNkSFcW2yP7vWWQn2a+eK2J8uYYbw99j2GD7A4XbpQUxy7dg0yvRVsYYJ5uZnLQ==}
+    peerDependencies:
+      '@remix-run/react': ^1.0.0 || ^2.0.0
+      '@remix-run/server-runtime': ^1.0.0 || ^2.0.0
+    dependencies:
+      '@remix-run/react': 2.2.0(react-dom@18.2.0)(react@18.2.0)(typescript@5.2.2)
+      '@remix-run/server-runtime': 1.19.3
+      lodash: 4.17.21
     dev: false
 
   /@ndelangen/get-tarball@3.0.9:
@@ -7467,6 +7493,10 @@ packages:
     engines: {node: '>=6'}
     dev: true
 
+  /cachified@3.5.4:
+    resolution: {integrity: sha512-RO7jQl7vL1qulRvr+o++iVVduFlKb2pJUYxY48LULusyqmGUFaRESERu1Z7UI895JNtTB4yvfErNv64OsayK8g==}
+    dev: false
+
   /call-bind@1.0.5:
     resolution: {integrity: sha512-C3nQxfFZxFRVoJoGKKI8y3MOEo129NQ+FgQ08iye+Mk4zNZZGdjfs06bVTr+DBSlA66Q2VEcMki/cUCP4SercQ==}
     dependencies:
@@ -7880,6 +7910,15 @@ packages:
       extend-shallow: 2.0.1
       is-whitespace: 0.3.0
       kind-of: 3.2.2
+    dev: false
+
+  /confetti-react@2.5.0(react@18.2.0):
+    resolution: {integrity: sha512-MqzdSqiksBFFVxFaueC6PIbhGw9vU+FgXvSfOYXxXVSZnmkEzX+MTbAovcc+AUu0cMjpxAYPO5eBR5xIfKTQnA==}
+    peerDependencies:
+      react: ^16.3.0 || ^17.0.0
+    dependencies:
+      react: 18.2.0
+      tween-functions: 1.2.0
     dev: false
 
   /config-chain@1.1.13:
@@ -11676,6 +11715,12 @@ packages:
       wrap-ansi: 8.1.0
     dev: true
 
+  /litefs-js@1.1.2:
+    resolution: {integrity: sha512-XKhntdOq8ZXoWbdmANu+PrmJBbf4aIUaHq0356IIk+Uw213evsfg1eNfU0aD04tbF4KXknvG4MWD8sp3D825zg==}
+    dependencies:
+      cookie: 0.5.0
+    dev: false
+
   /load-json-file@4.0.0:
     resolution: {integrity: sha512-Kx8hMakjX03tiGTLAIdJ+lL0htKnXjEZN6hk/tozf/WOuYGdZBJrZ+rCJRbVCugsjB3jMLn9746NsQIf5VjBMw==}
     engines: {node: '>=4'}
@@ -15264,6 +15309,10 @@ packages:
       tailwindcss: 3.3.5
     dev: false
 
+  /tailwindcss-radix@2.8.0:
+    resolution: {integrity: sha512-1k1UfoIYgVyBl13FKwwoKavjnJ5VEaUClCTAsgz3VLquN4ay/lyaMPzkbqD71sACDs2fRGImytAUlMb4TzOt1A==}
+    dev: false
+
   /tailwindcss@3.3.2:
     resolution: {integrity: sha512-9jPkMiIBXvPc2KywkraqsUfbfj+dHDb+JPWtSJa9MLFdrPyazI7q6WX2sUrm7R9eVR7qqv3Pas7EvQFzxKnI6w==}
     engines: {node: '>=14.0.0'}
@@ -15624,6 +15673,10 @@ packages:
       tailwindcss: 3.3.2
     transitivePeerDependencies:
       - ts-node
+    dev: false
+
+  /tween-functions@1.2.0:
+    resolution: {integrity: sha512-PZBtLYcCLtEcjL14Fzb1gSxPBeL7nWvGhO5ZFPGqziCcr8uvHp0NDmdjBchp6KHL+tExcg0m3NISmKxhU394dA==}
     dev: false
 
   /type-check@0.4.0:
