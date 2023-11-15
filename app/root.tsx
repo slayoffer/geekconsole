@@ -16,6 +16,7 @@ import {
 	ScrollRestoration,
 	useLoaderData,
 } from '@remix-run/react';
+import { withSentry } from '@sentry/remix';
 import { type PropsWithChildren } from 'react';
 import { AuthenticityTokenProvider } from 'remix-utils/csrf/react';
 
@@ -69,7 +70,9 @@ export const links: LinksFunction = () =>
 		cssBundleHref ? { rel: 'stylesheet', href: cssBundleHref } : null,
 	].filter(Boolean);
 
-export default function AppWithProviders() {
+export default withSentry(AppWithProviders);
+
+function AppWithProviders() {
 	const { honeyProps, csrfToken } = useLoaderData<typeof loader>();
 
 	return (

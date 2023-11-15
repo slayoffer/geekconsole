@@ -8,13 +8,13 @@ export const Footer = () => {
 				<div className="flex items-center justify-between">
 					<div>
 						<div className="mb-6">
-							<a href="/">
+							<Link to="/">
 								<img
 									className="h-8 w-auto"
 									src="/images/geekConsole3.png"
 									alt="Footer logo"
 								/>
-							</a>
+							</Link>
 						</div>
 						<p className="text-sm">
 							© {new Date().getFullYear()} GeekConsole™. All Rights Reserved

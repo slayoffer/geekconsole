@@ -1,6 +1,5 @@
 import { parse } from '@conform-to/zod';
 import { createId } from '@paralleldrive/cuid2';
-import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import {
 	json,
 	type DataFunctionArgs,
@@ -119,7 +118,6 @@ export const ErrorBoundary = () => {
 			statusHandlers={{
 				401: () => (
 					<Alert variant="destructive" className="w-2/4">
-						<ExclamationTriangleIcon className="h-4 w-4" />
 						<AlertTitle>Unauthorized</AlertTitle>
 						<AlertDescription>
 							You must be logged in to view your books.
@@ -132,7 +130,6 @@ export const ErrorBoundary = () => {
 				403: () => <p>You are not allowed to do that</p>,
 				500: () => (
 					<Alert variant="destructive" className="w-2/4">
-						<ExclamationTriangleIcon className="h-4 w-4" />
 						<AlertTitle>Server error</AlertTitle>
 						<AlertDescription>
 							Looks like something bad happened on our server. Already fixing!

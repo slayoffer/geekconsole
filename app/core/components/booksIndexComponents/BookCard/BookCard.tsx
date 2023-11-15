@@ -1,7 +1,6 @@
 import { useForm } from '@conform-to/react';
 import { getFieldsetConstraint, parse } from '@conform-to/zod';
 import { type Book } from '@prisma/client';
-import { Pencil2Icon } from '@radix-ui/react-icons';
 import { Form, Link, useActionData } from '@remix-run/react';
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
 import { type action } from '~/app/routes/_layout+/books+/_index.tsx';
@@ -51,7 +50,7 @@ export const BookCard = ({ book }: BookCardProps) => {
 				<p>{title}</p>
 				<Button variant="link" size="icon" asChild className="mt-0">
 					<Link to={`${id}/edit`} prefetch="intent">
-						<Pencil2Icon />
+						Edit
 					</Link>
 				</Button>
 			</CardHeader>

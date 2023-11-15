@@ -13,5 +13,6 @@
 	"requirePragma": false,
 	"singleAttributePerLine": false,
 	"embeddedLanguageFormatting": "auto",
-	"useTabs": true
+	"useTabs": true,
+  "plugins": ["prettier-plugin-tailwindcss", "prettier-plugin-sql"]
 }

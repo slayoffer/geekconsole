@@ -4,11 +4,19 @@ import { z } from 'zod';
 
 const schema = z.object({
 	NODE_ENV: z.enum(['production', 'development', 'test'] as const),
+
+	DATABASE_PATH: z.string(),
+	DATABASE_URL: z.string(),
+	CACHE_DATABASE_PATH: z.string(),
+
 	HONEYPOT_SECRET: z.string(),
 	SESSION_SECRET: z.string(),
+	INTERNAL_COMMAND_TOKEN: z.string(),
+
 	RESEND_API_KEY: z.string(),
 	GITHUB_CLIENT_ID: z.string(),
 	GITHUB_CLIENT_SECRET: z.string(),
+	SENTRY_DSN: z.string(),
 });
 
 declare global {
@@ -42,6 +50,7 @@ export function init() {
 export function getEnv() {
 	return {
 		MODE: process.env.NODE_ENV,
+		SENTRY_DSN: process.env.SENTRY_DSN,
 	};
 }
 

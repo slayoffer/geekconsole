@@ -1,4 +1,3 @@
-import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { json, type DataFunctionArgs } from '@remix-run/node';
 import { type MetaFunction, Link, useLoaderData } from '@remix-run/react';
 import invariant from 'tiny-invariant';
@@ -101,7 +100,6 @@ export function ErrorBoundary() {
 				404: ({ params }) => <p>Huh? What the heck is "{params.bookId}"?</p>,
 				401: () => (
 					<Alert variant="destructive" className="w-2/4">
-						<ExclamationTriangleIcon className="h-4 w-4" />
 						<AlertTitle>Unauthorized</AlertTitle>
 						<AlertDescription>
 							You must be logged in to view your books.

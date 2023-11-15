@@ -1,6 +1,5 @@
 import { conform, useForm } from '@conform-to/react';
 import { getFieldsetConstraint, parse } from '@conform-to/zod';
-import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import {
 	type DataFunctionArgs,
 	json,
@@ -284,7 +283,6 @@ export const ErrorBoundary = () => {
 			statusHandlers={{
 				401: () => (
 					<Alert variant="destructive" className="w-2/4">
-						<ExclamationTriangleIcon className="h-4 w-4" />
 						<AlertTitle>Unauthorized</AlertTitle>
 						<AlertDescription>
 							You must be logged in to add a book.
@@ -296,7 +294,6 @@ export const ErrorBoundary = () => {
 				),
 				500: () => (
 					<Alert variant="destructive" className="w-2/4">
-						<ExclamationTriangleIcon className="h-4 w-4" />
 						<AlertTitle>Server error</AlertTitle>
 						<AlertDescription>
 							Looks like something bad happened on our server. Already fixing!
