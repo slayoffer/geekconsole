@@ -16,7 +16,7 @@ WORKDIR /app
 
 # ADD package.json package-lock.json .npmrc ./
 ADD package.json .npmrc ./
-RUN npm cache clean --force
+# RUN npm cache clean --force
 RUN npm install --include=dev
 
 # Setup production node_modules
