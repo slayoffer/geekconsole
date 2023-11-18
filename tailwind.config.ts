@@ -1,0 +1,33 @@
+/** @type {import('tailwindcss').Config} */
+
+import { type Config } from 'tailwindcss';
+import defaultTheme from 'tailwindcss/defaultTheme.js';
+import animatePlugin from 'tailwindcss-animate';
+import radixPlugin from 'tailwindcss-radix';
+import { extendedTheme } from './app/core/utils/extendedTheme/extendedTheme.ts';
+
+export default {
+	darkMode: 'class',
+	content: [
+		'./pages/**/*.{ts,tsx}',
+		'./components/**/*.{ts,tsx}',
+		'./app/**/*.{ts,tsx}',
+		'./src/**/*.{ts,tsx}',
+	],
+	theme: {
+		container: {
+			center: true,
+			padding: '2rem',
+			screens: {
+				'2xl': '1400px',
+			},
+		},
+		extend: {
+			fontFamily: {
+				sans: ['var(--font-sans)', ...defaultTheme.fontFamily.sans],
+			},
+			...extendedTheme,
+		},
+	},
+	plugins: [animatePlugin, radixPlugin],
+} satisfies Config;
