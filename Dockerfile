@@ -14,7 +14,8 @@ FROM base as deps
 
 WORKDIR /app
 
-ADD package.json package-lock.json .npmrc ./
+# ADD package.json package-lock.json .npmrc ./
+ADD package.json .npmrc ./
 RUN npm install --include=dev
 
 # Setup production node_modules
@@ -23,7 +24,8 @@ FROM base as production-deps
 WORKDIR /app
 
 COPY --from=deps /app/node_modules /app/node_modules
-ADD package.json package-lock.json .npmrc ./
+# ADD package.json package-lock.json .npmrc ./
+ADD package.json .npmrc ./
 RUN npm prune --omit=dev
 
 # Build the app
