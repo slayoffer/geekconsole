@@ -54,7 +54,20 @@ ENV CACHE_DATABASE_FILENAME="cache.db"
 ENV CACHE_DATABASE_PATH="/$LITEFS_DIR/$CACHE_DATABASE_FILENAME"
 ENV INTERNAL_PORT="8080"
 ENV PORT="8081"
-ENV NODE_ENV="production"
+# ENV NODE_ENV="production"
+# ENV LITEFS_DIR="/litefs/data"
+# ENV DATABASE_URL="file:./data.db"
+# ENV DATABASE_PATH="./prisma/data.db"
+# ENV CACHE_DATABASE_PATH="./other/cache.db"
+
+ENV RESEND_API_KEY="re_hDfLT37G_DCQbEPTBGkt2EjqpjttSjrq8"
+ENV GITHUB_CLIENT_ID="f37538bf1b0a19307535"
+ENV GITHUB_CLIENT_SECRET="2d4d061206723738725365cd0da9bf0c83be29bb"
+ENV SENTRY_DSN=""
+
+# ENV HONEYPOT_SECRET=superSecret
+# ENV SESSION_SECRET=verySecret
+# ENV INTERNAL_COMMAND_TOKEN="some-made-up-token"
 
 # add shortcut for connecting to database CLI
 RUN echo "#!/bin/sh\nset -x\nsqlite3 \$DATABASE_URL" > /usr/local/bin/database-cli && chmod +x /usr/local/bin/database-cli
