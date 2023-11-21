@@ -5,9 +5,6 @@ services:
     container_name: ${CD_CONTAINER_NAME}-${CI_COMMIT_REF_SLUG}
     image: registry.gitlab.devcraft.app/broz/geek-console:${CI_COMMIT_REF_SLUG}-${IMAGE_TAG_FRONT}
     restart: unless-stopped
-    environment:
-      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
-      - SUPABASE_API_URL=${SUPABASE_API_URL}
     networks:
       - proxy
 
