@@ -20,18 +20,6 @@ RUN npm install --include=dev
 # Build the app
 FROM base as build
 
-WORKDIR /app
-
-COPY --from=deps /app/node_modules /app/node_modules
-
-ADD prisma .
-RUN npx prisma generate
-
-ADD . .
-RUN npm run build && \
-    npx prisma migrate deploy && \
-    npx prisma db seed
-
 ENV FLY="false"
 ENV LITEFS_DIR="/litefs/data"
 ENV DATABASE_URL="file:./data.db"
@@ -46,6 +34,18 @@ ENV SENTRY_DSN="https://6ab11c7d99cf03be36fa87b30e251670@o4506263262724096.inges
 ENV HONEYPOT_SECRET=superSecret
 ENV SESSION_SECRET=verySecret
 ENV INTERNAL_COMMAND_TOKEN="some-made-up-token"
+
+WORKDIR /app
+
+COPY --from=deps /app/node_modules /app/node_modules
+
+ADD prisma .
+RUN npx prisma generate
+
+ADD . .
+RUN npm run build && \
+    npx prisma migrate deploy && \
+    npx prisma db seed
 
 # add shortcut for connecting to database CLI
 RUN echo "#!/bin/sh\nset -x\nsqlite3 \$DATABASE_URL" > /usr/local/bin/database-cli && chmod +x /usr/local/bin/database-cli
