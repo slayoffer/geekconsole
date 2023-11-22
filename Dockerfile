@@ -54,7 +54,8 @@ RUN echo "#!/bin/sh\nset -x\nsqlite3 \$DATABASE_URL" > /usr/local/bin/database-c
 # RUN npm run setup
 
 EXPOSE 3000
-CMD ["npm", "run", "dev"]
+# CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "start"]
 
 # WORKDIR /app
 
