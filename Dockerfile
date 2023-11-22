@@ -1,5 +1,3 @@
-# This file is moved to the root directory before building the image
-
 # base node image
 FROM node:18-bookworm-slim as base
 
@@ -18,16 +16,6 @@ WORKDIR /app
 ADD package.json .npmrc ./
 # RUN npm cache clean --force
 RUN npm install --include=dev
-
-# Setup production node_modules
-FROM base as production-deps
-
-WORKDIR /app
-
-COPY --from=deps /app/node_modules /app/node_modules
-# ADD package.json package-lock.json .npmrc ./
-ADD package.json .npmrc ./
-RUN npm prune --omit=dev
 
 # Build the app
 FROM base as build
