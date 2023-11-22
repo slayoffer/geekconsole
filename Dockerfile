@@ -29,8 +29,8 @@ RUN npx prisma generate
 
 ADD . .
 RUN npm run build && \
-    prisma migrate deploy && \
-    prisma db seed
+    npx prisma migrate deploy && \
+    npx prisma db seed
 
 ENV FLY="false"
 ENV LITEFS_DIR="/litefs/data"
