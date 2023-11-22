@@ -48,6 +48,9 @@ ENV INTERNAL_COMMAND_TOKEN="some-made-up-token"
 # add shortcut for connecting to database CLI
 RUN echo "#!/bin/sh\nset -x\nsqlite3 \$DATABASE_URL" > /usr/local/bin/database-cli && chmod +x /usr/local/bin/database-cli
 
+# Run the setup script
+RUN npm run setup
+
 EXPOSE 3000
 CMD ["npm", "run", "dev"]
 
