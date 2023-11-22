@@ -42,9 +42,6 @@ RUN npx prisma generate
 ADD . .
 RUN npm run build
 
-# Finally, build the production image with minimal footprint
-FROM base
-
 ENV FLY="false"
 ENV LITEFS_DIR="/litefs/data"
 ENV DATABASE_URL="file:./data.db"
@@ -63,6 +60,7 @@ ENV INTERNAL_COMMAND_TOKEN="some-made-up-token"
 # add shortcut for connecting to database CLI
 RUN echo "#!/bin/sh\nset -x\nsqlite3 \$DATABASE_URL" > /usr/local/bin/database-cli && chmod +x /usr/local/bin/database-cli
 
+EXPOSE 3000
 CMD ["npm", "run", "dev"]
 
 # WORKDIR /app
