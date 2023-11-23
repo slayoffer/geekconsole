@@ -1,4 +1,4 @@
-app = "geekconsole"
+app = "geekconsole-staging"
 primary_region = "nrt"
 kill_signal = "SIGINT"
 kill_timeout = 5
