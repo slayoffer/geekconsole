@@ -1,5 +1,5 @@
-app = "geek-console"
-primary_region = "sjc"
+app = "geekconsole"
+primary_region = "nrt"
 kill_signal = "SIGINT"
 kill_timeout = 5
 processes = [ ]
