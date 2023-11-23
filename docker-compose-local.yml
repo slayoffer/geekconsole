@@ -7,6 +7,7 @@ services:
       context: .
       target: build
       dockerfile: ./Dockerfile
+      # no_cache: true
     restart: unless-stopped
     ports:
       - 3000:3000
