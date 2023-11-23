@@ -1,140 +1,266 @@
-import type { PropsWithChildren } from 'react';
-import { useEffect, useMemo } from 'react';
+import { parse } from '@conform-to/zod';
 import { cssBundleHref } from '@remix-run/css-bundle';
-import { json } from '@remix-run/node';
-import type { LinksFunction, LoaderFunctionArgs } from '@remix-run/node';
 import {
-  isRouteErrorResponse,
-  Links,
-  LiveReload,
-  Meta,
-  Outlet,
-  Scripts,
-  ScrollRestoration,
-  useLoaderData,
-  useRevalidator,
-  useRouteError,
+	type HeadersFunction,
+	type DataFunctionArgs,
+	json,
+	type LinksFunction,
+} from '@remix-run/node';
+import {
+	type MetaFunction,
+	Links,
+	LiveReload,
+	Meta,
+	Outlet,
+	Scripts,
+	ScrollRestoration,
+	useLoaderData,
 } from '@remix-run/react';
-import { createBrowserClient } from '@supabase/auth-helpers-remix';
+import { withSentry } from '@sentry/remix';
+import { type PropsWithChildren } from 'react';
+import { AuthenticityTokenProvider } from 'remix-utils/csrf/react';
 
-import { createSupabaseServerClient } from './core/server';
-import type { Database } from './shared/types';
-import styles from './styles.css';
+import { HoneypotProvider } from 'remix-utils/honeypot/react';
+import { href as iconsHref } from '~/app/shared/ui/Icons/Icon.tsx';
+import {
+	type Theme,
+	csrf,
+	getEnv,
+	honeypot,
+	setTheme,
+	getTheme,
+	prisma,
+	getToast,
+	getUserId,
+	makeTimings,
+	time,
+	logout,
+	getConfetti,
+} from './core/server/index.ts';
+import fonts from './core/styles/fonts.css';
+import twStyles from './core/styles/twStyles.css';
+import { ClientHintCheck, getHints, useNonce } from './core/utils/index.ts';
+import { useTheme } from './shared/lib/hooks/index.ts';
+import { combineHeaders, getDomainUrl } from './shared/lib/utils/index.ts';
+import { ThemeFormSchema } from './shared/schemas/index.ts';
+import { GeneralErrorBoundary } from './shared/ui/index.ts';
 
-function Document({ children, title }: PropsWithChildren<{ title: string }>) {
-  return (
-    <html className="dark h-full" lang="en">
-      <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <Meta />
-        <link
-          rel="icon"
-          type="image/png"
-          href="https://i.ibb.co/31W7B1y/Png-Item-1032462.png"
-        />
-        <title>{title}</title>
-        <Links />
-      </head>
-      <body className="flex h-full flex-col justify-between">
-        {children}
+export const links: LinksFunction = () =>
+	[
+		// Preload svg sprite as a resource to avoid render blocking
+		{ rel: 'preload', href: iconsHref, as: 'image' },
+		// Preload CSS as a resource to avoid render blocking
+		{
+			rel: 'preload',
+			href: twStyles,
+			as: 'style',
+		},
+		{ rel: 'preload', href: fonts, as: 'style' },
+		cssBundleHref ? { rel: 'preload', href: cssBundleHref, as: 'style' } : null,
+		{
+			rel: 'icon',
+			type: 'image/png',
+			href: 'https://i.ibb.co/31W7B1y/Png-Item-1032462.png',
+		},
+		{
+			rel: 'stylesheet',
+			href: twStyles,
+		},
+		{ rel: 'stylesheet', href: fonts },
+		cssBundleHref ? { rel: 'stylesheet', href: cssBundleHref } : null,
+	].filter(Boolean);
 
-        <ScrollRestoration />
-        <Scripts />
-        <LiveReload />
-      </body>
-    </html>
-  );
+export default withSentry(AppWithProviders);
+
+function AppWithProviders() {
+	const { honeyProps, csrfToken } = useLoaderData<typeof loader>();
+
+	return (
+		<AuthenticityTokenProvider token={csrfToken}>
+			<HoneypotProvider {...honeyProps}>
+				<App />
+			</HoneypotProvider>
+		</AuthenticityTokenProvider>
+	);
 }
 
-export default function App() {
-  const { env, session, userProfile } = useLoaderData<any>();
-  const { revalidate } = useRevalidator();
+function App() {
+	const { ENV } = useLoaderData<typeof loader>();
 
-  const supabase = useMemo(() => {
-    return createBrowserClient<Database>(
-      env.SUPABASE_URL,
-      env.SUPABASE_ANON_KEY,
-    );
-  }, [env.SUPABASE_URL, env.SUPABASE_ANON_KEY]);
+	const theme = useTheme();
+	const nonce = useNonce();
 
-  const serverAccessToken = session?.access_token;
+	return (
+		<Document title="Geek Console" nonce={nonce} theme={theme}>
+			<Outlet />
 
-  useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_, session) => {
-      if (session?.access_token !== serverAccessToken) revalidate();
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [serverAccessToken, supabase, revalidate]);
-
-  return (
-    <Document title="Your favourite geek storage">
-      <Outlet context={{ supabase, session, userProfile }} />
-    </Document>
-  );
+			<script
+				nonce={nonce}
+				dangerouslySetInnerHTML={{
+					__html: `window.ENV = ${JSON.stringify(ENV)}`,
+				}}
+			/>
+		</Document>
+	);
 }
 
-export const links: LinksFunction = () => [
-  ...(cssBundleHref !== undefined
-    ? [{ rel: 'stylesheet', href: cssBundleHref }]
-    : []),
-  {
-    rel: 'stylesheet',
-    href: styles,
-  },
-];
+function Document({
+	children,
+	title,
+	nonce,
+	theme,
+}: PropsWithChildren<{ title: string; nonce: string; theme?: Theme }>) {
+	return (
+		<html className={`${theme} h-full overflow-x-hidden`} lang="en">
+			<head>
+				<ClientHintCheck nonce={nonce} />
+				<Meta />
+				<Links />
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const env = {
-    SUPABASE_URL: process.env.SUPABASE_API_URL,
-    SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
-  };
+				<meta charSet="utf-8" />
+				<meta name="description" content="Your favourite geek storage" />
+				<meta name="viewport" content="width=device-width,initial-scale=1" />
 
-  const response = new Response();
+				<title>{title}</title>
+			</head>
+			<body className="flex h-full flex-col justify-between bg-background text-foreground">
+				{children}
 
-  const supabaseClient = createSupabaseServerClient({ response, request });
+				<ScrollRestoration nonce={nonce} />
+				<Scripts nonce={nonce} />
+				<LiveReload nonce={nonce} />
+			</body>
+		</html>
+	);
+}
 
-  const {
-    data: { session },
-  } = await supabaseClient.auth.getSession();
+export async function action({ request }: DataFunctionArgs) {
+	const formData = await request.formData();
 
-  const { data: userProfile } = await supabaseClient
-    .from('user_profiles')
-    .select('*')
-    .eq('id', session?.user.id)
-    .single();
+	const submission = parse(formData, {
+		schema: ThemeFormSchema,
+	});
 
-  return json({ env, session, userProfile }, { headers: response.headers });
+	if (submission.intent !== 'submit') {
+		return json({ status: 'success', submission } as const);
+	}
+
+	if (!submission.value) {
+		return json({ status: 'error', submission } as const, { status: 400 });
+	}
+
+	const { theme } = submission.value;
+
+	const responseInit = {
+		headers: { 'set-cookie': setTheme(theme) },
+	};
+
+	return json({ success: true, submission }, responseInit);
+}
+
+export const loader = async ({ request }: DataFunctionArgs) => {
+	const timings = makeTimings('root loader');
+	const userId = await time(() => getUserId(request), {
+		timings,
+		type: 'getUserId',
+		desc: 'getUserId in root',
+	});
+
+	const user = userId
+		? await time(
+				() =>
+					prisma.user.findUniqueOrThrow({
+						select: {
+							id: true,
+							name: true,
+							username: true,
+							email: true,
+							image: { select: { id: true } },
+							roles: {
+								select: {
+									name: true,
+									permissions: {
+										select: { entity: true, action: true, access: true },
+									},
+								},
+							},
+						},
+						where: { id: userId },
+					}),
+				{ timings, type: 'find user', desc: 'find user in root' },
+		  )
+		: null;
+
+	if (userId && !user) {
+		console.info('something weird happened');
+		// something weird happened... The user is authenticated but we can't find
+		// them in the database. Maybe they were deleted? Let's log them out.
+		await logout({ request, redirectTo: '/' });
+	}
+
+	const { toast, headers: toastHeaders } = await getToast(request);
+	const { confettiId, headers: confettiHeaders } = getConfetti(request);
+	const honeyProps = honeypot.getInputProps();
+	const [csrfToken, csrfCookieHeader] = await csrf.commitToken();
+
+	return json(
+		{
+			user,
+			requestInfo: {
+				hints: getHints(request),
+				origin: getDomainUrl(request),
+				path: new URL(request.url).pathname,
+				userPrefs: {
+					theme: getTheme(request),
+				},
+			},
+			ENV: getEnv(),
+			toast,
+			confettiId,
+			honeyProps,
+			csrfToken,
+		},
+		{
+			headers: combineHeaders(
+				{ 'Server-Timing': timings.toString() },
+				toastHeaders,
+				confettiHeaders,
+				csrfCookieHeader ? { 'set-cookie': csrfCookieHeader } : null,
+			),
+		},
+	);
+};
+
+export const headers: HeadersFunction = ({ loaderHeaders }) => {
+	const headers = {
+		'Server-Timing': loaderHeaders.get('Server-Timing') ?? '',
+	};
+
+	return headers;
+};
+
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+	return [
+		{ title: data ? 'Geek Console' : 'Error | Geek Console' },
+		{ name: 'description', content: `Your favourite geek storage` },
+	];
 };
 
 export function ErrorBoundary() {
-  const error = useRouteError();
+	// the nonce doesn't rely on the loader so we can access that
+	const nonce = useNonce();
 
-  if (isRouteErrorResponse(error)) {
-    return (
-      <Document title={`${error.status} ${error.statusText}`}>
-        <div>
-          <h1>
-            {error.status} {error.statusText}
-          </h1>
-        </div>
-      </Document>
-    );
-  }
+	// NOTE: you cannot use useLoaderData in an ErrorBoundary because the loader
+	// likely failed to run so we have to do the best we can.
+	// We could probably do better than this (it's possible the loader did run).
+	// This would require a change in Remix.
 
-  const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+	// Just make sure your root route never errors out and you'll always be able
+	// to give the user a better UX.
 
-  return (
-    <Document title="Ooops. Something went wrong">
-      <div>
-        <h1>App Error</h1>
-        <pre>{errorMessage}</pre>
-      </div>
-    </Document>
-  );
+	return (
+		<Document title="Oops. Something went wrong" nonce={nonce}>
+			<GeneralErrorBoundary />
+		</Document>
+	);
 }

@@ -1,0 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+	:root {
+		--font-sans: Nunito Sans, Nunito Sans Fallback;
+
+		--foreground-destructive: 345 82.7% 40.8%;
+
+		--background: 213 85% 95%;
+		--foreground: 0 0% 0%;
+
+		--muted: 213 84% 20%;
+		--muted-foreground: 0 0% 70%;
+
+		--popover: 213 85% 95%;
+		--popover-foreground: 0 0% 0%;
+
+		--card: 213 85% 95%;
+		--card-foreground: 0 0% 0%;
+
+		--primary: 73 100% 38%;
+		--primary-foreground: 0 0% 0%;
+
+		--secondary: 214 41% 90%;
+		--secondary-foreground: 0 0% 0%;
+
+		--accent: 335 100% 38%;
+		--accent-foreground: 213 85% 95%;
+
+		--destructive: 0 85% 60%;
+		--destructive-foreground: 0 0% 0%;
+
+		--border: 213 84% 20%;
+		--input: 213 84% 20%;
+		--ring: 335 100% 40%;
+		--radius: 0.5rem;
+	}
+
+	.dark {
+		--foreground-destructive: -4 84% 60%;
+
+		--background: 213 85% 5%;
+		--foreground: 0 0% 100%;
+
+		--muted: 213 84% 80%;
+		--muted-foreground: 0 0% 100%;
+
+		--accent: 335 100% 62%;
+		--accent-foreground: 213 85% 5%;
+
+		--popover: 213 85% 5%;
+		--popover-foreground: 0 0% 100%;
+
+		--card: 213 85% 5%;
+		--card-foreground: 0 0% 100%;
+
+		--primary: 73 100% 62%;
+		--primary-foreground: 213 85% 5%;
+
+		--secondary: 214 41% 10%;
+		--secondary-foreground: 0 0% 100%;
+
+		--destructive: 0 62% 30%;
+		--destructive-foreground: 0 0% 10%;
+
+		--border: 213 85% 60%;
+		--input: 213 84% 80%;
+		--ring: 335 100% 60%;
+	}
+}
+
+@layer base {
+	* {
+		@apply border-border;
+	}
+
+	body {
+		@apply bg-background text-foreground;
+
+		font-feature-settings:
+			'rlig' 1,
+			'calt' 1;
+	}
+}

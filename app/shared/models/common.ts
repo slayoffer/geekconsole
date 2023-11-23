@@ -1,13 +1,6 @@
-import { type Session, type SupabaseClient } from '@supabase/supabase-js';
-
-import type { UserProfile } from '../types';
+import { type Theme } from '~/app/core/server/index.ts';
 
 export type OutletContextValues = {
-  session: Session;
-  supabase: SupabaseClient;
-  userProfile: UserProfile;
+	theme: Theme;
+	toast: any;
 };
-
-export type ErrorWithStatus = {
-  status?: number | undefined;
-} & Error;

@@ -1,123 +1,111 @@
-/**
- * By default, Remix will handle generating the HTTP Response for you.
- * You are free to delete this file if you'd like to, but if you ever want it revealed again, you can run `npx remix reveal` ✨
- * For more information, see https://remix.run/file-conventions/entry.server
- */
-
-import { PassThrough } from 'node:stream';
+import { PassThrough } from 'stream';
 import {
-  createReadableStreamFromReadable,
-  type EntryContext,
+	createReadableStreamFromReadable,
+	type DataFunctionArgs,
+	type HandleDocumentRequestFunction,
 } from '@remix-run/node';
 import { RemixServer } from '@remix-run/react';
+import * as Sentry from '@sentry/remix';
 import isbot from 'isbot';
+import { getInstanceInfo } from 'litefs-js';
 import { renderToPipeableStream } from 'react-dom/server';
+import { getEnv, init, makeTimings } from './core/server/index.ts';
+import { NonceProvider } from './core/utils/index.ts';
 
-const ABORT_DELAY = 5_000;
+const ABORT_DELAY = 5000;
 
-export default function handleRequest(
-  request: Request,
-  responseStatusCode: number,
-  responseHeaders: Headers,
-  remixContext: EntryContext,
-) {
-  return isbot(request.headers.get('user-agent'))
-    ? handleBotRequest(
-        request,
-        responseStatusCode,
-        responseHeaders,
-        remixContext,
-      )
-    : handleBrowserRequest(
-        request,
-        responseStatusCode,
-        responseHeaders,
-        remixContext,
-      );
+init();
+global.ENV = getEnv();
+
+if (ENV.MODE === 'production' && ENV.SENTRY_DSN) {
+	import('./core/server/monitoring/monitoring.server.ts').then(({ init }) =>
+		init(),
+	);
 }
 
-async function handleBotRequest(
-  request: Request,
-  responseStatusCode: number,
-  responseHeaders: Headers,
-  remixContext: EntryContext,
-) {
-  return new Promise((resolve, reject) => {
-    const { pipe, abort } = renderToPipeableStream(
-      <RemixServer
-        context={remixContext}
-        url={request.url}
-        abortDelay={ABORT_DELAY}
-      />,
-      {
-        onAllReady() {
-          const body = new PassThrough();
-          const stream = createReadableStreamFromReadable(body);
+type DocRequestArgs = Parameters<HandleDocumentRequestFunction>;
 
-          responseHeaders.set('Content-Type', 'text/html');
+export default async function handleRequest(...args: DocRequestArgs) {
+	const [
+		request,
+		responseStatusCode,
+		responseHeaders,
+		remixContext,
+		loadContext,
+	] = args;
+	const { currentInstance, primaryInstance } = await getInstanceInfo();
 
-          resolve(
-            new Response(stream, {
-              headers: responseHeaders,
-              status: responseStatusCode,
-            }),
-          );
+	responseHeaders.set('fly-region', process.env.FLY_REGION ?? 'unknown');
+	responseHeaders.set('fly-app', process.env.FLY_APP_NAME ?? 'unknown');
+	responseHeaders.set('fly-primary-instance', primaryInstance);
+	responseHeaders.set('fly-instance', currentInstance);
 
-          pipe(body);
-        },
-        onShellError(error: unknown) {
-          reject(error);
-        },
-        onError(error: unknown) {
-          responseStatusCode = 500;
-          console.error(error);
-        },
-      },
-    );
+	const callbackName = isbot(request.headers.get('user-agent'))
+		? 'onAllReady'
+		: 'onShellReady';
 
-    setTimeout(abort, ABORT_DELAY);
-  });
+	const nonce = String(loadContext.cspNonce) ?? undefined;
+
+	return new Promise(async (resolve, reject) => {
+		let didError = false;
+
+		// NOTE: this timing will only include things that are rendered in the shell
+		// and will not include suspended components and deferred loaders
+		const timings = makeTimings('render', 'renderToPipeableStream');
+
+		const { pipe, abort } = renderToPipeableStream(
+			<NonceProvider value={nonce}>
+				<RemixServer context={remixContext} url={request.url} />
+			</NonceProvider>,
+			{
+				[callbackName]: () => {
+					const body = new PassThrough();
+
+					responseHeaders.set('Content-Type', 'text/html');
+					responseHeaders.append('Server-Timing', timings.toString());
+
+					resolve(
+						new Response(createReadableStreamFromReadable(body), {
+							headers: responseHeaders,
+							status: didError ? 500 : responseStatusCode,
+						}),
+					);
+
+					pipe(body);
+				},
+				onShellError: (err: unknown) => {
+					reject(err);
+				},
+				onError: (error: unknown) => {
+					didError = true;
+					console.error(error);
+				},
+				nonce,
+			},
+		);
+
+		setTimeout(abort, ABORT_DELAY);
+	});
 }
 
-async function handleBrowserRequest(
-  request: Request,
-  responseStatusCode: number,
-  responseHeaders: Headers,
-  remixContext: EntryContext,
-) {
-  return new Promise((resolve, reject) => {
-    const { pipe, abort } = renderToPipeableStream(
-      <RemixServer
-        context={remixContext}
-        url={request.url}
-        abortDelay={ABORT_DELAY}
-      />,
-      {
-        onShellReady() {
-          const body = new PassThrough();
-          const stream = createReadableStreamFromReadable(body);
+export async function handleDataRequest(response: Response) {
+	const { currentInstance, primaryInstance } = await getInstanceInfo();
 
-          responseHeaders.set('Content-Type', 'text/html');
+	response.headers.set('fly-region', process.env.FLY_REGION ?? 'unknown');
+	response.headers.set('fly-app', process.env.FLY_APP_NAME ?? 'unknown');
+	response.headers.set('fly-primary-instance', primaryInstance);
+	response.headers.set('fly-instance', currentInstance);
 
-          resolve(
-            new Response(stream, {
-              headers: responseHeaders,
-              status: responseStatusCode,
-            }),
-          );
+	return response;
+}
 
-          pipe(body);
-        },
-        onShellError(error: unknown) {
-          reject(error);
-        },
-        onError(error: unknown) {
-          console.error(error);
-          responseStatusCode = 500;
-        },
-      },
-    );
-
-    setTimeout(abort, ABORT_DELAY);
-  });
+export function handleError(
+	error: unknown,
+	{ request }: DataFunctionArgs,
+): void {
+	if (error instanceof Error) {
+		Sentry.captureRemixServerException(error, 'remix.server', request);
+	} else {
+		Sentry.captureException(error);
+	}
 }
