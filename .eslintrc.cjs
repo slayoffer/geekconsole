@@ -14,7 +14,7 @@ module.exports = {
 		'prettier',
 	],
 	overrides: [
-    {
+		{
 			plugins: ['remix-react-routes'],
 			files: appFiles,
 			excludedFiles: testFiles,

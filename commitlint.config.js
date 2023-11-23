@@ -1,6 +1,6 @@
 export default {
-  extends: ['gitmoji'],
-  rules: {
-    'header-max-length': [0, 'always', 100],
-  },
+	extends: ['gitmoji'],
+	rules: {
+		'header-max-length': [0, 'always', 100],
+	},
 };

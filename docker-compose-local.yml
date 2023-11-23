@@ -6,7 +6,7 @@ services:
     build:
       context: .
       target: build
-      dockerfile: ./Dockerfile
+      dockerfile: ./Dockerfile-local
     restart: unless-stopped
     ports:
       - 3000:3000

@@ -6,12 +6,12 @@ services:
     image: registry.gitlab.devcraft.app/broz/geek-console:${CI_COMMIT_REF_SLUG}-${IMAGE_TAG_FRONT}
     restart: unless-stopped
     # environment:
-      # - SESSION_SECRET=${SESSION_SECRET}
-      # - HONEYPOT_SECRET=${HONEYPOT_SECRET}
-      # - DATABASE_URL=${DATABASE_URL}
-      # - SESSION_SECRET=sSecret
-      # - HONEYPOT_SECRET=sSecret
-      # - DATABASE_URL="file:./data.db"
+    # - SESSION_SECRET=${SESSION_SECRET}
+    # - HONEYPOT_SECRET=${HONEYPOT_SECRET}
+    # - DATABASE_URL=${DATABASE_URL}
+    # - SESSION_SECRET=sSecret
+    # - HONEYPOT_SECRET=sSecret
+    # - DATABASE_URL="file:./data.db"
     networks:
       - proxy
 
