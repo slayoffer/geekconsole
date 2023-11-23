@@ -28,6 +28,7 @@ export default function AdminRoute() {
 		</div>
 	);
 }
+
 export function ErrorBoundary() {
 	return (
 		<GeneralErrorBoundary

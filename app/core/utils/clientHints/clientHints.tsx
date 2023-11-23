@@ -3,7 +3,7 @@
  * are needed by the server, but are only known by the browser.
  */
 import { useRevalidator } from '@remix-run/react';
-import * as React from 'react';
+import { useEffect } from 'react';
 import { useRequestInfo } from '~/app/shared/lib/hooks/index.ts';
 
 const clientHints = {
@@ -55,6 +55,7 @@ export function getHints(request?: Request) {
 	return Object.entries(clientHints).reduce(
 		(acc, [name, hint]) => {
 			const hintName = name as ClientHintNames;
+
 			if ('transform' in hint) {
 				acc[hintName] = hint.transform(
 					getCookieValue(cookieString, hintName) ?? hint.fallback,
@@ -63,6 +64,7 @@ export function getHints(request?: Request) {
 				// @ts-expect-error - this is fine (PRs welcome though)
 				acc[hintName] = getCookieValue(cookieString, hintName) ?? hint.fallback;
 			}
+
 			return acc;
 		},
 		{} as {
@@ -91,15 +93,19 @@ export function useHints() {
 export function ClientHintCheck({ nonce }: { nonce: string }) {
 	const { revalidate } = useRevalidator();
 
-	React.useEffect(() => {
+	useEffect(() => {
 		const themeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
 		function handleThemeChange() {
 			document.cookie = `${clientHints.theme.cookieName}=${
 				themeQuery.matches ? 'dark' : 'light'
 			}; Max-Age=31536000; Path=/`;
+
 			revalidate();
 		}
+
 		themeQuery.addEventListener('change', handleThemeChange);
+
 		return () => {
 			themeQuery.removeEventListener('change', handleThemeChange);
 		};

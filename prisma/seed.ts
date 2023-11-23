@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import { faker } from '@faker-js/faker';
 import { PrismaClient } from '@prisma/client';
 import { promiseHash } from 'remix-utils/promise';
-import { createPassword, createUser } from '~/tests/db-utils.ts';
+import { cleanupDb, createPassword, createUser } from '~/tests/db-utils.ts';
 import { insertGitHubUser } from '~/tests/mocks/github.ts';
 
 const prisma = new PrismaClient();
@@ -26,9 +26,53 @@ async function seed() {
 	console.time(`🌱 Database has been seeded`);
 
 	console.time('🧹 Cleaned up the database...');
-	await prisma.user.deleteMany();
-	await prisma.verification.deleteMany();
+	await cleanupDb(prisma);
 	console.timeEnd('🧹 Cleaned up the database...');
+
+	console.time('🔑 Created permissions...');
+	const entities = ['user', 'book'];
+	const actions = ['create', 'read', 'update', 'delete'];
+	const accesses = ['own', 'any'] as const;
+	for (const entity of entities) {
+		for (const action of actions) {
+			for (const access of accesses) {
+				await prisma.permission.create({ data: { entity, action, access } });
+			}
+		}
+	}
+	console.timeEnd('🔑 Created permissions...');
+
+	console.time('👑 Created roles...');
+	await prisma.role.create({
+		data: {
+			name: 'admin',
+			permissions: {
+				connect: await prisma.permission.findMany({
+					select: { id: true },
+					where: { access: 'any' },
+				}),
+			},
+		},
+	});
+
+	await prisma.role.create({
+		data: {
+			name: 'user',
+			permissions: {
+				connect: await prisma.permission.findMany({
+					select: { id: true },
+					where: { access: 'own' },
+				}),
+			},
+		},
+	});
+	console.timeEnd('👑 Created roles...');
+
+	if (process.env.MINIMAL_SEED) {
+		console.log('👍 Minimal seed complete');
+		console.timeEnd(`🌱 Database has been seeded`);
+		return;
+	}
 
 	const totalUsers = 5;
 	console.time(`👤 Created ${totalUsers} users...`);

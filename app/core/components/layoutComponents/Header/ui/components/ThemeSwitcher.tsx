@@ -5,7 +5,11 @@ import { type action as rootAction } from '~/app/root.tsx';
 import { useOptimisticThemeMode } from '~/app/shared/lib/hooks/index.ts';
 import { ErrorList, Icon } from '~/app/shared/ui/index.ts';
 
-export function ThemeSwitcher({ userPreference }: { userPreference?: Theme }) {
+export function ThemeSwitcher({
+	userPreference,
+}: {
+	userPreference?: Theme | null;
+}) {
 	const fetcher = useFetcher<typeof rootAction>();
 
 	const [form] = useForm({

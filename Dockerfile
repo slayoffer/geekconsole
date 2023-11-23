@@ -1,5 +1,3 @@
-# This file is moved to the root directory before building the image
-
 # base node image
 FROM node:18-bookworm-slim as base
 
@@ -54,16 +52,7 @@ ENV CACHE_DATABASE_FILENAME="cache.db"
 ENV CACHE_DATABASE_PATH="/$LITEFS_DIR/$CACHE_DATABASE_FILENAME"
 ENV INTERNAL_PORT="8080"
 ENV PORT="8081"
-# ENV NODE_ENV="production"
-# ENV LITEFS_DIR="/litefs/data"
-# ENV DATABASE_URL="file:./data.db"
-# ENV DATABASE_PATH="./prisma/data.db"
-# ENV CACHE_DATABASE_PATH="./other/cache.db"
-ENV SENTRY_DSN=""
-
-# ENV HONEYPOT_SECRET=superSecret
-# ENV SESSION_SECRET=verySecret
-# ENV INTERNAL_COMMAND_TOKEN="some-made-up-token"
+ENV NODE_ENV="production"
 
 # add shortcut for connecting to database CLI
 RUN echo "#!/bin/sh\nset -x\nsqlite3 \$DATABASE_URL" > /usr/local/bin/database-cli && chmod +x /usr/local/bin/database-cli
@@ -78,7 +67,7 @@ COPY --from=build /app/build /app/build
 COPY --from=build /app/public /app/public
 COPY --from=build /app/package.json /app/package.json
 COPY --from=build /app/prisma /app/prisma
-# COPY --from=build /app/app/components/ui/icons /app/app/components/ui/icons
+COPY --from=build /app/app/shared/ui/Icons /app/app/shared/ui/Icons
 
 # prepare for litefs
 COPY --from=flyio/litefs:0.5.8 /usr/local/bin/litefs /usr/local/bin/litefs

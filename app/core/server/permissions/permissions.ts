@@ -77,6 +77,7 @@ function parsePermissionString(permissionString: PermissionString) {
 		Entity,
 		Access | undefined,
 	];
+
 	return {
 		action,
 		entity,
@@ -89,6 +90,7 @@ export function userHasPermission(
 	permission: PermissionString,
 ) {
 	if (!user) return false;
+
 	const { action, entity, access } = parsePermissionString(permission);
 
 	return user.roles.some((role) =>
