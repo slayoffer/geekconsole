@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
 	"$schema": "https://sly-cli.fly.dev/registry/config.json",
 	"libraries": [
 		{
@@ -9,15 +8,4 @@
 			"transformers": ["transform-icon.ts"]
 		}
 	]
-=======
-  "$schema": "https://sly-cli.fly.dev/registry/config.json",
-  "libraries": [
-    {
-      "name": "@radix-ui/icons",
-      "directory": "./other/svg-icons",
-      "postinstall": ["npm", "run", "build:icons"],
-      "transformers": ["transform-icon.ts"]
-    }
-  ]
->>>>>>> 8b2359c057d89e43c9b8ee73fc0115be4bdad515
 }
