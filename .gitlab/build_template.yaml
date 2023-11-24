@@ -14,13 +14,8 @@
     - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
   script:
     - docker build .
-      --build-arg RESEND_API_KEY=$RESEND_API_KEY
       --build-arg GITHUB_CLIENT_ID=$GITHUB_CLIENT_ID
       --build-arg GITHUB_CLIENT_SECRET=$GITHUB_CLIENT_SECRET
-      --build-arg SENTRY_DSN=$SENTRY_DSN
-      --build-arg HONEYPOT_SECRET=$HONEYPOT_SECRET
-      --build-arg SESSION_SECRET=$SESSION_SECRET
-      --build-arg INTERNAL_COMMAND_TOKEN=$INTERNAL_COMMAND_TOKEN
       -f ./Dockerfile_gitlab
       -t $CI_REGISTRY/broz/geek-console:$CI_COMMIT_REF_SLUG-$IMAGE_TAG_FRONT
     - docker push

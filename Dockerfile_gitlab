@@ -30,13 +30,6 @@ RUN npm ci --only=production
 # Build the app
 FROM base as build
 
-# ENV DATABASE_URL="file:./data.db"
-# ENV DATABASE_PATH="./prisma/data.db"
-# ENV CACHE_DATABASE_PATH="./other/cache.db"
-
-# ARG GITHUB_CLIENT_ID
-# ARG GITHUB_CLIENT_SECRET
-
 WORKDIR /app
 
 COPY --from=deps /app/node_modules /app/node_modules
@@ -52,13 +45,8 @@ ENV DATABASE_URL="file:./data.db"
 ENV DATABASE_PATH="./prisma/data.db"
 ENV CACHE_DATABASE_PATH="./other/cache.db"
 
-# ARG RESEND_API_KEY
 ARG GITHUB_CLIENT_ID
 ARG GITHUB_CLIENT_SECRET
-# ARG SENTRY_DSN
-# ARG HONEYPOT_SECRET
-# ARG SESSION_SECRET
-# ARG INTERNAL_COMMAND_TOKEN
 
 # add shortcut for connecting to database CLI
 RUN echo "#!/bin/sh\nset -x\nsqlite3 \$DATABASE_URL" > /usr/local/bin/database-cli && chmod +x /usr/local/bin/database-cli
