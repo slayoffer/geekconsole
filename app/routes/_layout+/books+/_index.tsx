@@ -61,7 +61,16 @@ export const loader = async ({ request }: DataFunctionArgs) => {
 	const userId = await requireUserId(request);
 
 	const usersBooks = await prisma.book.findMany({
-		select: { id: true, title: true, readingStatus: true },
+		select: {
+			id: true,
+			title: true,
+			readingStatus: true,
+			images: {
+				select: {
+					id: true,
+				},
+			},
+		},
 		where: { ownerId: userId },
 	});
 

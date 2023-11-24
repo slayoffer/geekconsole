@@ -49,9 +49,9 @@ export async function loader({ request }: DataFunctionArgs) {
 						url: `${domain}/resources/user-images/${user.image.id}`,
 				  }
 				: null,
-			notes: user.books.map((note) => ({
-				...note,
-				images: note.images.map((image) => ({
+			books: user.books.map((book) => ({
+				...book,
+				images: book.images.map((image) => ({
 					...image,
 					url: `${domain}/resources/book-images/${image.id}`,
 				})),

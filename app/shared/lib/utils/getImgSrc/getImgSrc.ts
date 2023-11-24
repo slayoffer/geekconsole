@@ -3,5 +3,5 @@ export function getUserImgSrc(imageId?: string | null) {
 }
 
 export function getBookImgSrc(imageId: string) {
-	return `/resources/note-images/${imageId}`;
+	return `/resources/book-images/${imageId}`;
 }

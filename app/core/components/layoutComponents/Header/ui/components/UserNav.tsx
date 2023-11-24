@@ -1,6 +1,7 @@
 import { Form, Link } from '@remix-run/react';
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
 import { useUser } from '~/app/shared/lib/hooks/index.ts';
+import { getUserImgSrc } from '~/app/shared/lib/utils/index.ts';
 
 import {
 	Avatar,
@@ -26,10 +27,7 @@ export const UserNav = () => {
 				<Button variant="outline" className="relative h-12 w-12 rounded-full">
 					<Avatar className="h-12 w-12">
 						<AvatarImage
-							src={
-								// FIX: fix this nonsense
-								null ?? `https://robohash.org/${user.username}.png`
-							}
+							src={getUserImgSrc(user.image?.id)}
 							alt="User Avatar"
 						/>
 						<AvatarFallback />

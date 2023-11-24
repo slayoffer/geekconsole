@@ -16,8 +16,12 @@ export function getTheme(request: Request): Theme | null {
 
 export function setTheme(theme: Theme | 'system') {
 	if (theme === 'system') {
-		return cookie.serialize(COOKIE_NAME, '', { path: '/', maxAge: -1 });
+		return cookie.serialize(COOKIE_NAME, '', {
+			path: '/',
+			maxAge: -1,
+			sameSite: 'lax',
+		});
 	} else {
-		return cookie.serialize(COOKIE_NAME, theme, { path: '/' });
+		return cookie.serialize(COOKIE_NAME, theme, { path: '/', sameSite: 'lax' });
 	}
 }
