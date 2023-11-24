@@ -6,7 +6,7 @@ services:
     image: registry.gitlab.devcraft.app/broz/geek-console:${CI_COMMIT_REF_SLUG}-${IMAGE_TAG_FRONT}
     restart: unless-stopped
     environment:
-    - DATABASE_URL=${DATABASE_URL}
+    - DATABASE_URL="file:./data.db"
     - RESEND_API_KEY=${RESEND_API_KEY}
     - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
     - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
