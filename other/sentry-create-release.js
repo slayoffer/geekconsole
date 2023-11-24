@@ -1,7 +1,7 @@
-import 'dotenv/config';
 import fs from 'node:fs';
 import { createRelease } from '@sentry/remix/scripts/createRelease.js';
 import { glob } from 'glob';
+import 'dotenv/config';
 
 const DEFAULT_URL_PREFIX = '#build/';
 const DEFAULT_BUILD_PATH = 'public/build';

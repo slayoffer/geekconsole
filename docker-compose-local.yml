@@ -1,0 +1,12 @@
+version: '3.9'
+
+services:
+  geekconsole:
+    container_name: geekconsole-develop
+    build:
+      context: .
+      target: build
+      dockerfile: ./Dockerfile_gitlab
+    restart: unless-stopped
+    ports:
+      - 3000:3000
