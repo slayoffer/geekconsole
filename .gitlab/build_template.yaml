@@ -1,8 +1,6 @@
 .build_template:
   stage: build
   image: docker:20.10.16
-  # services:
-  #   - docker:20.10.16-dind
   tags:
     - docker
   variables:
@@ -15,7 +13,7 @@
     - echo $IMAGE_TAG_FRONT
     - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
   script:
-    - docker build . -f ./Dockerfile -t
+    - docker build . -f ./Dockerfile_gitlab -t
       $CI_REGISTRY/broz/geek-console:$CI_COMMIT_REF_SLUG-$IMAGE_TAG_FRONT
     - docker push
       $CI_REGISTRY/broz/geek-console:$CI_COMMIT_REF_SLUG-$IMAGE_TAG_FRONT

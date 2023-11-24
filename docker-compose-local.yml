@@ -6,7 +6,7 @@ services:
     build:
       context: .
       target: build
-      dockerfile: ./Dockerfile-local
+      dockerfile: ./Dockerfile_gitlab
     restart: unless-stopped
     ports:
       - 3000:3000
