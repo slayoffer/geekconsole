@@ -5,12 +5,12 @@
 	"tsx": true,
 	"tailwind": {
 		"config": "tailwind.config.ts",
-		"css": "app/styles/global.css",
+		"css": "app/core/styles/twStyles.css",
 		"baseColor": "slate",
 		"cssVariables": true
 	},
 	"aliases": {
-		"components": "~/app/shared",
+		"components": "~/app/shared/ui",
 		"utils": "~/app/shared/lib/utils"
 	}
 }
