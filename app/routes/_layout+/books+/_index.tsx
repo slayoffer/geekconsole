@@ -28,7 +28,7 @@ import {
 export const meta: MetaFunction = () => {
 	return [
 		{ title: 'Books collection | Geek Console' },
-		{ name: 'description', content: 'Your full books collection' },
+		{ name: 'description', content: 'Your precious books collection' },
 	];
 };
 
