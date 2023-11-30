@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 import 'dotenv/config';
 
-const PORT = process.env.PORT || '3001';
+const PORT = process.env.PORT || '3000';
 
 export default defineConfig({
 	testDir: './tests/e2e',

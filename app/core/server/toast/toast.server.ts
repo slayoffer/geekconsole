@@ -3,7 +3,7 @@ import { createCookieSessionStorage, redirect } from '@remix-run/node';
 import { z } from 'zod';
 import { combineHeaders } from '~/app/shared/lib/utils/index.ts';
 
-const TOAST_KEY = 'toast';
+export const TOAST_KEY = 'toast';
 
 const TypeSchema = z.enum(['message', 'success', 'error']);
 const ToastSchema = z.object({
