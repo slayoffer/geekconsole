@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
-
 import { z } from 'zod';
 
 const schema = z.object({

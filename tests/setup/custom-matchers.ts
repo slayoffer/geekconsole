@@ -16,6 +16,7 @@ expect.extend({
 	toHaveRedirect(response: Response, redirectTo?: string) {
 		const location = response.headers.get('location');
 		const redirectToSupplied = redirectTo !== undefined;
+
 		if (redirectToSupplied !== Boolean(location)) {
 			return {
 				pass: Boolean(location),
@@ -29,8 +30,10 @@ expect.extend({
 					}`,
 			};
 		}
+
 		const isRedirectStatusCode =
 			response.status >= 300 && response.status < 400;
+
 		if (!isRedirectStatusCode) {
 			return {
 				pass: false,
@@ -65,7 +68,8 @@ expect.extend({
 
 		return {
 			pass:
-				location == redirectTo || urlsMatch(toUrl(location), toUrl(redirectTo)),
+				location === redirectTo ||
+				urlsMatch(toUrl(location), toUrl(redirectTo)),
 			message: () =>
 				`Expected response to ${
 					this.isNot ? 'not ' : ''
@@ -84,7 +88,7 @@ expect.extend({
 			return {
 				pass: false,
 				message: () =>
-					`The en_session set-cookie header was${
+					`The gk_session set-cookie header was${
 						this.isNot ? '' : ' not'
 					} defined`,
 			};
@@ -118,14 +122,14 @@ expect.extend({
 	async toSendToast(response: Response, toast: OptionalToast) {
 		const setCookies = getSetCookie(response.headers);
 		const toastSetCookie = setCookies.find(
-			(c) => setCookieParser.parseString(c).name === 'en_toast',
+			(c) => setCookieParser.parseString(c).name === 'gk_toast',
 		);
 
 		if (!toastSetCookie) {
 			return {
 				pass: false,
 				message: () =>
-					`en_toast set-cookie header was${this.isNot ? '' : ' not'} defined`,
+					`gk_toast set-cookie header was${this.isNot ? '' : ' not'} defined`,
 			};
 		}
 
@@ -162,8 +166,12 @@ type CustomMatchers<R = unknown> = {
 };
 
 declare module 'vitest' {
-	type Assertion<T = any> = {} & CustomMatchers<T>;
-	type AsymmetricMatchersContaining = {} & CustomMatchers;
+	// dunno why, but ts does not see the extended types with type alias
+	// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+	interface Assertion<T = any> extends CustomMatchers<T> {}
+	// dunno why, but ts does not see the extended types with type alias
+	// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+	interface AsymmetricMatchersContaining extends CustomMatchers {}
 }
 
 function getSetCookie(headers: Headers) {

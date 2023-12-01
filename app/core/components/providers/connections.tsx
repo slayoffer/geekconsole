@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { useIsPending } from '~/app/shared/lib/hooks/index.ts';
 import { Icon, StatusButton } from '~/app/shared/ui/index.ts';
 
-const GITHUB_PROVIDER_NAME = 'github';
+export const GITHUB_PROVIDER_NAME = 'github';
 // to add another provider, set their name here and add it to the providerNames below
 
 export const providerNames = [GITHUB_PROVIDER_NAME] as const;

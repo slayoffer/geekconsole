@@ -1,4 +1,5 @@
 export {
+	GITHUB_PROVIDER_NAME,
 	ProviderConnectionForm,
 	ProviderNameSchema,
 	type ProviderName,
