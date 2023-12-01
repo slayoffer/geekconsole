@@ -32,6 +32,7 @@ test('Users can add 2FA to their account and use it when logging in', async ({
 
 	await page.getByRole('link', { name: user.name ?? user.username }).click();
 	await page.getByRole('button', { name: /logout/i }).click();
+
 	await expect(page).toHaveURL(`/`);
 
 	await page.goto('/login');
@@ -46,7 +47,6 @@ test('Users can add 2FA to their account and use it when logging in', async ({
 
 	await page.getByRole('button', { name: /submit/i }).click();
 
-	await expect(
-		page.getByRole('link', { name: user.name ?? user.username }),
-	).toBeVisible();
+	await page.getByRole('link', { name: user.name ?? user.username }).click();
+	await expect(page.getByText(user.email)).toBeVisible();
 });

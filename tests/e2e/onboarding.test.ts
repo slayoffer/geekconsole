@@ -72,6 +72,13 @@ test('onboarding with link', async ({ page, getOnboardingData }) => {
 
 	await page.goto(onboardingUrl);
 
+	await expect(page).toHaveURL(/\/verify/);
+
+	await page
+		.getByRole('main')
+		.getByRole('button', { name: /submit/i })
+		.click();
+
 	await expect(page).toHaveURL(`/onboarding`);
 
 	await page
@@ -92,8 +99,10 @@ test('onboarding with link', async ({ page, getOnboardingData }) => {
 
 	await expect(page).toHaveURL(`/`);
 
-	await page.getByRole('button').first().click();
-	await page.getByRole('menuitem', { name: /logout/i }).click();
+	await page
+		.getByRole('link', { name: onboardingData.name ?? onboardingData.username })
+		.click();
+	await page.getByRole('button', { name: /logout/i }).click();
 
 	await expect(page).toHaveURL(`/`);
 });
@@ -131,13 +140,16 @@ test('login as existing user', async ({ page, insertNewUser }) => {
 	const password = faker.internet.password();
 	const user = await insertNewUser({ password });
 	invariant(user.name, 'User name not found');
+
 	await page.goto('/login');
 	await page.getByRole('textbox', { name: /username/i }).fill(user.username);
 	await page.getByLabel(/^password$/i).fill(password);
 	await page.getByRole('button', { name: /log in/i }).click();
+
 	await expect(page).toHaveURL(`/`);
 
-	await expect(page.getByRole('link', { name: user.name })).toBeVisible();
+	await page.getByRole('link', { name: user.name ?? user.username }).click();
+	await expect(page.getByText(user.email)).toBeVisible();
 });
 
 test('reset password with a link', async ({ page, insertNewUser }) => {
@@ -197,7 +209,8 @@ test('reset password with a link', async ({ page, insertNewUser }) => {
 
 	await expect(page).toHaveURL(`/`);
 
-	await expect(page.getByRole('link', { name: user.name })).toBeVisible();
+	await page.getByRole('link', { name: user.name ?? user.username }).click();
+	await expect(page.getByText(user.email)).toBeVisible();
 });
 
 test('reset password with a short code', async ({ page, insertNewUser }) => {
