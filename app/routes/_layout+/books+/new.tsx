@@ -8,7 +8,6 @@ import {
 	unstable_createMemoryUploadHandler as createMemoryUploadHandler,
 } from '@remix-run/node';
 import { type MetaFunction, Link, useActionData, Form } from '@remix-run/react';
-import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useSpinDelay } from 'spin-delay';
 import { z } from 'zod';
@@ -223,14 +222,7 @@ export default function NewBook() {
 						<ErrorList id={form.errorId} errors={form.errors} />
 
 						<Button type="submit" disabled={showSpinner}>
-							{showSpinner ? (
-								<>
-									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-									Please wait
-								</>
-							) : (
-								'Add this book to collection'
-							)}
+							Add this book to collection
 						</Button>
 					</Form>
 				</CardContent>

@@ -24,9 +24,7 @@ export const Header = () => {
 					</div>
 					<div className="flex items-center justify-center gap-4">
 						{maybeUser !== null ? (
-							<div className="ml-10 hidden space-x-4 lg:block">
-								<UserNav />
-							</div>
+							<UserNav />
 						) : (
 							<div className="ml-10 hidden space-x-4 lg:block">
 								<Button asChild variant="link">

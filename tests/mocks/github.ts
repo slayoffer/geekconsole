@@ -99,14 +99,18 @@ export async function insertGitHubUser(
 	{ primaryEmailAddress }: { primaryEmailAddress?: string } = {},
 ) {
 	const githubUsers = await getGitHubUsers();
+
 	let user = githubUsers.find((u) => u.code === code);
+
 	if (user) {
 		Object.assign(user, createGitHubUser(code, { primaryEmailAddress }));
 	} else {
 		user = createGitHubUser(code);
 		githubUsers.push(user);
 	}
+
 	await setGitHubUsers(githubUsers);
+
 	return user;
 }
 

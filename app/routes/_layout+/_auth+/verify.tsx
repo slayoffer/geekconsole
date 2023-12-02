@@ -6,6 +6,7 @@ import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
 import { HoneypotInputs } from 'remix-utils/honeypot/react';
 import { z } from 'zod';
 import {
+	checkHoneypot,
 	ensurePrimary,
 	generateTOTP,
 	prisma,
@@ -54,27 +55,9 @@ export type VerifyFunctionArgs = {
 	body: FormData | URLSearchParams;
 };
 
-export async function loader({ request }: DataFunctionArgs) {
-	const params = new URL(request.url).searchParams;
-
-	if (!params.has(codeQueryParam)) {
-		// we don't want to show an error message on page load if the otp hasn't been
-		// prefilled in yet, so we'll send a response with an empty submission.
-		return json({
-			status: 'idle',
-			submission: {
-				intent: '',
-				payload: Object.fromEntries(params) as Record<string, unknown>,
-				error: {} as Record<string, Array<string>>,
-			},
-		} as const);
-	}
-
-	return validateRequest(request, params);
-}
-
 export async function action({ request }: DataFunctionArgs) {
 	const formData = await request.formData();
+	checkHoneypot(formData);
 	await validateCSRF(formData, request.headers);
 	return validateRequest(request, formData);
 }
@@ -323,6 +306,7 @@ export default function VerifyRoute() {
 				<div>
 					<ErrorList errors={form.errors} id={form.errorId} />
 				</div>
+
 				<div className="flex w-full gap-2">
 					<Form method="POST" {...form.props} className="flex-1">
 						<AuthenticityTokenInput />

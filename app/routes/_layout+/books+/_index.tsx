@@ -28,7 +28,7 @@ import {
 export const meta: MetaFunction = () => {
 	return [
 		{ title: 'Books collection | Geek Console' },
-		{ name: 'description', content: 'Your full books collection' },
+		{ name: 'description', content: 'Your precious books collection' },
 	];
 };
 
@@ -61,7 +61,16 @@ export const loader = async ({ request }: DataFunctionArgs) => {
 	const userId = await requireUserId(request);
 
 	const usersBooks = await prisma.book.findMany({
-		select: { id: true, title: true, readingStatus: true },
+		select: {
+			id: true,
+			title: true,
+			readingStatus: true,
+			images: {
+				select: {
+					id: true,
+				},
+			},
+		},
 		where: { ownerId: userId },
 	});
 

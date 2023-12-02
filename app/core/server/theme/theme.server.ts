@@ -7,7 +7,7 @@ export function getTheme(request: Request): Theme | null {
 	const cookieHeader = request.headers.get('cookie');
 	const parsed = cookieHeader
 		? cookie.parse(cookieHeader)[COOKIE_NAME]
-		: 'light';
+		: 'dark';
 
 	if (parsed === 'light' || parsed === 'dark') return parsed;
 
@@ -16,8 +16,12 @@ export function getTheme(request: Request): Theme | null {
 
 export function setTheme(theme: Theme | 'system') {
 	if (theme === 'system') {
-		return cookie.serialize(COOKIE_NAME, '', { path: '/', maxAge: -1 });
+		return cookie.serialize(COOKIE_NAME, '', {
+			path: '/',
+			maxAge: -1,
+			sameSite: 'lax',
+		});
 	} else {
-		return cookie.serialize(COOKIE_NAME, theme, { path: '/' });
+		return cookie.serialize(COOKIE_NAME, theme, { path: '/', sameSite: 'lax' });
 	}
 }

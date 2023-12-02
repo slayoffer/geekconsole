@@ -23,12 +23,12 @@ const prisma = remember('prisma', () => {
 			e.duration < logThreshold * 1.1
 				? 'green'
 				: e.duration < logThreshold * 1.2
-				? 'blue'
-				: e.duration < logThreshold * 1.3
-				? 'yellow'
-				: e.duration < logThreshold * 1.4
-				? 'redBright'
-				: 'red';
+				  ? 'blue'
+				  : e.duration < logThreshold * 1.3
+				    ? 'yellow'
+				    : e.duration < logThreshold * 1.4
+				      ? 'redBright'
+				      : 'red';
 
 		const dur = chalk[color](`${e.duration}ms`);
 

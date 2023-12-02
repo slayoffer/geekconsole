@@ -1,26 +1,21 @@
 import { faker } from '@faker-js/faker';
 import { HttpResponse, http, type HttpHandler } from 'msw';
-import { z } from 'zod';
+import { requireHeader, writeEmail } from './utils.ts';
 
 const { json } = HttpResponse;
 
-const EmailSchema = z.object({
-	to: z.string(),
-	from: z.string(),
-	subject: z.string(),
-	text: z.string(),
-	html: z.string().optional(),
-});
-
 export const handlers: Array<HttpHandler> = [
 	http.post(`https://api.resend.com/emails`, async ({ request }) => {
-		const body = EmailSchema.parse(await request.json());
+		requireHeader(request.headers, 'Authorization');
+		const body = await request.json();
 		console.info('🔶 mocked email contents:', body);
+
+		const email = await writeEmail(body);
 
 		return json({
 			id: faker.string.uuid(),
-			from: body.from,
-			to: body.to,
+			from: email.from,
+			to: email.to,
 			created_at: new Date().toISOString(),
 		});
 	}),

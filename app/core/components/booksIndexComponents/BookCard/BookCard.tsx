@@ -1,11 +1,12 @@
 import { useForm } from '@conform-to/react';
 import { getFieldsetConstraint, parse } from '@conform-to/zod';
-import { type Book } from '@prisma/client';
+import { type BookImage, type Book } from '@prisma/client';
 import { Form, Link, useActionData } from '@remix-run/react';
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
 import { type action } from '~/app/routes/_layout+/books+/_index.tsx';
 import { useDoubleCheck } from '~/app/shared/lib/hooks/index.ts';
 import { useDelayedIsPending } from '~/app/shared/lib/hooks/useDelayedIsPending/useDelayedIsPending.tsx';
+import { getBookImgSrc } from '~/app/shared/lib/utils/index.ts';
 import {
 	DELETE_BOOK_INTENT,
 	DeleteBookFormSchema,
@@ -23,13 +24,15 @@ import {
 	StatusButton,
 } from '~/app/shared/ui/index.ts';
 
-type BookProps = Pick<Book, 'id' | 'title' | 'readingStatus'>;
+type BookProps = Pick<Book, 'id' | 'title' | 'readingStatus'> & {
+	images: Pick<BookImage, 'id'>[];
+};
 type BookCardProps = {
 	book: BookProps;
 };
 
 export const BookCard = ({ book }: BookCardProps) => {
-	const { id, title, readingStatus } = book;
+	const { id, title, readingStatus, images } = book;
 
 	const actionData = useActionData<typeof action>();
 	const isPending = useDelayedIsPending();
@@ -57,7 +60,7 @@ export const BookCard = ({ book }: BookCardProps) => {
 			<CardContent className="flex flex-col items-center gap-2">
 				<img
 					className="h-40 w-40 max-w-full rounded-xl align-middle"
-					src={'images/noCover.gif'}
+					src={images[0] ? getBookImgSrc(images[0].id) : 'images/noCover.gif'}
 					alt={book.title}
 				/>
 				<Badge variant="outline">{readingStatus}</Badge>
