@@ -36,16 +36,19 @@ test('a new user goes to onboarding', async () => {
 
 test('when auth fails, send the user to login with a toast', async () => {
 	consoleError.mockImplementation(() => {});
+
 	server.use(
 		http.post('https://github.com/login/oauth/access_token', async () => {
 			return new Response('error', { status: 400 });
 		}),
 	);
+
 	const request = await setupRequest();
 	const response = await loader({ request, params: PARAMS, context: {} }).catch(
 		(e) => e,
 	);
 	invariant(response instanceof Response, 'response should be a Response');
+
 	expect(response).toHaveRedirect('/login');
 	await expect(response).toSendToast(
 		expect.objectContaining({
@@ -64,6 +67,7 @@ test('when a user is logged in, it creates the connection', async () => {
 		code: githubUser.code,
 	});
 	const response = await loader({ request, params: PARAMS, context: {} });
+
 	expect(response).toHaveRedirect('/settings/profile/connections');
 	await expect(response).toSendToast(
 		expect.objectContaining({
@@ -72,6 +76,7 @@ test('when a user is logged in, it creates the connection', async () => {
 			description: expect.stringContaining(githubUser.profile.login),
 		}),
 	);
+
 	const connection = await prisma.connection.findFirst({
 		select: { id: true },
 		where: {
@@ -79,6 +84,7 @@ test('when a user is logged in, it creates the connection', async () => {
 			providerId: githubUser.profile.id.toString(),
 		},
 	});
+
 	expect(
 		connection,
 		'the connection was not created in the database',
@@ -88,6 +94,7 @@ test('when a user is logged in, it creates the connection', async () => {
 test(`when a user is logged in and has already connected, it doesn't do anything and just redirects the user back to the connections page`, async () => {
 	const session = await setupUser();
 	const githubUser = await insertGitHubUser();
+
 	await prisma.connection.create({
 		data: {
 			providerName: GITHUB_PROVIDER_NAME,
@@ -95,11 +102,13 @@ test(`when a user is logged in and has already connected, it doesn't do anything
 			providerId: githubUser.profile.id.toString(),
 		},
 	});
+
 	const request = await setupRequest({
 		sessionId: session.id,
 		code: githubUser.code,
 	});
 	const response = await loader({ request, params: PARAMS, context: {} });
+
 	expect(response).toHaveRedirect('/settings/profile/connections');
 	expect(response).toSendToast(
 		expect.objectContaining({
@@ -132,16 +141,17 @@ test('when a user exists with the same email, create connection and make session
 			providerId: githubUser.profile.id.toString(),
 		},
 	});
+
 	expect(
 		connection,
 		'the connection was not created in the database',
 	).toBeTruthy();
-
 	await expect(response).toHaveSessionForUser(userId);
 });
 
 test('gives an error if the account is already connected to another user', async () => {
 	const githubUser = await insertGitHubUser();
+
 	await prisma.user.create({
 		data: {
 			...createUser(),
@@ -159,6 +169,7 @@ test('gives an error if the account is already connected to another user', async
 		code: githubUser.code,
 	});
 	const response = await loader({ request, params: PARAMS, context: {} });
+
 	expect(response).toHaveRedirect('/settings/profile/connections');
 	await expect(response).toSendToast(
 		expect.objectContaining({
@@ -173,6 +184,7 @@ test('gives an error if the account is already connected to another user', async
 test('if a user is not logged in, but the connection exists, make a session', async () => {
 	const githubUser = await insertGitHubUser();
 	const { userId } = await setupUser();
+
 	await prisma.connection.create({
 		data: {
 			providerName: GITHUB_PROVIDER_NAME,
@@ -180,8 +192,10 @@ test('if a user is not logged in, but the connection exists, make a session', as
 			userId,
 		},
 	});
+
 	const request = await setupRequest({ code: githubUser.code });
 	const response = await loader({ request, params: PARAMS, context: {} });
+
 	expect(response).toHaveRedirect('/');
 	await expect(response).toHaveSessionForUser(userId);
 });
