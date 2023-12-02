@@ -1,6 +1,9 @@
 /**
  * @vitest-environment jsdom
  */
+
+// This pragma above gives us a simulated browser environment
+
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { useState } from 'react';
@@ -30,6 +33,7 @@ function TestComponent() {
 
 test('prevents default on the first click, and does not on the second', async () => {
 	const user = userEvent.setup();
+
 	render(<TestComponent />);
 
 	const status = screen.getByRole('status');
@@ -39,26 +43,31 @@ test('prevents default on the first click, and does not on the second', async ()
 	expect(button).toHaveTextContent('Click me');
 
 	await user.click(button);
+
 	expect(button).toHaveTextContent('You sure?');
 	expect(status).toHaveTextContent('Default Prevented: yes');
 
 	await user.click(button);
+
 	expect(button).toHaveTextContent('You sure?');
 	expect(status).toHaveTextContent('Default Prevented: no');
 });
 
 test('blurring the button starts things over', async () => {
 	const user = userEvent.setup();
+
 	render(<TestComponent />);
 
 	const status = screen.getByRole('status');
 	const button = screen.getByRole('button');
 
 	await user.click(button);
+
 	expect(button).toHaveTextContent('You sure?');
 	expect(status).toHaveTextContent('Default Prevented: yes');
 
 	await user.click(document.body);
+
 	// button goes back to click me
 	expect(button).toHaveTextContent('Click me');
 	// our callback wasn't called, so the status doesn't change
@@ -67,16 +76,19 @@ test('blurring the button starts things over', async () => {
 
 test('hitting "escape" on the input starts things over', async () => {
 	const user = userEvent.setup();
+
 	render(<TestComponent />);
 
 	const status = screen.getByRole('status');
 	const button = screen.getByRole('button');
 
 	await user.click(button);
+
 	expect(button).toHaveTextContent('You sure?');
 	expect(status).toHaveTextContent('Default Prevented: yes');
 
 	await user.keyboard('{Escape}');
+
 	// button goes back to click me
 	expect(button).toHaveTextContent('Click me');
 	// our callback wasn't called, so the status doesn't change
