@@ -18,7 +18,9 @@ export let consoleError: SpyInstance<Parameters<(typeof console)['error']>>;
 
 beforeEach(() => {
 	const originalConsoleError = console.error;
+
 	consoleError = vi.spyOn(console, 'error');
+
 	consoleError.mockImplementation(
 		(...args: Parameters<typeof console.error>) => {
 			originalConsoleError(...args);
