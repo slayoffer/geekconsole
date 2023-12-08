@@ -12,6 +12,8 @@ FROM base as deps
 
 WORKDIR /app
 
+# RUN npm cache clean --force
+
 # ADD package.json package-lock.json .npmrc ./
 ADD package.json package-lock.json .npmrc ./
 # RUN npm cache clean --force
