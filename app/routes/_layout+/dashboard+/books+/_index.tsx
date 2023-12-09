@@ -47,7 +47,7 @@ export default function Books() {
 				<div className="flex flex-col items-center justify-center">
 					<p>There are no books to display.</p>
 					<Button asChild variant="link">
-						<Link to="/books/new" prefetch="intent">
+						<Link to="new" prefetch="intent">
 							Add your own
 						</Link>
 					</Button>
@@ -113,7 +113,7 @@ export const action = async ({ request }: DataFunctionArgs) => {
 
 	await prisma.book.delete({ where: { id: book.id } });
 
-	return redirectWithToast('/books', {
+	return redirectWithToast('/dashboard/books', {
 		id: createId(),
 		type: 'success',
 		title: 'Book deleted',

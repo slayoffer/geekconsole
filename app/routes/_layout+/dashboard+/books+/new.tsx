@@ -262,7 +262,7 @@ export const action = async ({ request }: DataFunctionArgs) => {
 		coverImg,
 	});
 
-	return redirect('/books', { headers: response.headers });
+	return redirect('/dashboard/books', { headers: response.headers });
 };
 
 export const loader = async (_: DataFunctionArgs) => {
