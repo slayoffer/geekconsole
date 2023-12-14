@@ -1,8 +1,14 @@
 import { conform, useForm } from '@conform-to/react';
 import { getFieldsetConstraint, parse } from '@conform-to/zod';
+import { invariant } from '@epic-web/invariant';
 import { type SEOHandle } from '@nasa-gcn/remix-seo';
 import * as E from '@react-email/components';
-import { json, redirect, type DataFunctionArgs } from '@remix-run/node';
+import {
+	json,
+	redirect,
+	type ActionFunctionArgs,
+	type LoaderFunctionArgs,
+} from '@remix-run/node';
 import { Form, useActionData, useLoaderData } from '@remix-run/react';
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
 import { z } from 'zod';
@@ -20,7 +26,6 @@ import {
 	type VerifyFunctionArgs,
 } from '~/app/routes/_layout+/_auth+/verify.tsx';
 import { useIsPending } from '~/app/shared/lib/hooks/index.ts';
-import { invariant } from '~/app/shared/lib/utils/index.ts';
 import { EmailSchema } from '~/app/shared/schemas/index.ts';
 import { ErrorList, Field, Icon, StatusButton } from '~/app/shared/ui/index.ts';
 import { type BreadcrumbHandle } from './profile.tsx';
@@ -90,7 +95,7 @@ const ChangeEmailSchema = z.object({
 	email: EmailSchema,
 });
 
-export async function loader({ request }: DataFunctionArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
 	await requireRecentVerification(request);
 	const userId = await requireUserId(request);
 
@@ -107,7 +112,7 @@ export async function loader({ request }: DataFunctionArgs) {
 	return json({ user });
 }
 
-export async function action({ request }: DataFunctionArgs) {
+export async function action({ request }: ActionFunctionArgs) {
 	const userId = await requireUserId(request);
 
 	const formData = await request.formData();

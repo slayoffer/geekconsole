@@ -1,8 +1,10 @@
 import { parse } from '@conform-to/zod';
+import { invariantResponse } from '@epic-web/invariant';
 import { createId } from '@paralleldrive/cuid2';
 import {
 	json,
-	type DataFunctionArgs,
+	type ActionFunctionArgs,
+	type LoaderFunctionArgs,
 	type MetaFunction,
 } from '@remix-run/node';
 import { Link, useLoaderData } from '@remix-run/react';
@@ -15,7 +17,6 @@ import {
 	requireUserWithPermission,
 	validateCSRF,
 } from '~/app/core/server/index.ts';
-import { invariantResponse } from '~/app/shared/lib/utils/index.ts';
 import { DeleteBookFormSchema } from '~/app/shared/schemas/index.ts';
 import {
 	Alert,
@@ -57,7 +58,7 @@ export default function Books() {
 	);
 }
 
-export const loader = async ({ request }: DataFunctionArgs) => {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
 	const userId = await requireUserId(request);
 
 	const usersBooks = await prisma.book.findMany({
@@ -77,7 +78,7 @@ export const loader = async ({ request }: DataFunctionArgs) => {
 	return json({ usersBooks });
 };
 
-export const action = async ({ request }: DataFunctionArgs) => {
+export const action = async ({ request }: ActionFunctionArgs) => {
 	const userId = await requireUserId(request);
 
 	const formData = await request.formData();

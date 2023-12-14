@@ -1,7 +1,7 @@
 import { conform, useForm } from '@conform-to/react';
 import { getFieldsetConstraint, parse } from '@conform-to/zod';
 import {
-	type DataFunctionArgs,
+	type LoaderFunctionArgs,
 	json,
 	redirect,
 	unstable_parseMultipartFormData as parseMultipartFormData,
@@ -231,7 +231,7 @@ export default function NewBook() {
 	);
 }
 
-export const action = async ({ request }: DataFunctionArgs) => {
+export const action = async ({ request }: LoaderFunctionArgs) => {
 	const response = new Response();
 
 	const uploadHandler = createMemoryUploadHandler({
@@ -265,7 +265,7 @@ export const action = async ({ request }: DataFunctionArgs) => {
 	return redirect('/dashboard/books', { headers: response.headers });
 };
 
-export const loader = async (_: DataFunctionArgs) => {
+export const loader = async (_: LoaderFunctionArgs) => {
 	return json({ ok: true });
 };
 

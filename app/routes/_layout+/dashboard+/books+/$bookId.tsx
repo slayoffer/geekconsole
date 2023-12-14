@@ -1,4 +1,4 @@
-import { json, type DataFunctionArgs } from '@remix-run/node';
+import { json, type LoaderFunctionArgs } from '@remix-run/node';
 import { type MetaFunction, Link, useLoaderData } from '@remix-run/react';
 import invariant from 'tiny-invariant';
 
@@ -73,7 +73,7 @@ export default function BookOverview() {
 	);
 }
 
-export const loader = async ({ params }: DataFunctionArgs) => {
+export const loader = async ({ params }: LoaderFunctionArgs) => {
 	const response = new Response();
 	const { bookId } = params;
 	invariant(bookId, 'Missing bookId param');

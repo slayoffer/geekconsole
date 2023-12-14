@@ -1,10 +1,11 @@
+import { invariantResponse } from '@epic-web/invariant';
 import { type SEOHandle } from '@nasa-gcn/remix-seo';
-import { json, type DataFunctionArgs } from '@remix-run/node';
+import { json, type LoaderFunctionArgs } from '@remix-run/node';
 import { Link, Outlet, useMatches } from '@remix-run/react';
 import { z } from 'zod';
 import { prisma, requireUserId } from '~/app/core/server/index.ts';
 import { useUser } from '~/app/shared/lib/hooks/index.ts';
-import { cn, invariantResponse } from '~/app/shared/lib/utils/index.ts';
+import { cn } from '~/app/shared/lib/utils/index.ts';
 import { Icon, Spacer } from '~/app/shared/ui/index.ts';
 
 export const BreadcrumbHandle = z.object({ breadcrumb: z.any() });
@@ -15,7 +16,7 @@ export const handle: BreadcrumbHandle & SEOHandle = {
 	getSitemapEntries: () => null,
 };
 
-export async function loader({ request }: DataFunctionArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
 	const userId = await requireUserId(request);
 
 	const user = await prisma.user.findUnique({

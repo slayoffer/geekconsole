@@ -1,8 +1,8 @@
-import { type DataFunctionArgs } from '@remix-run/node';
+import { invariantResponse } from '@epic-web/invariant';
+import { type LoaderFunctionArgs } from '@remix-run/node';
 import { prisma } from '~/app/core/server/index.ts';
-import { invariantResponse } from '~/app/shared/lib/utils/index.ts';
 
-export async function loader({ params }: DataFunctionArgs) {
+export async function loader({ params }: LoaderFunctionArgs) {
 	invariantResponse(params.imageId, 'Image ID is required', { status: 400 });
 
 	const image = await prisma.bookImage.findUnique({

@@ -1,4 +1,4 @@
-import { redirect, type DataFunctionArgs } from '@remix-run/node';
+import { redirect, type ActionFunctionArgs } from '@remix-run/node';
 import { ProviderNameSchema } from '~/app/core/components/providers/index.ts';
 import {
 	authenticator,
@@ -11,7 +11,7 @@ export async function loader() {
 	return redirect('/login');
 }
 
-export async function action({ request, params }: DataFunctionArgs) {
+export async function action({ request, params }: ActionFunctionArgs) {
 	const providerName = ProviderNameSchema.parse(params.provider);
 
 	try {

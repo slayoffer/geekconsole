@@ -1,9 +1,11 @@
 import { conform, useForm } from '@conform-to/react';
 import { getFieldsetConstraint, parse } from '@conform-to/zod';
+import { invariant } from '@epic-web/invariant';
 import {
 	json,
 	redirect,
-	type DataFunctionArgs,
+	type LoaderFunctionArgs,
+	type ActionFunctionArgs,
 	type MetaFunction,
 } from '@remix-run/node';
 import { Form, useActionData, useLoaderData } from '@remix-run/react';
@@ -14,7 +16,6 @@ import {
 	verifySessionStorage,
 } from '~/app/core/server/index.ts';
 import { useIsPending } from '~/app/shared/lib/hooks/index.ts';
-import { invariant } from '~/app/shared/lib/utils/index.ts';
 import { PasswordAndConfirmPasswordSchema } from '~/app/shared/schemas/index.ts';
 import {
 	ErrorList,
@@ -73,12 +74,12 @@ async function requireResetPasswordUsername(request: Request) {
 	return resetPasswordUsername;
 }
 
-export async function loader({ request }: DataFunctionArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
 	const resetPasswordUsername = await requireResetPasswordUsername(request);
 	return json({ resetPasswordUsername });
 }
 
-export async function action({ request }: DataFunctionArgs) {
+export async function action({ request }: ActionFunctionArgs) {
 	const resetPasswordUsername = await requireResetPasswordUsername(request);
 
 	const formData = await request.formData();
