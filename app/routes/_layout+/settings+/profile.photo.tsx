@@ -26,13 +26,13 @@ import {
 } from '~/app/core/server/index.ts';
 import { useDoubleCheck, useIsPending } from '~/app/shared/lib/hooks/index.ts';
 import { getUserImgSrc } from '~/app/shared/lib/utils/index.ts';
+import { type BreadcrumbHandle } from '~/app/shared/schemas/index.ts';
 import {
 	Button,
 	ErrorList,
 	Icon,
 	StatusButton,
 } from '~/app/shared/ui/index.ts';
-import { type BreadcrumbHandle } from './profile.tsx';
 
 export const handle: BreadcrumbHandle & SEOHandle = {
 	breadcrumb: <Icon name="avatar">Photo</Icon>,

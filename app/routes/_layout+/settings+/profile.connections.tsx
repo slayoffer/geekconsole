@@ -23,6 +23,7 @@ import {
 	requireUserId,
 	resolveConnectionData,
 } from '~/app/core/server/index.ts';
+import { type BreadcrumbHandle } from '~/app/shared/schemas/index.ts';
 import {
 	Icon,
 	StatusButton,
@@ -31,7 +32,6 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from '~/app/shared/ui/index.ts';
-import { type BreadcrumbHandle } from './profile.tsx';
 
 export const handle: BreadcrumbHandle & SEOHandle = {
 	breadcrumb: <Icon name="link-2">Connections</Icon>,

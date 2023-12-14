@@ -19,7 +19,10 @@ import {
 	verifyUserPassword,
 } from '~/app/core/server/index.ts';
 import { useIsPending } from '~/app/shared/lib/hooks/index.ts';
-import { PasswordSchema } from '~/app/shared/schemas/index.ts';
+import {
+	type BreadcrumbHandle,
+	PasswordSchema,
+} from '~/app/shared/schemas/index.ts';
 import {
 	Button,
 	ErrorList,
@@ -27,7 +30,6 @@ import {
 	Icon,
 	StatusButton,
 } from '~/app/shared/ui/index.ts';
-import { type BreadcrumbHandle } from './profile.tsx';
 
 export const handle: BreadcrumbHandle & SEOHandle = {
 	breadcrumb: <Icon name="dots-horizontal">Password</Icon>,

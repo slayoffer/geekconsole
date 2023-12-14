@@ -13,9 +13,9 @@ import {
 	validateCSRF,
 } from '~/app/core/server/index.ts';
 import { useDoubleCheck } from '~/app/shared/lib/hooks/index.ts';
+import { type BreadcrumbHandle } from '~/app/shared/schemas/index.ts';
 import { Icon, StatusButton } from '~/app/shared/ui/index.ts';
 import { requireRecentVerification } from '../_auth+/verify.tsx';
-import { type BreadcrumbHandle } from './profile.tsx';
 import { twoFAVerificationType } from './profile.two-factor.tsx';
 
 export const handle: BreadcrumbHandle & SEOHandle = {

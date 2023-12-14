@@ -1,6 +1,8 @@
+import { type SEOHandle } from '@nasa-gcn/remix-seo';
 import { json, type LoaderFunctionArgs } from '@remix-run/node';
 import { type MetaFunction, Link, useLoaderData } from '@remix-run/react';
 import invariant from 'tiny-invariant';
+import { type BreadcrumbHandle } from '~/app/shared/schemas/index.ts';
 
 import {
 	Alert,
@@ -21,6 +23,11 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 		{ title: `${bookName} | Geek Console` },
 		{ name: 'description', content: bookSummary },
 	];
+};
+
+export const handle: BreadcrumbHandle & SEOHandle = {
+	breadcrumb: 'Overview',
+	getSitemapEntries: () => null,
 };
 
 export default function BookOverview() {

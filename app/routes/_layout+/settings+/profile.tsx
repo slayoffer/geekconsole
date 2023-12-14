@@ -6,10 +6,8 @@ import { z } from 'zod';
 import { prisma, requireUserId } from '~/app/core/server/index.ts';
 import { useUser } from '~/app/shared/lib/hooks/index.ts';
 import { cn } from '~/app/shared/lib/utils/index.ts';
+import { BreadcrumbHandle } from '~/app/shared/schemas/index.ts';
 import { Icon, Spacer } from '~/app/shared/ui/index.ts';
-
-export const BreadcrumbHandle = z.object({ breadcrumb: z.any() });
-export type BreadcrumbHandle = z.infer<typeof BreadcrumbHandle>;
 
 export const handle: BreadcrumbHandle & SEOHandle = {
 	breadcrumb: <Icon name="file-text">Edit Profile</Icon>,
