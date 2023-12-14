@@ -3,7 +3,7 @@ import { getFieldsetConstraint, parse } from '@conform-to/zod';
 import { type BookImage, type Book } from '@prisma/client';
 import { Form, Link, useActionData } from '@remix-run/react';
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
-import { type action } from '~/app/routes/_layout+/dashboard+/books.tsx';
+import { type action } from '~/app/routes/_layout+/dashboard+/books+/collection.tsx';
 import { useDoubleCheck } from '~/app/shared/lib/hooks/index.ts';
 import { useDelayedIsPending } from '~/app/shared/lib/hooks/useDelayedIsPending/useDelayedIsPending.tsx';
 import { getBookImgSrc } from '~/app/shared/lib/utils/index.ts';
