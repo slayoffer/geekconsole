@@ -1,9 +1,11 @@
 import { conform, useForm } from '@conform-to/react';
 import { getFieldsetConstraint, parse } from '@conform-to/zod';
+import { invariant } from '@epic-web/invariant';
 import {
 	json,
 	redirect,
-	type DataFunctionArgs,
+	type ActionFunctionArgs,
+	type LoaderFunctionArgs,
 	type MetaFunction,
 } from '@remix-run/node';
 import {
@@ -28,7 +30,6 @@ import {
 	verifySessionStorage,
 } from '~/app/core/server/index.ts';
 import { useIsPending } from '~/app/shared/lib/hooks/index.ts';
-import { invariant } from '~/app/shared/lib/utils/index.ts';
 import {
 	NameSchema,
 	PasswordSchema,
@@ -84,12 +85,12 @@ async function requireOnboardingEmail(request: Request) {
 	return email;
 }
 
-export async function loader({ request }: DataFunctionArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
 	const email = await requireOnboardingEmail(request);
 	return json({ email });
 }
 
-export async function action({ request }: DataFunctionArgs) {
+export async function action({ request }: ActionFunctionArgs) {
 	const email = await requireOnboardingEmail(request);
 
 	const formData = await request.formData();

@@ -8,12 +8,18 @@ export default defineConfig({
 	plugins: [react(), tsconfigPaths()],
 	css: { postcss: { plugins: [] } },
 	test: {
-		include: ['./tests/unit/**/*.test.{ts,tsx}'],
+		include: [
+			'./tests/unit/**/*.test.{ts,tsx}',
+			'./tests/integration/**/*.test.{ts,tsx}',
+		],
 		setupFiles: ['./tests/setup/setup-test-env.ts'],
 		globalSetup: ['./tests/setup/global-setup.ts'],
 		restoreMocks: true,
 		coverage: {
-			include: ['tests/unit/**/*.{ts,tsx}'],
+			include: [
+				'tests/unit/**/*.{ts,tsx}',
+				'tests/integration/**/*.test.{ts,tsx}',
+			],
 			all: true,
 		},
 	},

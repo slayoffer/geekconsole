@@ -1,6 +1,5 @@
 export { exhaustiveCheck } from './exhaustiveCheck/exhaustiveCheck.ts';
 export { cn } from './cn/cn.ts';
-export { invariantResponse } from './invariantResponse/invariantResponse.ts';
 export { getErrorMessage } from './getErrorMessage/getErrorMessage.ts';
 export { init } from './devtools/devtools.tsx';
 export { combineHeaders } from './combineHeaders/combineHeaders.ts';
@@ -8,6 +7,5 @@ export { combineResponseInits } from './combineResponseInits/combineResponseInit
 export { downloadFile } from './downloadFile/downloadFile.ts';
 export { getDomainUrl } from './getDomainUrl/getDomainUrl.ts';
 export { getReferrerRoute } from './getReferrerRoute/getReferrerRoute.ts';
-export { invariant } from './invariant/invariant.ts';
 export { mergeHeaders } from './mergeHeaders/mergeHeaders.ts';
 export { getUserImgSrc, getBookImgSrc } from './getImgSrc/getImgSrc.ts';

@@ -1,5 +1,9 @@
 import { type SEOHandle } from '@nasa-gcn/remix-seo';
-import { json, type DataFunctionArgs } from '@remix-run/node';
+import {
+	json,
+	type ActionFunctionArgs,
+	type LoaderFunctionArgs,
+} from '@remix-run/node';
 import { useFetcher } from '@remix-run/react';
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
 import {
@@ -9,9 +13,9 @@ import {
 	validateCSRF,
 } from '~/app/core/server/index.ts';
 import { useDoubleCheck } from '~/app/shared/lib/hooks/index.ts';
+import { type BreadcrumbHandle } from '~/app/shared/schemas/index.ts';
 import { Icon, StatusButton } from '~/app/shared/ui/index.ts';
 import { requireRecentVerification } from '../_auth+/verify.tsx';
-import { type BreadcrumbHandle } from './profile.tsx';
 import { twoFAVerificationType } from './profile.two-factor.tsx';
 
 export const handle: BreadcrumbHandle & SEOHandle = {
@@ -19,12 +23,12 @@ export const handle: BreadcrumbHandle & SEOHandle = {
 	getSitemapEntries: () => null,
 };
 
-export async function loader({ request }: DataFunctionArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
 	await requireRecentVerification(request);
 	return json({});
 }
 
-export async function action({ request }: DataFunctionArgs) {
+export async function action({ request }: ActionFunctionArgs) {
 	await requireRecentVerification(request);
 
 	await validateCSRF(await request.formData(), request.headers);

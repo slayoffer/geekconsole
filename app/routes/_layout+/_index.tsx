@@ -29,7 +29,7 @@ export default function Index() {
 				</p>
 				{userIsAdmin ? (
 					<Button asChild variant="secondary" className="mt-4">
-						<Link to="/admin">
+						<Link to="/admin/cache">
 							<Icon name="backpack">
 								<span className="hidden sm:block">Admin</span>
 							</Icon>

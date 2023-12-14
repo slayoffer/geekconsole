@@ -1,8 +1,8 @@
-import { json, type DataFunctionArgs } from '@remix-run/node';
+import { json, type LoaderFunctionArgs } from '@remix-run/node';
 import { prisma, requireUserId } from '~/app/core/server/index.ts';
 import { getDomainUrl } from '~/app/shared/lib/utils/index.ts';
 
-export async function loader({ request }: DataFunctionArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
 	const userId = await requireUserId(request);
 
 	const user = await prisma.user.findUniqueOrThrow({

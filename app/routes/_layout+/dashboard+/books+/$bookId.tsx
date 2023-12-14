@@ -1,6 +1,8 @@
-import { json, type DataFunctionArgs } from '@remix-run/node';
+import { type SEOHandle } from '@nasa-gcn/remix-seo';
+import { json, type LoaderFunctionArgs } from '@remix-run/node';
 import { type MetaFunction, Link, useLoaderData } from '@remix-run/react';
 import invariant from 'tiny-invariant';
+import { type BreadcrumbHandle } from '~/app/shared/schemas/index.ts';
 
 import {
 	Alert,
@@ -21,6 +23,11 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 		{ title: `${bookName} | Geek Console` },
 		{ name: 'description', content: bookSummary },
 	];
+};
+
+export const handle: BreadcrumbHandle & SEOHandle = {
+	breadcrumb: 'Overview',
+	getSitemapEntries: () => null,
 };
 
 export default function BookOverview() {
@@ -73,7 +80,7 @@ export default function BookOverview() {
 	);
 }
 
-export const loader = async ({ params }: DataFunctionArgs) => {
+export const loader = async ({ params }: LoaderFunctionArgs) => {
 	const response = new Response();
 	const { bookId } = params;
 	invariant(bookId, 'Missing bookId param');

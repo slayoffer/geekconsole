@@ -12,7 +12,7 @@ import { remember } from '@epic-web/remember';
 import Database from 'better-sqlite3';
 import { LRUCache } from 'lru-cache';
 import { z } from 'zod';
-import { updatePrimaryCacheValue } from '~/app/routes/admin+/cache_.sqlite.tsx';
+import { updatePrimaryCacheValue } from '~/app/routes/_layout+/admin+/cache_.sqlite.tsx';
 import {
 	getInstanceInfo,
 	getInstanceInfoSync,

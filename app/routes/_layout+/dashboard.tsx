@@ -1,16 +1,15 @@
-import { Link, type MetaFunction } from '@remix-run/react';
+import { type SEOHandle } from '@nasa-gcn/remix-seo';
 import {
-	Button,
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-	Tabs,
-	TabsContent,
-	TabsList,
-	TabsTrigger,
-} from '~/app/shared/ui/index.ts';
+	Outlet,
+	type MetaFunction,
+	NavLink,
+	Link,
+	useMatches,
+} from '@remix-run/react';
+import { z } from 'zod';
+import { cn } from '~/app/shared/lib/utils/index.ts';
+import { BreadcrumbHandle } from '~/app/shared/schemas/index.ts';
+import { Icon } from '~/app/shared/ui/index.ts';
 
 export const meta: MetaFunction = () => {
 	return [
@@ -19,179 +18,100 @@ export const meta: MetaFunction = () => {
 	];
 };
 
+const DASHBOARD_ROUTES = [
+	{
+		path: 'books',
+		text: 'Books to Read',
+	},
+	{
+		path: 'games',
+		text: 'Games to Play',
+	},
+	{
+		path: 'car',
+		text: 'Car to Maintain',
+	},
+];
+
+const NAV_LINK_DEFAULT_CN =
+	'flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50';
+
+export const handle: BreadcrumbHandle & SEOHandle = {
+	breadcrumb: 'Dashboard',
+	getSitemapEntries: () => null,
+};
+
+const BreadcrumbHandleMatch = z.object({
+	handle: BreadcrumbHandle,
+});
+
 export default function Dashboard() {
+	const matches = useMatches();
+
+	const breadcrumbs = matches
+		.map((m) => {
+			const result = BreadcrumbHandleMatch.safeParse(m);
+
+			if (!result.success || !result.data.handle.breadcrumb) return null;
+
+			return (
+				<Link key={m.id} to={m.pathname} className="flex items-center">
+					{result.data.handle.breadcrumb}
+				</Link>
+			);
+		})
+		.filter(Boolean);
+
 	return (
-		<div className="overflow-hidden rounded-[0.5rem] border bg-background shadow">
-			<div className="hidden flex-col md:flex">
-				<div className="flex-1 space-y-4 p-8 pt-6">
-					<div className="flex items-center justify-between space-y-2">
-						<h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+		<div className="grid w-full lg:grid-cols-[280px_1fr]">
+			<div className="hidden border-r bg-gray-100/40 dark:bg-gray-800/40 lg:block">
+				<div className="flex h-full max-h-screen flex-col gap-2">
+					<div className="flex h-[60px] items-center border-b px-6">
+						<Link className="flex items-center gap-2 font-semibold" to="/">
+							<Icon name="skull">Dashboard</Icon>
+						</Link>
 					</div>
-					<Tabs defaultValue="overview" className="space-y-4">
-						<TabsList>
-							<TabsTrigger value="overview">Overview</TabsTrigger>
-							<TabsTrigger value="books">Books</TabsTrigger>
-							<TabsTrigger value="movies" disabled>
-								Movies
-							</TabsTrigger>
-							<TabsTrigger value="car" disabled>
-								Car
-							</TabsTrigger>
-						</TabsList>
-						<TabsContent value="overview" className="space-y-4">
-							<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-								<Card>
-									<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-										<CardTitle className="text-sm font-medium">
-											Total Revenue
-										</CardTitle>
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											viewBox="0 0 24 24"
-											fill="none"
-											stroke="currentColor"
-											strokeLinecap="round"
-											strokeLinejoin="round"
-											strokeWidth="2"
-											className="h-4 w-4 text-muted-foreground"
-										>
-											<path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-										</svg>
-									</CardHeader>
-									<CardContent>
-										<div className="text-2xl font-bold">$45,231.89</div>
-										<p className="text-xs text-muted-foreground">
-											+20.1% from last month
-										</p>
-									</CardContent>
-								</Card>
-								<Card>
-									<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-										<CardTitle className="text-sm font-medium">
-											Subscriptions
-										</CardTitle>
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											viewBox="0 0 24 24"
-											fill="none"
-											stroke="currentColor"
-											strokeLinecap="round"
-											strokeLinejoin="round"
-											strokeWidth="2"
-											className="h-4 w-4 text-muted-foreground"
-										>
-											<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-											<circle cx="9" cy="7" r="4" />
-											<path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-										</svg>
-									</CardHeader>
-									<CardContent>
-										<div className="text-2xl font-bold">+2350</div>
-										<p className="text-xs text-muted-foreground">
-											+180.1% from last month
-										</p>
-									</CardContent>
-								</Card>
-								<Card>
-									<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-										<CardTitle className="text-sm font-medium">Sales</CardTitle>
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											viewBox="0 0 24 24"
-											fill="none"
-											stroke="currentColor"
-											strokeLinecap="round"
-											strokeLinejoin="round"
-											strokeWidth="2"
-											className="h-4 w-4 text-muted-foreground"
-										>
-											<rect width="20" height="14" x="2" y="5" rx="2" />
-											<path d="M2 10h20" />
-										</svg>
-									</CardHeader>
-									<CardContent>
-										<div className="text-2xl font-bold">+12,234</div>
-										<p className="text-xs text-muted-foreground">
-											+19% from last month
-										</p>
-									</CardContent>
-								</Card>
-								<Card>
-									<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-										<CardTitle className="text-sm font-medium">
-											Active Now
-										</CardTitle>
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											viewBox="0 0 24 24"
-											fill="none"
-											stroke="currentColor"
-											strokeLinecap="round"
-											strokeLinejoin="round"
-											strokeWidth="2"
-											className="h-4 w-4 text-muted-foreground"
-										>
-											<path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-										</svg>
-									</CardHeader>
-									<CardContent>
-										<div className="text-2xl font-bold">+573</div>
-										<p className="text-xs text-muted-foreground">
-											+201 since last hour
-										</p>
-									</CardContent>
-								</Card>
-							</div>
-							<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-								<Card className="col-span-4">
-									<CardHeader>
-										<CardTitle>Overview</CardTitle>
-									</CardHeader>
-									<CardContent className="pl-2">
-										{/* TODO: Add more info */}
-										Overview info here
-									</CardContent>
-								</Card>
-								<Card className="col-span-3">
-									<CardHeader>
-										<CardTitle>Some more info here</CardTitle>
-										<CardDescription>
-											Lorem ipsum dolor sit amet, qui minim labore adipisicing
-											minim sint cillum sint consectetur cupidatat.
-										</CardDescription>
-									</CardHeader>
-									<CardContent>
-										Lorem ipsum dolor sit amet, officia excepteur ex fugiat
-										reprehenderit enim labore culpa sint ad nisi Lorem pariatur
-										mollit ex esse exercitation amet. Nisi anim cupidatat
-										excepteur officia. Reprehenderit nostrud nostrud ipsum Lorem
-										est aliquip amet voluptate voluptate dolor minim nulla est
-										proident. Nostrud officia pariatur ut officia. Sit irure
-										elit esse ea nulla sunt ex occaecat reprehenderit commodo
-										officia dolor Lorem duis laboris cupidatat officia
-										voluptate. Culpa proident adipisicing id nulla nisi laboris
-										ex in Lorem sunt duis officia eiusmod. Aliqua reprehenderit
-										commodo ex non excepteur duis sunt velit enim. Voluptate
-										laboris sint cupidatat ullamco ut ea consectetur et est
-										culpa et culpa duis.
-									</CardContent>
-								</Card>
-							</div>
-						</TabsContent>
-
-						<TabsContent value="books" className="space-y-4">
-							<div className="flex flex-col space-y-2">
-								<Button asChild variant="link">
-									<Link to="/books">Your books collection</Link>
-								</Button>
-
-								<Button asChild variant="link">
-									<Link to="/books/new">Add new book</Link>
-								</Button>
-							</div>
-						</TabsContent>
-					</Tabs>
+					<div className="flex-1 overflow-auto py-2">
+						<nav className="grid items-start px-4 text-sm font-medium">
+							{DASHBOARD_ROUTES.map((route) => (
+								<NavLink
+									key={route.path}
+									to={route.path}
+									className={({ isActive }) =>
+										cn(
+											NAV_LINK_DEFAULT_CN,
+											isActive &&
+												'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-50',
+										)
+									}
+								>
+									{route.text}
+								</NavLink>
+							))}
+						</nav>
+					</div>
 				</div>
+			</div>
+
+			<div className="flex flex-col p-6">
+				<header className="flex h-14 items-center gap-4 border-b bg-gray-100/40 px-6 dark:bg-gray-800/40">
+					<ul className="flex gap-3">
+						{breadcrumbs.map((breadcrumb, i, arr) => (
+							<li
+								key={i}
+								className={cn('flex items-center gap-3', {
+									'text-muted-foreground': i < arr.length - 1,
+								})}
+							>
+								{breadcrumb}
+								{i !== arr.length - 1 && <Icon name="arrow-right" />}
+							</li>
+						))}
+					</ul>
+				</header>
+				<main className="flex flex-1 flex-wrap gap-4 p-4 md:gap-8 md:p-6">
+					<Outlet />
+				</main>
 			</div>
 		</div>
 	);

@@ -2,7 +2,8 @@ import { parse } from '@conform-to/zod';
 import { cssBundleHref } from '@remix-run/css-bundle';
 import {
 	type HeadersFunction,
-	type DataFunctionArgs,
+	type LoaderFunctionArgs,
+	type ActionFunctionArgs,
 	json,
 	type LinksFunction,
 } from '@remix-run/node';
@@ -134,7 +135,7 @@ function Document({
 	);
 }
 
-export async function action({ request }: DataFunctionArgs) {
+export async function action({ request }: ActionFunctionArgs) {
 	const formData = await request.formData();
 
 	const submission = parse(formData, {
@@ -158,7 +159,7 @@ export async function action({ request }: DataFunctionArgs) {
 	return json({ success: true, submission }, responseInit);
 }
 
-export const loader = async ({ request }: DataFunctionArgs) => {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
 	const timings = makeTimings('root loader');
 	const userId = await time(() => getUserId(request), {
 		timings,

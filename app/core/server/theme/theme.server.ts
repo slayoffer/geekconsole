@@ -22,6 +22,10 @@ export function setTheme(theme: Theme | 'system') {
 			sameSite: 'lax',
 		});
 	} else {
-		return cookie.serialize(COOKIE_NAME, theme, { path: '/', sameSite: 'lax' });
+		return cookie.serialize(COOKIE_NAME, theme, {
+			path: '/',
+			maxAge: 31536000,
+			sameSite: 'lax',
+		});
 	}
 }

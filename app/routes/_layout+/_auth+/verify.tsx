@@ -1,6 +1,6 @@
 import { type Submission, conform, useForm } from '@conform-to/react';
 import { getFieldsetConstraint, parse } from '@conform-to/zod';
-import { json, type DataFunctionArgs } from '@remix-run/node';
+import { json, type ActionFunctionArgs } from '@remix-run/node';
 import { Form, useActionData, useSearchParams } from '@remix-run/react';
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
 import { HoneypotInputs } from 'remix-utils/honeypot/react';
@@ -55,7 +55,7 @@ export type VerifyFunctionArgs = {
 	body: FormData | URLSearchParams;
 };
 
-export async function action({ request }: DataFunctionArgs) {
+export async function action({ request }: ActionFunctionArgs) {
 	const formData = await request.formData();
 	checkHoneypot(formData);
 	await validateCSRF(formData, request.headers);

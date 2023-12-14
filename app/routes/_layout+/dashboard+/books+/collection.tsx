@@ -1,63 +1,60 @@
 import { parse } from '@conform-to/zod';
+import { invariantResponse } from '@epic-web/invariant';
+import { type SEOHandle } from '@nasa-gcn/remix-seo';
 import { createId } from '@paralleldrive/cuid2';
 import {
+	type ActionFunctionArgs,
+	type LoaderFunctionArgs,
 	json,
-	type DataFunctionArgs,
-	type MetaFunction,
 } from '@remix-run/node';
-import { Link, useLoaderData } from '@remix-run/react';
-
-import { BookCard } from '~/app/core/components/booksIndexComponents/index.ts';
+import { Link, Outlet, useLoaderData } from '@remix-run/react';
+import { BookCard } from '~/app/core/components/books/index.ts';
 import {
+	requireUserId,
 	prisma,
 	redirectWithToast,
-	requireUserId,
 	requireUserWithPermission,
 	validateCSRF,
 } from '~/app/core/server/index.ts';
-import { invariantResponse } from '~/app/shared/lib/utils/index.ts';
-import { DeleteBookFormSchema } from '~/app/shared/schemas/index.ts';
 import {
-	Alert,
-	AlertDescription,
-	AlertTitle,
-	Button,
+	DeleteBookFormSchema,
+	type BreadcrumbHandle,
+} from '~/app/shared/schemas/index.ts';
+import {
 	GeneralErrorBoundary,
+	Alert,
+	AlertTitle,
+	AlertDescription,
+	Button,
 } from '~/app/shared/ui/index.ts';
 
-export const meta: MetaFunction = () => {
-	return [
-		{ title: 'Books collection | Geek Console' },
-		{ name: 'description', content: 'Your precious books collection' },
-	];
+export const handle: BreadcrumbHandle & SEOHandle = {
+	breadcrumb: 'Collection',
+	getSitemapEntries: () => null,
 };
 
-export default function Books() {
+export default function BooksCollectionRoute() {
 	const { usersBooks } = useLoaderData<typeof loader>();
 
 	return (
 		<>
 			{usersBooks && usersBooks.length > 0 ? (
-				<div className="grid grid-cols-5 gap-4">
+				<div className="grid grid-cols-4 gap-4">
 					{usersBooks.map((book) => (
 						<BookCard key={book.id} book={book} />
 					))}
+					<Outlet />
 				</div>
 			) : (
 				<div className="flex flex-col items-center justify-center">
-					<p>There are no books to display.</p>
-					<Button asChild variant="link">
-						<Link to="/books/new" prefetch="intent">
-							Add your own
-						</Link>
-					</Button>
+					<p>There are no books to display :(</p>
 				</div>
 			)}
 		</>
 	);
 }
 
-export const loader = async ({ request }: DataFunctionArgs) => {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
 	const userId = await requireUserId(request);
 
 	const usersBooks = await prisma.book.findMany({
@@ -77,7 +74,7 @@ export const loader = async ({ request }: DataFunctionArgs) => {
 	return json({ usersBooks });
 };
 
-export const action = async ({ request }: DataFunctionArgs) => {
+export const action = async ({ request }: ActionFunctionArgs) => {
 	const userId = await requireUserId(request);
 
 	const formData = await request.formData();
@@ -113,7 +110,7 @@ export const action = async ({ request }: DataFunctionArgs) => {
 
 	await prisma.book.delete({ where: { id: book.id } });
 
-	return redirectWithToast('/books', {
+	return redirectWithToast('/dashboard/books/collection', {
 		id: createId(),
 		type: 'success',
 		title: 'Book deleted',

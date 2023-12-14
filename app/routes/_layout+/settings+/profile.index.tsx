@@ -1,7 +1,12 @@
 import { conform, useForm } from '@conform-to/react';
 import { getFieldsetConstraint, parse } from '@conform-to/zod';
+import { invariantResponse } from '@epic-web/invariant';
 import { type SEOHandle } from '@nasa-gcn/remix-seo';
-import { json, type DataFunctionArgs } from '@remix-run/node';
+import {
+	type ActionFunctionArgs,
+	type LoaderFunctionArgs,
+	json,
+} from '@remix-run/node';
 import { Link, useFetcher, useLoaderData } from '@remix-run/react';
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react';
 import { z } from 'zod';
@@ -14,10 +19,7 @@ import {
 	validateCSRF,
 } from '~/app/core/server/index.ts';
 import { useDoubleCheck } from '~/app/shared/lib/hooks/index.ts';
-import {
-	getUserImgSrc,
-	invariantResponse,
-} from '~/app/shared/lib/utils/index.ts';
+import { getUserImgSrc } from '~/app/shared/lib/utils/index.ts';
 import { NameSchema, UsernameSchema } from '~/app/shared/schemas/index.ts';
 import {
 	Button,
@@ -47,7 +49,7 @@ const ProfileFormSchema = z.object({
 	username: UsernameSchema,
 });
 
-export async function loader({ request }: DataFunctionArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
 	const userId = await requireUserId(request);
 
 	const user = await prisma.user.findUniqueOrThrow({
@@ -89,7 +91,7 @@ export async function loader({ request }: DataFunctionArgs) {
 	});
 }
 
-export async function action({ request }: DataFunctionArgs) {
+export async function action({ request }: ActionFunctionArgs) {
 	const userId = await requireUserId(request);
 
 	const formData = await request.formData();
@@ -186,7 +188,7 @@ export default function EditUserProfile() {
 				<div>
 					<Link
 						reloadDocument
-						download="my-epic-notes-data.json"
+						download="my-geek-console-data.json"
 						to="/resources/download-user-data"
 					>
 						<Icon name="download">Download your data</Icon>

@@ -1,9 +1,11 @@
 import { conform, useForm } from '@conform-to/react';
 import { getFieldsetConstraint, parse } from '@conform-to/zod';
+import { invariant } from '@epic-web/invariant';
 import {
 	json,
 	redirect,
-	type DataFunctionArgs,
+	type LoaderFunctionArgs,
+	type ActionFunctionArgs,
 	type MetaFunction,
 } from '@remix-run/node';
 import {
@@ -27,7 +29,6 @@ import {
 	verifySessionStorage,
 } from '~/app/core/server/index.ts';
 import { useIsPending } from '~/app/shared/lib/hooks/index.ts';
-import { invariant } from '~/app/shared/lib/utils/index.ts';
 import { NameSchema, UsernameSchema } from '~/app/shared/schemas/index.ts';
 import {
 	CheckboxField,
@@ -84,7 +85,7 @@ async function requireData({
 	}
 }
 
-export async function loader({ request, params }: DataFunctionArgs) {
+export async function loader({ request, params }: LoaderFunctionArgs) {
 	const { email } = await requireData({ request, params });
 
 	const authSession = await authSessionStorage.getSession(
@@ -112,7 +113,7 @@ export async function loader({ request, params }: DataFunctionArgs) {
 	});
 }
 
-export async function action({ request, params }: DataFunctionArgs) {
+export async function action({ request, params }: ActionFunctionArgs) {
 	const { email, providerId, providerName } = await requireData({
 		request,
 		params,

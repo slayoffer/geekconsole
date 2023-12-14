@@ -1,12 +1,14 @@
 import { conform, useForm } from '@conform-to/react';
 import { getFieldsetConstraint, parse } from '@conform-to/zod';
+import { invariantResponse } from '@epic-web/invariant';
 import { type SEOHandle } from '@nasa-gcn/remix-seo';
 import {
 	json,
 	redirect,
 	unstable_createMemoryUploadHandler,
 	unstable_parseMultipartFormData,
-	type DataFunctionArgs,
+	type ActionFunctionArgs,
+	type LoaderFunctionArgs,
 } from '@remix-run/node';
 import {
 	Form,
@@ -23,17 +25,14 @@ import {
 	validateCSRF,
 } from '~/app/core/server/index.ts';
 import { useDoubleCheck, useIsPending } from '~/app/shared/lib/hooks/index.ts';
-import {
-	getUserImgSrc,
-	invariantResponse,
-} from '~/app/shared/lib/utils/index.ts';
+import { getUserImgSrc } from '~/app/shared/lib/utils/index.ts';
+import { type BreadcrumbHandle } from '~/app/shared/schemas/index.ts';
 import {
 	Button,
 	ErrorList,
 	Icon,
 	StatusButton,
 } from '~/app/shared/ui/index.ts';
-import { type BreadcrumbHandle } from './profile.tsx';
 
 export const handle: BreadcrumbHandle & SEOHandle = {
 	breadcrumb: <Icon name="avatar">Photo</Icon>,
@@ -59,7 +58,7 @@ const NewImageSchema = z.object({
 
 const PhotoFormSchema = z.union([DeleteImageSchema, NewImageSchema]);
 
-export async function loader({ request }: DataFunctionArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
 	const userId = await requireUserId(request);
 
 	const user = await prisma.user.findUnique({
@@ -77,7 +76,7 @@ export async function loader({ request }: DataFunctionArgs) {
 	return json({ user });
 }
 
-export async function action({ request }: DataFunctionArgs) {
+export async function action({ request }: ActionFunctionArgs) {
 	const userId = await requireUserId(request);
 
 	const formData = await unstable_parseMultipartFormData(
@@ -223,8 +222,8 @@ export default function PhotoRoute() {
 							pendingIntent === 'submit'
 								? 'pending'
 								: lastSubmissionIntent === 'submit'
-								? actionData?.status ?? 'idle'
-								: 'idle'
+								  ? actionData?.status ?? 'idle'
+								  : 'idle'
 						}
 					>
 						Save Photo
@@ -249,8 +248,8 @@ export default function PhotoRoute() {
 								pendingIntent === 'delete'
 									? 'pending'
 									: lastSubmissionIntent === 'delete'
-									? actionData?.status ?? 'idle'
-									: 'idle'
+									  ? actionData?.status ?? 'idle'
+									  : 'idle'
 							}
 						>
 							<Icon name="trash">

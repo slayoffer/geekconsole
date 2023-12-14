@@ -1,5 +1,11 @@
+import { invariantResponse } from '@epic-web/invariant';
 import { type SEOHandle } from '@nasa-gcn/remix-seo';
-import { json, redirect, type DataFunctionArgs } from '@remix-run/node';
+import {
+	json,
+	redirect,
+	type ActionFunctionArgs,
+	type LoaderFunctionArgs,
+} from '@remix-run/node';
 import {
 	Form,
 	Link,
@@ -19,14 +25,13 @@ import {
 	getAllCacheKeys,
 } from '~/app/core/server/index.ts';
 import { useDebounce, useDoubleCheck } from '~/app/shared/lib/hooks/index.ts';
-import { invariantResponse } from '~/app/shared/lib/utils/index.ts';
 import { Button, Field, Spacer } from '~/app/shared/ui/index.ts';
 
 export const handle: SEOHandle = {
 	getSitemapEntries: () => null,
 };
 
-export async function loader({ request }: DataFunctionArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
 	await requireUserWithRole(request, 'admin');
 
 	const searchParams = new URL(request.url).searchParams;
@@ -56,7 +61,7 @@ export async function loader({ request }: DataFunctionArgs) {
 	return json({ cacheKeys, instance, instances, currentInstanceInfo });
 }
 
-export async function action({ request }: DataFunctionArgs) {
+export async function action({ request }: ActionFunctionArgs) {
 	await requireUserWithRole(request, 'admin');
 
 	const formData = await request.formData();

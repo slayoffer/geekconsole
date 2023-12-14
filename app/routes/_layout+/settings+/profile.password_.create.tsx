@@ -1,7 +1,12 @@
 import { conform, useForm } from '@conform-to/react';
 import { getFieldsetConstraint, parse } from '@conform-to/zod';
 import { type SEOHandle } from '@nasa-gcn/remix-seo';
-import { json, redirect, type DataFunctionArgs } from '@remix-run/node';
+import {
+	json,
+	redirect,
+	type ActionFunctionArgs,
+	type LoaderFunctionArgs,
+} from '@remix-run/node';
 import { Form, Link, useActionData } from '@remix-run/react';
 import {
 	getPasswordHash,
@@ -9,7 +14,10 @@ import {
 	requireUserId,
 } from '~/app/core/server/index.ts';
 import { useIsPending } from '~/app/shared/lib/hooks/index.ts';
-import { PasswordAndConfirmPasswordSchema } from '~/app/shared/schemas/index.ts';
+import {
+	type BreadcrumbHandle,
+	PasswordAndConfirmPasswordSchema,
+} from '~/app/shared/schemas/index.ts';
 import {
 	Button,
 	ErrorList,
@@ -17,7 +25,6 @@ import {
 	Icon,
 	StatusButton,
 } from '~/app/shared/ui/index.ts';
-import { type BreadcrumbHandle } from './profile.tsx';
 
 export const handle: BreadcrumbHandle & SEOHandle = {
 	breadcrumb: <Icon name="dots-horizontal">Password</Icon>,
@@ -37,13 +44,13 @@ async function requireNoPassword(userId: string) {
 	}
 }
 
-export async function loader({ request }: DataFunctionArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
 	const userId = await requireUserId(request);
 	await requireNoPassword(userId);
 	return json({});
 }
 
-export async function action({ request }: DataFunctionArgs) {
+export async function action({ request }: ActionFunctionArgs) {
 	const userId = await requireUserId(request);
 
 	await requireNoPassword(userId);

@@ -4,7 +4,7 @@ import * as E from '@react-email/components';
 import {
 	type MetaFunction,
 	json,
-	type DataFunctionArgs,
+	type ActionFunctionArgs,
 	redirect,
 } from '@remix-run/node';
 import { Form, useActionData, useSearchParams } from '@remix-run/react';
@@ -33,7 +33,7 @@ const SignupSchema = z.object({
 	email: EmailSchema,
 });
 
-export async function action({ request }: DataFunctionArgs) {
+export async function action({ request }: ActionFunctionArgs) {
 	const formData = await request.formData();
 
 	await validateCSRF(formData, request.headers);
