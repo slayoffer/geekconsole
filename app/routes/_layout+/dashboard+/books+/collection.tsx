@@ -1,32 +1,33 @@
-import { parse } from '@conform-to/zod';
-import { invariantResponse } from '@epic-web/invariant';
 import { type SEOHandle } from '@nasa-gcn/remix-seo';
-import { createId } from '@paralleldrive/cuid2';
+import { type Book, type BookImage } from '@prisma/client';
 import {
-	type ActionFunctionArgs,
+	type SerializeFrom,
 	type LoaderFunctionArgs,
 	json,
 } from '@remix-run/node';
 import { Link, Outlet, useLoaderData } from '@remix-run/react';
-import { BookCard } from '~/app/core/components/books/index.ts';
-import {
-	requireUserId,
-	prisma,
-	redirectWithToast,
-	requireUserWithPermission,
-	validateCSRF,
-} from '~/app/core/server/index.ts';
-import {
-	DeleteBookFormSchema,
-	type BreadcrumbHandle,
-} from '~/app/shared/schemas/index.ts';
+import { requireUserId, prisma } from '~/app/core/server/index.ts';
+import { getBookImgSrc } from '~/app/shared/lib/utils';
+import { type BreadcrumbHandle } from '~/app/shared/schemas/index.ts';
 import {
 	GeneralErrorBoundary,
 	Alert,
 	AlertTitle,
 	AlertDescription,
 	Button,
+	Badge,
+	Card,
+	CardContent,
+	CardFooter,
+	CardHeader,
 } from '~/app/shared/ui/index.ts';
+
+type BookProps = Pick<Book, 'id' | 'title' | 'readingStatus'> & {
+	images: Pick<BookImage, 'id'>[];
+};
+type BookCardProps = {
+	book: BookProps;
+};
 
 export const handle: BreadcrumbHandle & SEOHandle = {
 	breadcrumb: 'Collection',
@@ -54,6 +55,33 @@ export default function BooksCollectionRoute() {
 	);
 }
 
+export const BookCard = ({ book }: SerializeFrom<BookCardProps>) => {
+	const { id, title, readingStatus, images } = book;
+
+	return (
+		<Card className="flex flex-col items-center">
+			<CardHeader className="flex-row items-center gap-4">
+				<p>{title}</p>
+			</CardHeader>
+			<CardContent className="flex flex-col items-center gap-2">
+				<img
+					className="h-40 w-40 max-w-full rounded-xl align-middle"
+					src={images[0] ? getBookImgSrc(images[0].id) : 'images/noCover.gif'}
+					alt={book.title}
+				/>
+				<Badge variant="outline">{readingStatus}</Badge>
+			</CardContent>
+			<CardFooter className="flex flex-col gap-2">
+				<Button asChild variant="link">
+					<Link to={`/dashboard/books/${id}`} prefetch="intent">
+						See more
+					</Link>
+				</Button>
+			</CardFooter>
+		</Card>
+	);
+};
+
 export const loader = async ({ request }: LoaderFunctionArgs) => {
 	const userId = await requireUserId(request);
 
@@ -72,50 +100,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 	});
 
 	return json({ usersBooks });
-};
-
-export const action = async ({ request }: ActionFunctionArgs) => {
-	const userId = await requireUserId(request);
-
-	const formData = await request.formData();
-
-	await validateCSRF(formData, request.headers);
-
-	const submission = parse(formData, {
-		schema: DeleteBookFormSchema,
-	});
-
-	if (submission.intent !== 'submit') {
-		return json({ status: 'idle', submission } as const);
-	}
-
-	if (!submission.value) {
-		return json({ status: 'error', submission } as const, { status: 400 });
-	}
-
-	const { bookId } = submission.value;
-
-	const book = await prisma.book.findFirst({
-		select: { id: true, ownerId: true },
-		where: { id: bookId },
-	});
-
-	invariantResponse(book, 'Not found', { status: 404 });
-
-	const isOwner = userId === book.ownerId;
-	await requireUserWithPermission(
-		request,
-		isOwner ? 'delete:book:own' : 'delete:book:any',
-	);
-
-	await prisma.book.delete({ where: { id: book.id } });
-
-	return redirectWithToast('/dashboard/books/collection', {
-		id: createId(),
-		type: 'success',
-		title: 'Book deleted',
-		description: 'Your book has been deleted',
-	});
 };
 
 export const ErrorBoundary = () => {
