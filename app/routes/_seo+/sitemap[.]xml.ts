@@ -1,5 +1,4 @@
 import { generateSitemap } from '@nasa-gcn/remix-seo';
-// @ts-expect-error - this does work, though it's not exactly a public API
 import { routes } from '@remix-run/dev/server-build';
 import { type LoaderFunctionArgs } from '@remix-run/node';
 import { getDomainUrl } from '~/app/shared/lib/utils/index.ts';
