@@ -6,6 +6,7 @@ import {
 	Link,
 	useMatches,
 } from '@remix-run/react';
+import { Fragment } from 'react';
 import { z } from 'zod';
 import { cn } from '~/app/shared/lib/utils/index.ts';
 import { BreadcrumbHandle } from '~/app/shared/schemas/index.ts';
@@ -97,9 +98,8 @@ export default function Dashboard() {
 				<header className="flex h-14 items-center gap-4 border-b bg-muted px-6">
 					<ul className="flex gap-3">
 						{breadcrumbs.map((breadcrumb, i, arr) => (
-							<>
+							<Fragment key={i}>
 								<li
-									key={i}
 									className={cn(
 										'flex items-center gap-3 hover:text-foreground',
 										{
@@ -108,9 +108,9 @@ export default function Dashboard() {
 									)}
 								>
 									{breadcrumb}
+									{i !== arr.length - 1 && <Icon name="arrow-right" />}
 								</li>
-								{i !== arr.length - 1 && <Icon name="arrow-right" />}
-							</>
+							</Fragment>
 						))}
 					</ul>
 				</header>

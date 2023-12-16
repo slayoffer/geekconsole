@@ -5,9 +5,19 @@ import {
 	type LoaderFunctionArgs,
 	json,
 } from '@remix-run/node';
-import { Link, Outlet, useLoaderData } from '@remix-run/react';
+import {
+	Form,
+	Link,
+	useLoaderData,
+	useSearchParams,
+	useSubmit,
+} from '@remix-run/react';
+import { useId } from 'react';
+import { z } from 'zod';
 import { requireUserId, prisma } from '~/app/core/server/index.ts';
-import { getBookImgSrc } from '~/app/shared/lib/utils';
+import { useDebounce, useIsPending } from '~/app/shared/lib/hooks';
+import { useDelayedIsPending } from '~/app/shared/lib/hooks/useDelayedIsPending/useDelayedIsPending';
+import { cn, getBookImgSrc } from '~/app/shared/lib/utils';
 import { type BreadcrumbHandle } from '~/app/shared/schemas/index.ts';
 import {
 	GeneralErrorBoundary,
@@ -20,14 +30,24 @@ import {
 	CardContent,
 	CardFooter,
 	CardHeader,
+	Icon,
+	Input,
+	Label,
+	StatusButton,
+	ErrorList,
 } from '~/app/shared/ui/index.ts';
 
-type BookProps = Pick<Book, 'id' | 'title' | 'readingStatus'> & {
-	images: Pick<BookImage, 'id'>[];
+type BookPreviewWithImgs = Pick<Book, 'id' | 'title' | 'readingStatus'> & {
+	imageId: Pick<BookImage, 'id'>['id'] | null;
 };
-type BookCardProps = {
-	book: BookProps;
-};
+
+const BooksSearchResultSchema = z.object({
+	id: z.string(),
+	title: z.string(),
+	readingStatus: z.string(),
+	imageId: z.string().nullable(),
+});
+const BooksSearchResultsSchema = z.array(BooksSearchResultSchema);
 
 export const handle: BreadcrumbHandle & SEOHandle = {
 	breadcrumb: 'Collection',
@@ -35,28 +55,96 @@ export const handle: BreadcrumbHandle & SEOHandle = {
 };
 
 export default function BooksCollectionRoute() {
-	const { usersBooks } = useLoaderData<typeof loader>();
+	const data = useLoaderData<typeof loader>();
+	const isPending = useDelayedIsPending();
+
+	if (data.status === 'error') console.error(data.error);
 
 	return (
-		<>
-			{usersBooks && usersBooks.length > 0 ? (
-				<div className="grid grid-cols-4 gap-4">
-					{usersBooks.map((book) => (
-						<BookCard key={book.id} book={book} />
-					))}
-					<Outlet />
-				</div>
-			) : (
-				<div className="flex flex-col items-center justify-center">
-					<p>There are no books to display :(</p>
-				</div>
-			)}
-		</>
+		<div className="flex w-full flex-col gap-6">
+			<SearchBooksBar status={data.status} autoFocus autoSubmit />
+
+			<main className="w-full">
+				{data.status === 'idle' ? (
+					data.usersBooks.length ? (
+						<div
+							className={cn('grid w-full grid-cols-4 gap-4 delay-200', {
+								'opacity-50': isPending,
+							})}
+						>
+							{data.usersBooks.map((book) => (
+								<BookCard key={book.id} book={book} />
+							))}
+						</div>
+					) : (
+						<p>No books found</p>
+					)
+				) : data.status === 'error' ? (
+					<ErrorList errors={['There was an error parsing the results']} />
+				) : null}
+			</main>
+		</div>
 	);
 }
 
-export const BookCard = ({ book }: SerializeFrom<BookCardProps>) => {
-	const { id, title, readingStatus, images } = book;
+export function SearchBooksBar({
+	status,
+	autoFocus = false,
+	autoSubmit = false,
+}: {
+	status: 'idle' | 'pending' | 'success' | 'error';
+	autoFocus?: boolean;
+	autoSubmit?: boolean;
+}) {
+	const id = useId();
+	const [searchParams] = useSearchParams();
+	const submit = useSubmit();
+	const isSubmitting = useIsPending();
+
+	const searchTerm = searchParams.get('search');
+
+	const handleFormChange = useDebounce((form: HTMLFormElement) => {
+		submit(form);
+	}, 400);
+
+	return (
+		<Form
+			className="flex flex-wrap items-center justify-center gap-2"
+			onChange={(e) => autoSubmit && handleFormChange(e.currentTarget)}
+		>
+			<div className="flex-1">
+				<Label htmlFor={id} className="sr-only">
+					Search
+				</Label>
+				<Input
+					type="search"
+					name="search"
+					id={id}
+					defaultValue={searchTerm ?? ''}
+					placeholder="Search by title or author"
+					className="w-full"
+					autoFocus={autoFocus}
+				/>
+			</div>
+			<div>
+				<StatusButton
+					type="submit"
+					status={isSubmitting ? 'pending' : status}
+					className="flex w-full items-center justify-center"
+					size="sm"
+				>
+					<Icon name="magnifying-glass" size="sm" />
+					<span className="sr-only">Search</span>
+				</StatusButton>
+			</div>
+		</Form>
+	);
+}
+
+export const BookCard = ({
+	book,
+}: SerializeFrom<{ book: BookPreviewWithImgs }>) => {
+	const { id, title, readingStatus, imageId } = book;
 
 	return (
 		<Card className="flex flex-col items-center">
@@ -66,7 +154,7 @@ export const BookCard = ({ book }: SerializeFrom<BookCardProps>) => {
 			<CardContent className="flex flex-col items-center gap-2">
 				<img
 					className="h-40 w-40 max-w-full rounded-xl align-middle"
-					src={images[0] ? getBookImgSrc(images[0].id) : 'images/noCover.gif'}
+					src={imageId ? getBookImgSrc(imageId) : 'images/noCover.gif'}
 					alt={book.title}
 				/>
 				<Badge variant="outline">{readingStatus}</Badge>
@@ -85,21 +173,65 @@ export const BookCard = ({ book }: SerializeFrom<BookCardProps>) => {
 export const loader = async ({ request }: LoaderFunctionArgs) => {
 	const userId = await requireUserId(request);
 
-	const usersBooks = await prisma.book.findMany({
-		select: {
-			id: true,
-			title: true,
-			readingStatus: true,
-			images: {
-				select: {
-					id: true,
+	const searchParams = new URL(request.url).searchParams;
+	const searchTerm = searchParams.get('search');
+
+	if (!searchTerm) {
+		const usersBooks = await prisma.book.findMany({
+			select: {
+				id: true,
+				title: true,
+				readingStatus: true,
+				images: {
+					take: 1,
+					select: {
+						id: true,
+					},
 				},
 			},
-		},
-		where: { ownerId: userId },
-	});
+			orderBy: {
+				updatedAt: 'desc',
+			},
+			where: { ownerId: userId },
+		});
 
-	return json({ usersBooks });
+		const mappedUsersBooks = usersBooks.map(({ images, ...book }) => ({
+			...book,
+			imageId: images.length ? images[0].id : null,
+		}));
+
+		return json({ status: 'idle', usersBooks: mappedUsersBooks } as const);
+	} else {
+		const like = `%${searchTerm}%`;
+
+		const rawBooks = await prisma.$queryRaw`
+			SELECT 
+				Book.id, 
+				Book.title, 
+				Book.readingStatus, 
+				(
+					SELECT BookImage.id 
+					FROM BookImage 
+					WHERE BookImage.bookId = Book.id 
+					LIMIT 1
+				) AS imageId
+			FROM Book
+			WHERE (Book.title LIKE ${like} OR Book.author LIKE ${like})
+			AND Book.ownerId = ${userId}
+			ORDER BY Book.updatedAt DESC
+			LIMIT 10
+		`;
+
+		const result = BooksSearchResultsSchema.safeParse(rawBooks);
+
+		if (!result.success) {
+			return json({ status: 'error', error: result.error.message } as const, {
+				status: 400,
+			});
+		}
+
+		return json({ status: 'idle', usersBooks: result.data } as const);
+	}
 };
 
 export const ErrorBoundary = () => {
