@@ -57,7 +57,7 @@ export default function EditUserProfile() {
 					<li>
 						<Link
 							className="text-muted-foreground"
-							to={`/users/${user.username}`}
+							to={`/profile/${user.username}`}
 						>
 							Profile
 						</Link>

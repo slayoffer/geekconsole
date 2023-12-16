@@ -21,7 +21,7 @@ export const Footer = () => {
 						</p>
 					</div>
 
-					<ul className="mb-4 flex flex-wrap items-center text-[body-lg] text-primary lg:mb-0">
+					<ul className="mb-4 flex flex-wrap items-center text-primary lg:mb-0">
 						<li>
 							<Button asChild variant="link">
 								<Link to="/">Home</Link>
