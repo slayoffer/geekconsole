@@ -317,7 +317,10 @@ export default function VerifyRoute() {
 								htmlFor: fields[codeQueryParam].id,
 								children: 'Code',
 							}}
-							inputProps={conform.input(fields[codeQueryParam])}
+							inputProps={{
+								...conform.input(fields[codeQueryParam]),
+								autoComplete: 'one-time-code',
+							}}
 							errors={fields[codeQueryParam].errors}
 						/>
 
