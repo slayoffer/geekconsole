@@ -32,6 +32,7 @@ import {
 	DELETE_BOOK_INTENT,
 } from '~/app/shared/schemas/index.ts';
 import {
+	Badge,
 	Button,
 	ErrorList,
 	GeneralErrorBoundary,
@@ -79,19 +80,17 @@ export default function BookOverview() {
 					<div>
 						<h4 className="font-bold">Author</h4>
 						<p className="mb-3 font-light text-muted-foreground">
-							{book.author ? book.author : 'Author unknown'}
+							{book.author}
 						</p>
 					</div>
 					<div>
 						<h4 className="font-bold ">Year</h4>
-						<p className="mb-3 font-light text-muted-foreground">
-							{book.year ? book.year : 'Year unknown'}
-						</p>
+						<p className="mb-3 font-light text-muted-foreground">{book.year}</p>
 					</div>
 					<div>
 						<h4 className="font-bold">Description</h4>
 						<p className="mb-3 font-light text-muted-foreground">
-							{book.description ? book.description : 'No description'}
+							{book.description}
 						</p>
 					</div>
 					<div>
@@ -100,7 +99,10 @@ export default function BookOverview() {
 							{book.comment ? book.comment : 'No comments yet. Add one!'}
 						</p>
 					</div>
-					<div className="grid flex-1 grid-cols-2 gap-2 min-[525px]:flex md:gap-4">
+
+					<Badge className="mb-3">{book.readingStatus}</Badge>
+
+					<div className="flex gap-4">
 						<DeleteBook id={book.id} />
 
 						<Button
@@ -158,6 +160,7 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 			title: true,
 			author: true,
 			year: true,
+			readingStatus: true,
 			description: true,
 			comment: true,
 			ownerId: true,
