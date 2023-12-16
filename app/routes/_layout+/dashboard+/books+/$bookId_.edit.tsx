@@ -41,7 +41,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 			},
 		},
 		where: {
-			id: params.noteId,
+			id: params.bookId,
 			ownerId: userId,
 		},
 	});

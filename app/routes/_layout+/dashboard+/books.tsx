@@ -26,7 +26,7 @@ export default function Books() {
 	const { pathname } = useLocation();
 
 	return (
-		<section className="flex flex-col gap-4">
+		<section className="flex w-full flex-col gap-4">
 			<div className="flex items-center gap-2">
 				<h2>Check out the coolest book collection!</h2>
 
@@ -49,7 +49,7 @@ export default function Books() {
 				</div>
 			</div>
 
-			<div>
+			<div className="w-full">
 				<Outlet />
 			</div>
 		</section>

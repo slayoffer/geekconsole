@@ -186,7 +186,11 @@ export default function TwoFactorRoute() {
 								htmlFor: fields.code.id,
 								children: 'Code',
 							}}
-							inputProps={{ ...conform.input(fields.code), autoFocus: true }}
+							inputProps={{
+								...conform.input(fields.code),
+								autoFocus: true,
+								autoComplete: 'one-time-code',
+							}}
 							errors={fields.code.errors}
 						/>
 						<div className="flex justify-between gap-4">

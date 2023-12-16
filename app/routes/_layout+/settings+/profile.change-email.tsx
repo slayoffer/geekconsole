@@ -229,7 +229,7 @@ export function EmailChangeNoticeEmail({ userId }: { userId: string }) {
 	);
 }
 
-export default function ChangeEmailIndex() {
+export default function ChangeEmailRoute() {
 	const data = useLoaderData<typeof loader>();
 	const actionData = useActionData<typeof action>();
 	const isPending = useIsPending();
@@ -256,7 +256,10 @@ export default function ChangeEmailIndex() {
 
 					<Field
 						labelProps={{ children: 'New Email' }}
-						inputProps={conform.input(fields.email)}
+						inputProps={{
+							...conform.input(fields.email),
+							autoComplete: 'email',
+						}}
 						errors={fields.email.errors}
 					/>
 

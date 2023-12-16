@@ -2,13 +2,12 @@ import { Outlet, useRouteLoaderData } from '@remix-run/react';
 
 import {
 	Footer,
-	GlobalLoading,
 	Header,
 	LogoutTimer,
 } from '~/app/core/components/layoutComponents/index.ts';
 import { type loader as rootLoader } from '~/app/root.tsx';
 import { useOptionalUser } from '~/app/shared/lib/hooks/index.ts';
-import { Confetti, CustomToaster } from '~/app/shared/ui/index.ts';
+import { Confetti, CustomToaster, ProgressBar } from '~/app/shared/ui/index.ts';
 
 export default function Layout() {
 	const data = useRouteLoaderData<typeof rootLoader>('root');
@@ -22,7 +21,7 @@ export default function Layout() {
 			</main>
 			<Footer />
 
-			<GlobalLoading />
+			<ProgressBar />
 			<CustomToaster toast={data?.toast ?? null} />
 			<Confetti id={data?.confettiId} />
 

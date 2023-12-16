@@ -20,3 +20,4 @@ export * from './Checkbox/Checkbox.tsx';
 export * from './Forms/Forms.tsx';
 export * from './Toaster/Toaster.tsx';
 export * from './Confetti/Confetti.tsx';
+export * from './ProgressBar/ProgressBar.tsx';
