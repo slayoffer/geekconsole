@@ -267,19 +267,17 @@ export default function BookEditor({
 											key={image.key}
 											className="relative border-b-2 border-muted-foreground"
 										>
-											{array.length > 1 && (
-												<button
-													className="absolute right-0 top-0 text-foreground-destructive"
-													{...list.remove(fields.images.name, { index })}
-												>
-													<span aria-hidden>
-														<Icon name="cross-1" />
-													</span>{' '}
-													<span className="sr-only">
-														Remove image {index + 1}
-													</span>
-												</button>
-											)}
+											<button
+												className="absolute right-0 top-0 text-foreground-destructive"
+												{...list.remove(fields.images.name, { index })}
+											>
+												<span aria-hidden>
+													<Icon name="cross-1" />
+												</span>
+												<span className="sr-only">
+													Remove image {index + 1}
+												</span>
+											</button>
 											<ImageChooser config={image} />
 										</li>
 									))}

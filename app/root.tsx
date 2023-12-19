@@ -92,7 +92,7 @@ function App() {
 	const nonce = useNonce();
 
 	return (
-		<Document title="Geek Console" nonce={nonce} theme={theme}>
+		<Document nonce={nonce} theme={theme}>
 			<Outlet />
 
 			<script
@@ -107,10 +107,9 @@ function App() {
 
 function Document({
 	children,
-	title,
 	nonce,
 	theme,
-}: PropsWithChildren<{ title: string; nonce: string; theme?: Theme }>) {
+}: PropsWithChildren<{ nonce: string; theme?: Theme }>) {
 	return (
 		<html className={`${theme} h-full overflow-x-hidden`} lang="en">
 			<head>
@@ -121,8 +120,6 @@ function Document({
 				<meta charSet="utf-8" />
 				<meta name="description" content="Your favourite geek storage" />
 				<meta name="viewport" content="width=device-width,initial-scale=1" />
-
-				<title>{title}</title>
 			</head>
 			<body className="flex h-full flex-col justify-between bg-background text-foreground">
 				{children}
@@ -260,7 +257,7 @@ export function ErrorBoundary() {
 	// to give the user a better UX.
 
 	return (
-		<Document title="Oops. Something went wrong" nonce={nonce}>
+		<Document nonce={nonce}>
 			<GeneralErrorBoundary />
 		</Document>
 	);
