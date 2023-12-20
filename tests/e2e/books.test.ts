@@ -72,7 +72,6 @@ test('Users can delete books', async ({ page, login }) => {
 
 	await page.goto(`/dashboard/books/collection`);
 
-	// find links with href prefix
 	const bookLinks = page
 		.getByRole('main')
 		.getByRole('link', { name: /see more/i });
