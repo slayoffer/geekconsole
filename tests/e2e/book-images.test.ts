@@ -161,6 +161,7 @@ function createBook() {
 		comment: faker.lorem.paragraph(),
 	} satisfies Omit<Book, 'id' | 'createdAt' | 'updatedAt' | 'ownerId'>;
 }
+
 function createBookWithImage() {
 	return {
 		...createBook(),
