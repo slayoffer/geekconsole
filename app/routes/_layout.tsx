@@ -4,10 +4,12 @@ import {
 	Footer,
 	Header,
 	LogoutTimer,
+	ProgressBar,
+	Confetti,
+	CustomToaster,
 } from '~/app/core/components/layoutComponents/index.ts';
 import { type loader as rootLoader } from '~/app/root.tsx';
 import { useOptionalUser } from '~/app/shared/lib/hooks/index.ts';
-import { Confetti, CustomToaster, ProgressBar } from '~/app/shared/ui/index.ts';
 
 export default function Layout() {
 	const data = useRouteLoaderData<typeof rootLoader>('root');
