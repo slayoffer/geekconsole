@@ -4,4 +4,4 @@ export { GlobalLoading } from './GlobalLoading/index.ts';
 export { LogoutTimer } from './LogoutTimer/LogoutTimer.tsx';
 export { ProgressBar } from './ProgressBar/ProgressBar.tsx';
 export { Confetti } from './Confetti/Confetti.tsx';
-export { CustomToaster } from './Toaster/Toaster.tsx';
+export { useToast } from './Toaster/Toaster.tsx';

@@ -4,9 +4,9 @@ import {
 	LoaderFunctionArgs,
 	type HandleDocumentRequestFunction,
 } from '@remix-run/node';
+import { isbot } from 'isbot';
 import { RemixServer } from '@remix-run/react';
 import * as Sentry from '@sentry/remix';
-import isbot from 'isbot';
 import { getInstanceInfo } from 'litefs-js';
 import { renderToPipeableStream } from 'react-dom/server';
 import { getEnv, init, makeTimings } from './core/server/index.ts';
@@ -40,7 +40,7 @@ export default async function handleRequest(...args: DocRequestArgs) {
 	responseHeaders.set('fly-primary-instance', primaryInstance);
 	responseHeaders.set('fly-instance', currentInstance);
 
-	const callbackName = isbot(request.headers.get('user-agent'))
+	const callbackName = isbot(request.headers.get('user-agent') ?? '')
 		? 'onAllReady'
 		: 'onShellReady';
 
