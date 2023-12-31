@@ -4,14 +4,19 @@ import {
 	Footer,
 	Header,
 	LogoutTimer,
+	ProgressBar,
+	Confetti,
+	useToast,
 } from '~/app/core/components/layoutComponents/index.ts';
 import { type loader as rootLoader } from '~/app/root.tsx';
-import { useOptionalUser } from '~/app/shared/lib/hooks/index.ts';
-import { Confetti, CustomToaster, ProgressBar } from '~/app/shared/ui/index.ts';
+import { useOptionalUser, useTheme } from '~/app/shared/lib/hooks/index.ts';
+import { GeekToaster } from '~/app/shared/ui';
 
 export default function Layout() {
 	const data = useRouteLoaderData<typeof rootLoader>('root');
 	const maybeUser = useOptionalUser();
+	const theme = useTheme();
+	useToast(data?.toast);
 
 	return (
 		<>
@@ -22,7 +27,7 @@ export default function Layout() {
 			<Footer />
 
 			<ProgressBar />
-			<CustomToaster toast={data?.toast ?? null} />
+			<GeekToaster closeButton position="bottom-right" theme={theme} />
 			<Confetti id={data?.confettiId} />
 
 			{maybeUser ? <LogoutTimer /> : null}

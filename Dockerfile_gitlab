@@ -66,6 +66,7 @@ COPY --from=build /app/node_modules/.prisma /app/node_modules/.prisma
 COPY --from=build /app/node_modules/@faker-js /app/node_modules/@faker-js
 COPY --from=build /app/node_modules/enforce-unique /app/node_modules/enforce-unique
 COPY --from=build /app/node_modules/fs-extra /app/node_modules/fs-extra
+COPY --from=build /app/node_modules/graceful-fs /app/node_modules/graceful-fs
 COPY --from=build /app/node_modules/msw /app/node_modules/msw
 COPY --from=build /app/node_modules/outvariant /app/node_modules/outvariant
 COPY --from=build /app/node_modules/strict-event-emitter /app/node_modules/strict-event-emitter

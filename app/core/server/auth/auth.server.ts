@@ -4,10 +4,7 @@ import bcrypt from 'bcryptjs';
 import { Authenticator } from 'remix-auth';
 import { safeRedirect } from 'remix-utils/safe-redirect';
 import { type ProviderName } from '~/app/core/components/providers/index.ts';
-import {
-	combineResponseInits,
-	downloadFile,
-} from '~/app/shared/lib/utils/index.ts';
+import { combineHeaders, downloadFile } from '~/app/shared/lib/utils/index.ts';
 import {
 	connectionSessionStorage,
 	providers,
@@ -40,11 +37,11 @@ for (const [providerName, provider] of Object.entries(providers)) {
 }
 
 export async function getUserId(request: Request) {
-	const cookieSession = await authSessionStorage.getSession(
+	const authSession = await authSessionStorage.getSession(
 		request.headers.get('cookie'),
 	);
 
-	const sessionId = cookieSession.get(SESSION_KEY);
+	const sessionId = authSession.get(SESSION_KEY);
 
 	if (!sessionId) return null;
 
@@ -53,7 +50,13 @@ export async function getUserId(request: Request) {
 		where: { id: sessionId, expirationDate: { gt: new Date() } },
 	});
 
-	if (!session?.user) throw await logout({ request });
+	if (!session?.user) {
+		throw redirect('/', {
+			headers: {
+				'set-cookie': await authSessionStorage.destroySession(authSession),
+			},
+		});
+	}
 
 	return session.user.id;
 }
@@ -66,6 +69,7 @@ export async function requireUserId(
 
 	if (!userId) {
 		const requestUrl = new URL(request.url);
+
 		redirectTo =
 			redirectTo === null
 				? null
@@ -86,19 +90,6 @@ export async function requireUserId(
 export async function requireAnonymous(request: Request) {
 	const userId = await getUserId(request);
 	if (userId) throw redirect('/');
-}
-
-export async function requireUser(request: Request) {
-	const userId = await requireUserId(request);
-
-	const user = await prisma.user.findUnique({
-		select: { id: true, username: true },
-		where: { id: userId },
-	});
-
-	if (!user) throw await logout({ request });
-
-	return user;
 }
 
 export async function login({
@@ -205,23 +196,29 @@ export async function logout(
 	},
 	responseInit?: ResponseInit,
 ) {
-	const cookieSession = await authSessionStorage.getSession(
+	const authSession = await authSessionStorage.getSession(
 		request.headers.get('cookie'),
 	);
 
-	const sessionId = cookieSession.get(SESSION_KEY);
+	const sessionId = authSession.get(SESSION_KEY);
 
-	// delete the session if it exists, but don't wait for it, go ahead an log the user out
-	if (sessionId) void prisma.session.deleteMany({ where: { id: sessionId } });
+	// if this fails, we still need to delete the session from the user's browser
+	// and it doesn't do any harm staying in the db anyway.
+	if (sessionId) {
+		// the .catch is important because that's what triggers the query.
+		// learn more about PrismaPromise: https://www.prisma.io/docs/orm/reference/prisma-client-reference#prismapromise-behavior
+		void prisma.session
+			.deleteMany({ where: { id: sessionId } })
+			.catch(() => {});
+	}
 
-	throw redirect(
-		safeRedirect(redirectTo),
-		combineResponseInits(responseInit, {
-			headers: {
-				'set-cookie': await authSessionStorage.destroySession(cookieSession),
-			},
-		}),
-	);
+	throw redirect(safeRedirect(redirectTo), {
+		...responseInit,
+		headers: combineHeaders(
+			{ 'set-cookie': await authSessionStorage.destroySession(authSession) },
+			responseInit?.headers,
+		),
+	});
 }
 
 export async function getPasswordHash(password: string) {
