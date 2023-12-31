@@ -4,6 +4,8 @@ import { type Config } from 'tailwindcss';
 import defaultTheme from 'tailwindcss/defaultTheme.js';
 import animatePlugin from 'tailwindcss-animate';
 import radixPlugin from 'tailwindcss-radix';
+
+// it's imported like this by purpose, DO NOT CHANGE
 import { extendedTheme } from './app/core/utils/extendedTheme/extendedTheme.ts';
 
 export default {
