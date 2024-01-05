@@ -5,7 +5,7 @@ export { type Theme, getTheme, setTheme } from './theme/theme.server.ts';
 export { prisma } from './db/db.server.ts';
 export {
 	type Toast,
-	type OptionalToast,
+	type ToastInput,
 	TOAST_KEY,
 	toastSessionStorage,
 	redirectWithToast,
